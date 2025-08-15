@@ -1,0 +1,48 @@
+REVIEW QUERIES
+all reviews					[entity-type=review]
+reviews for a given food item			[entity-type=review, food-id]
+reviews from a user				[entity-type=user, user-id]
+reviews with a given date			[entity-type=review, date]
+specific review					[uuid]
+
+
+USER QUERIES
+all users					[entity-type=user]
+users who reviewed a food item			[entity-type=review, food-id]
+users who submitted a review with a date 	[entity-type=review, date]
+users with a given name				[name]
+users with a given email			[email]
+specific user					[uuid]
+
+
+FOOD QUERIES
+all food items					[entity-type=food]
+food items reviewed by user			[entity-type=review, user-id]
+food items with a given name			[name]
+food items with a given origin			[origin]
+food items featured on the menu with a date	[entity-type=menu, date]
+times a food item was featured on the menu	[entity-type=menu, foodid]
+specific food item				[uuid]
+
+entityID: 	STRING (uuid)
+entityType:	STRING (Food | User | Menu | Review)
+
+FOOD SPECIFIC
+foodName:	STRING
+foodOrigin:	STRING
+foodAttributes:	NESTED { dateAdded, nutrients, description }
+
+USER SPECIFIC
+userName:	STRING
+userEmail:	STRING
+userFlags:	NESTED { canSubmitReviews, canAddMenuAndFoodItems } <== these flags are booleans (or maybe not lol)
+
+REVIEW & MENU SPECIFIC
+foodID:		STRING (uuid)
+userID:		STRING (uuid)
+quality:	NUMBER (0-10 float)
+quantity:	NUMBER (1-5  int)
+rating:		NUMBER (0-10 float)
+reviewDate:	STRING (ISO-8601)
+menuDate:	STRING (ISO-8601)
+menuOption:	STRING (Main | Chilled)

@@ -1,0 +1,4 @@
+matching other users with similar ratings
+normalize ratings to form composite ratings (matching medians/range?)
+predictive rating for future meals
+web scrape upcoming lunch review

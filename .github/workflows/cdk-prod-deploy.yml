@@ -1,0 +1,75 @@
+name: CDK Prod Deploy
+
+on:
+  push:
+    branches:
+      - master
+defaults:
+  run:
+    working-directory: ./cdk
+jobs:
+  aws-cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: './cdk/package-lock.json'
+      
+      - name: Install AWS CDK
+        run: npm i -g aws-cdk
+      
+      - name: Install CDK dependencies
+        run:  npm install
+      
+      - name: Build Local Lambda Projects
+        run: |
+          for dir in ./lambda/*/*/; do
+            if [ -d "$dir" ]; then
+                echo "Building Lambda in $dir"
+                (cd "$dir" && npm install && npm run build)
+            fi
+          done
+      
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          touch .env
+          echo "REACT_APP_AUTH0_DOMAIN=$DOMAIN" >> .env
+          echo "REACT_APP_AUTH0_CLIENT_ID=$CLIENT_ID" >> .env
+          echo "REACT_APP_AUTH0_AUDIENCE=$AUDIENCE" >> .env
+          npm install
+          npm run build
+        env:
+          DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+
+      - name: Copy Frontend Build to CDK Assets
+        run: |
+          mkdir -p ./assets
+          cp -r ../frontend/build/* ./assets
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: 'us-east-1'
+
+#      - name: Bootstrap CDK
+#        run: |
+#          cdk bootstrap aws://$(aws sts get-caller-identity --query 'Account' --output text)/us-east-1
+      
+      - name: Synth stack
+        run: cdk synth
+      
+      - name: Deploy stack
+        run: cdk deploy --all --require-approval never

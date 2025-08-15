@@ -1,0 +1,8 @@
+EntityID,Entity Type,Food Name,Food Origin,Food Attributes,User Name,User Email,User Flags,FoodID,UserID,Quality Rating,Quantity Rating,Overall Rating,Date Updated,Date of Meal,Menu Option
+uuid,Food Item,food name,food origin,"date added
+nutrients
+description",,,,,,,,,,,
+uuid,User,,,,user name,email,"can submit reviews
+can add menu items",,,,,,,,
+uuid,Review,,,,,,,F-1,U-1,rating,rating,rating,date of rating,date of meal,
+uuid,Menu Item,,,,,,,F-1,,,,,,date of meal,main/chilled
