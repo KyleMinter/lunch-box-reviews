@@ -13,33 +13,36 @@ export const handler = async (event: any) => {
         'Content-Type': 'application-json',
     };
 
-    const client = new DynamoDBClient({});
-    const dynamo = DynamoDBDocumentClient.from(client);
-    const tableName = 'Review-Entities-Table';
-
-    const requestJSON = JSON.parse(event.body);
-    
-    const uuid: string = uuidv4();
-    const review = {
-        entityID: uuid,
-        entityType: 'review',
-        foodID: requestJSON.foodID,
-        userID: requestJSON.userID,
-        quality: requestJSON.quality,
-        quantity: requestJSON.quantity,
-        rating: requestJSON.rating,
-        reviewDate: requestJSON.reviewDate,
-        menuDate: requestJSON.menuDate
-    };
-
     try {
+        const client = new DynamoDBClient({});
+        const dynamo = DynamoDBDocumentClient.from(client);
+        const tableName = 'Review-Entities-Table';
 
-        body = await dynamo.send(
+        const requestJSON = JSON.parse(event.body);
+        
+        const uuid: string = uuidv4();
+        const review = {
+            entityID: uuid,
+            entityType: 'review',
+            foodID: requestJSON.foodID,
+            userID: requestJSON.userID,
+            quality: requestJSON.quality,
+            quantity: requestJSON.quantity,
+            rating: requestJSON.rating,
+            reviewDate: requestJSON.reviewDate,
+            menuDate: requestJSON.menuDate
+        };
+
+        await dynamo.send(
             new PutCommand({
                 TableName: tableName,
                 Item: review,
             })
         );
+
+        body = {
+            entityID: uuid,
+        };
     }
     catch (err: any) {
         statusCode = 400;

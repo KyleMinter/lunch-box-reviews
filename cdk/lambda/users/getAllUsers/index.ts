@@ -36,9 +36,9 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                 IndexName: 'GSI-entityType',
                 KeyConditionExpression: 'entityType = :pkValue',
                 ExpressionAttributeValues: {
-                        ':pkValue': 'review'
+                        ':pkValue': 'user'
                 },
-                ProjectionExpression: 'entityID, entityType, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
+                ProjectionExpression: 'entityID, entityType, userName, userEmail, userFlags',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })

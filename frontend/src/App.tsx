@@ -15,10 +15,17 @@ function App() {
     console.log(clientId);
     console.log(audience);
 
+    const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+
     useEffect(() => {
         async function validateUserInDatabase() {
+            console.log('2');
             try {
-                const token = await getAccessTokenSilently();
+                const token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: audience
+                    }
+                });
                 const response = await fetch(`${audience}/users`, {
                     method: 'POST',
                     headers: {
@@ -36,12 +43,13 @@ function App() {
                 console.log(error);
             }
         }
+        console.log('0');
 
-        if (isAuthenticated)
+        if (isAuthenticated) {
+            console.log('1');
             validateUserInDatabase();
-    })
-
-    const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+        }
+    }, [isAuthenticated, getAccessTokenSilently, user, audience]);
 
     return (
         <Auth0Provider

@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as path from 'path';
-import { HttpApi, CorsHttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
+import { HttpApi, CorsHttpMethod, HttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import * as fs from 'fs';
 
@@ -83,19 +83,6 @@ export class ApiStack extends cdk.Stack {
         //         }
         //     }))
         // });
-
-        // // httpApi.addRoutes({
-        // //     path: '/reviews',
-        // //     methods: [HttpMethod.GET],
-        // //     integration: new HttpLambdaIntegration('reviews-integration', new lambda.Function(this, 'getAllReviewsFunction', {
-        // //         runtime: this.RUNTIME,
-        // //         handler: 'index.handler',
-        // //         code: lambda.Code.fromAsset(path.join(__dirname, '/../lambda/reviews/getAllReviews')),
-        // //         environment: {
-        // //             REGION: this.REGION
-        // //         }
-        // //     }))
-        // // });
 
         new cdk.CfnOutput(this, 'ApiEndpoint', {
             value: httpApi.apiEndpoint,
