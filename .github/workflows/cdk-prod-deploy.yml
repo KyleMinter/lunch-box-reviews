@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - cdk
 defaults:
   run:
     working-directory: ./cdk
