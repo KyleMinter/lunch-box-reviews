@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                 ExpressionAttributeValues: {
                         ':pkValue': 'review'
                 },
-                ProjectionExpression: 'entityID, entityType, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
+                ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })
