@@ -71,7 +71,7 @@ This endpoint is used for creating and storing new reviews in the database. This
 }
 ```
 
-These fields determine the various values of the newly created review. Upon receiving a request, a UUID will be genereated and the overal rating will be calculated for the review. Checks are performed on the backend to ensure that no improper data is supplied in these fields.
+These fields determine the various values of the newly created review. Upon receiving a request, a UUID will be generated and the overall rating will be calculated for the review. Checks are performed on the backend to ensure that no improper data is supplied in these fields.
 
 If invalid data is supplied, such as IDs referrencing users or foodItems that do not exist, invalid rating scores, or improperly formatted date strings, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
 
@@ -86,7 +86,8 @@ This endpoint is used to retrieve all the users stored in the database. Users re
     entityID: ...,          // The UUID used to identify the user.
     userName: ...,          // The name of the user.
     userEmail: ...,         // The email of the user.
-    userFlags: {            // A object containing boolean flags which represent the permissions of the user.
+    userFlags:              // An object containing boolean flags which represent the permissions of the user.
+    {  
         canSubmitReviews: ...,          // Determines if the user can submit reviews.
         canSubmitFoodItems: ...,        // Determines if the user can submit food items.
         canSubmitMenuInstances: ...     // Determines if the user can submit menu instances.
@@ -120,5 +121,56 @@ This endpoint is used for creating and storing new users in the database. This e
 The JWT token provided in the header is both used to verify that users are authenticated with Auth0 and to obtain a unique ID to identify the newly created user. (Specifically the the sub field in the JWT body is used as this unqiue ID).
 
 These fields in the body of the request determine the various values of the newly created user. Upon receiving a request, a user flags will be generated. Checks are performed on the backend to ensure that no improper data is supplied in these fields.
+
+If invalid data is supplied, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
+
+### Food Items
+
+#### GET: /foodItems
+
+This endpoint is used to retrieve all the food items stored in the database. Food items returned by this endpoint follows the following format:
+
+```
+{
+    entityID: ...,          // The UUID used to identify the food item.
+    foodName: ...,          // The name of the food item.
+    foodOrigin: ...,        // The email of the food item.
+    foodAttributes:         // An object containing different attributes of the food item.
+    {
+        nutrients: ...,          // The nutritional information of the food item (calories, macros, etc).
+        description: ...,        // The description of the food item.
+    }
+}
+```
+
+No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
+
+#### GET: /foodItems/{id}
+
+This endpoint is used to retrieve food items with a given userID, name, or origin. Depending on the parameters supplied, this endpoint can return 0, 1, or many reviews. Providing a ID as a path parameter will result in food items associated with the ID being returned. It is important to note, however, that the query parameter queryType will determine how results are queried.
+
+The queryType parameter accepts the following values: user, name, origin. As the names of these options imply, they will determine the type of ID you are supplying as the path parameter and, as previously mentioned, query the database differently. For instance, if you wanted to retrieve all food items with a given name you would do the following: `/foodItems/{name}/?queryType=name`
+
+The queryType is optional and if left unsupplied, the endpoint will assume you are querying using a specific foodID. If you are not attempting to query for food items with a foodID, the queryType parameter will need to be supplied in order to retrieve correct results. The endpoint will return a 400 error if an unsupported queryType parameter is supplied.
+
+> NOTE: If a request is made using the user query type, only individual foodIDs will be returned. These IDs can then be used in subsequent API queries to get food item data.
+
+#### POST: /foodItems
+
+This endpoint is used for creating and storing new food items in the database. This endpoint expects a requests with a body containing the following fields:
+
+```
+{
+    foodName: ...,          // The name of the food item.
+    foodOrigin: ...,        // The email of the food item.
+    foodAttributes:         // An object containing different attributes of the food item.
+    {
+        nutrients: ...,          // The nutritional information of the food item (calories, macros, etc).
+        description: ...,        // The description of the food item.
+    }
+}
+```
+
+These fields determine the various values of the newly created food item. Both the nutrients and description found within the foodAttributes key can be empty, but the name, origin, and attributes must be supplied. Upon receiving a request, a UUID will be generated for the food item. 
 
 If invalid data is supplied, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
