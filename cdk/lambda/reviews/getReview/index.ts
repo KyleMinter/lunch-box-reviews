@@ -76,7 +76,7 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                 IndexName: indexName,
                 KeyConditionExpression: keyConditionExpression,
                 ExpressionAttributeValues: expressionAttributeValues,
-                ProjectionExpression: 'entityID, entityType, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
+                ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })

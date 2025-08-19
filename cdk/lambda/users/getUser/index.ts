@@ -37,10 +37,10 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
         let indexName: string;
         let keyConditionExpression: string;
         let expressionAttributeValues;
-        let projectionExpression: string = 'entityID, entityType, foodID, userID, quality, quantity, rating, reviewDate, menuDate';
+        let projectionExpression: string = 'entityID, userName, userEmail, userFlags';
 
         switch (queryType) {
-            // The request is attempting to get reviews with a given userID.
+            // The request is attempting to get users with a given foodID.
             case 'foodItem':
                 indexName = 'GSI-entityType-foodID';
                 keyConditionExpression = 'entityType = :pkValue AND foodID = :skValue';
@@ -50,7 +50,7 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                 };
                 projectionExpression = 'userID';
                 break;
-            // The request is attempting to get reviews with a given foodID.
+            // The request is attempting to get users with a given name.
             case 'name':
                 indexName = 'GSI-userName';
                 keyConditionExpression = 'userName = :pkValue';
@@ -58,6 +58,7 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                     ':pkValue': `${queryID}`,
                 };
                 break;
+            // The request is atttemping to get users with a given email.
             case 'email':
                 indexName = 'GSI-userEmail';
                 keyConditionExpression = 'userEmail = :pkValue';

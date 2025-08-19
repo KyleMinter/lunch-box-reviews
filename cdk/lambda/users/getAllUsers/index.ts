@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
                 ExpressionAttributeValues: {
                         ':pkValue': 'user'
                 },
-                ProjectionExpression: 'entityID, entityType, userName, userEmail, userFlags',
+                ProjectionExpression: 'entityID, userName, userEmail, userFlags',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })
