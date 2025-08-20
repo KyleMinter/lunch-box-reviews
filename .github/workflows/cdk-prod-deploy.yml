@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - cdk
+      - backend
 defaults:
   run:
     working-directory: ./cdk
