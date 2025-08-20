@@ -19,29 +19,29 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
         const dynamo = DynamoDBDocumentClient.from(client);
         const tableName = 'Review-Entities-Table';
 
-        // Get the userID from the request's path parameter.
-        const userID = event.pathParameters?.id;
-        if (!userID)
-            throw new Error('UserID is undefined');
+        // Get the foodID from the request's path parameter.
+        const foodID = event.pathParameters?.id;
+        if (!foodID)
+            throw new Error('FoodID is undefined');
 
         // Get the request's query parameters.
         const queryParams = event.queryStringParameters;
         if (queryParams)
             throw new Error('Query parameters are not supported for this endpoint');
 
-        // Get the user from the database.
-        const user = await dynamo.send(
+        // Get the review from the database.
+        const foodItems = await dynamo.send(
             new GetCommand({
                 TableName: tableName,
                 Key: {
-                    entityID: userID
+                    entityID: foodID
                 },
-                ProjectionExpression: 'entityID, userName, userEmail, userFlags'
+                ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
             })
         );
 
         // Store the review in the response body.
-        body = user.Item;
+        body = foodItems.Item;
     }
     catch (err: any) {
         statusCode = 400;

@@ -16,105 +16,128 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 # API Documentation
 
 ## Overview
+<a name="overview"></a>
 
-### Pagination
+>## Table of Contents
+<a name="table-of-contents"></a>
 
-All endpoints support pagination to divide large queries into smaller more managable chunks. However, due to the particulars of DYnamoDB, endpoints do not function via the standard of supplying a limit and offset as query parameters. Instead, along with the results of an API query, the response body contains a LastEvaluatedKey object. As the name suggest, this object represents the last items queried by the database during a given API call. This object, along with a limit (represented as an integer) can then be supplied in subsequent API calls to continue querying for more results. Both the limit and LastEvaulatedKey query parameters are optional, however, if not supplied, the endpoint will assume the lowest limit of 10, and that you are requesting the first pagination of results. The limit parameter defaults to 10, but can also be set to 30, 50, or 100 to retrieve more results in a single API call.
+- [Overview](#overview)
+    - [Table of Contents](#table-of-contents)
+    - [Pagination](#pagination)
+    - [Querying using dates](#querying-using-dates)
+- [Endpoints](#endpoints)
+    - [Reviews](#reviews)
+        - [GET: /reviews](#get-reviews)
+        - [GET: /reviews/{id}](#get-reviewsid)
+        - [POST: /reviews](#post-reviews)
+    - [Users](#users)
+        - [GET: /users](#get-users)
+        - [GET: /users/{id}](#get-usersid)
+        - [GET: /users/{id}/reviews](#get-usersidreviews)
+        - [GET: /users/{id}/foodItems](#get-usersidfooditems)
+        - [POST: /users](#post-users)
+    - [Food Items](#food-items)
+        - [GET: /foodItems](#get-fooditems)
+        - [GET: /foodItems/{id}](#get-fooditemsid)
+        - [GET: /foodItems/{id}/reviews](#get-fooditemsidreviews)
+        - [GET: /foodItems/{id}/users](#get-fooditemsidusers)
+        - [POST: /foodItems](#post-fooditems)
 
-### Querying using dates
+>## Pagination
+<a name="pagination"></a>
+
+All endpoints support pagination to divide large queries into smaller more managable chunks. However, due to the particulars of DynamoDB, endpoints do not function via the standard of supplying a limit and offset as query parameters.
+
+Instead, along with the results of an API query, the response body contains a LastEvaluatedKey object. As the name suggest, this object represents the last items queried by the database during a given API call. This object, along with a limit (represented as an integer) can then be supplied in subsequent API calls to continue querying for more results.
+
+Both the limit and LastEvaulatedKey query parameters are optional, however, if not supplied, the endpoint will assume the lowest limit of 10, and that you are requesting the first pagination of results. The limit parameter defaults to 10, but can also be set to 30, 50, or 100 to retrieve more results in a single API call.
+
+>## Querying using dates
+<a name="querying-using-dates"></a>
 
 wasd
 
 ## Endpoints
+<a name="endpoints"></a>
 
-### Reviews
+> ## Reviews
+<a name="reviews"></a>
 
-#### GET: /reviews
+* ### GET: /reviews
+<a name="get-reviews"></a>
 
-This endpoint is used to retrieve all the reviews stored in the database regardless of which user made the review, what food item the review is for, or what menu instance the review is for. Reviews returned by this endpoint follows the following format:
-
-```
-{
-    entityID: ...,          // The UUID used to identify the review.
-    foodID: ...,            // The ID of the food item associated with the review.
-    userID: ...,            // The ID of the user who created the review.
-    quality: ...,           // The quality rating of the review.
-    quantity: ...,          // The quanitity rating of the review.
-    rating: ...,            // The calculated overall rating of the review. 
-    reviewDate: ...,        // The date of the last time the review was submitted/edited.
-    menuInstanceDate: ...   // The date of the the menu instance associated with the review.
-}
-```
-
+This endpoint is used to retrieve all the reviews stored in the database regardless of which user made the review, what food item the review is for, or what menu instance the review is for.
 
 No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
 
-#### GET: /reviews/{id}
+* ### GET: /reviews/{id}
+<a name="get-reviews/{id}"></a>
 
-This endpoint is used to retrieve reviews with a given reviewID, userID, foodID, or menuID. Depending on the parameters supplied, this endpoint can return 0, 1, or many reviews. Providing a ID as a path parameter will result in reviews associated with the ID being returned. It is important to note, however, that the query parameter queryType will determine how results are queried.
+This endpoint is used to retrieve a review with a given reviewID. If the given ID does not match an existing review nothing will be returned.
 
-The queryType parameter accepts the following values: user, foodItem, menuInstance. As the names of these options imply, they will determine the type of ID you are supplying as the path parameter and, as previously mentioned, query the database differently. For instance, if you wanted to retrieve all reviews made by a user you would do the following: `/reviews/{userID}/?queryType=user`
+This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
 
-The queryType is optional and if left unsupplied, the endpoint will assume you are querying using a specific reviewID. If you are not attempting to query for reviews with a reviewID, the queryType parameter will need to be supplied in order to retrieve correct results. The endpoint will return a 400 error if an unsupported queryType parameter is supplied.
-
-#### POST: /reviews
+* ### POST: /reviews
+<a name="post-reviews"></a>
 
 This endpoint is used for creating and storing new reviews in the database. This endpoint expects a requests with a body containing the following fields:
 
 ```
 {
-    foodID: ...,            // The unique ID for the food item this review is referencing.
-    userID: ...,            // The unique ID for the user who is creating this review.
-    quality: ...,           // The quality rating for the review. Represented as float value between 1-10.
-    quantity: ...,          // The quantity rating for the review. Represented as an integer between 1-5.
-    menuInstanceDate: ...   // The date of the menu instance this review is referencing. Represented as an ISO-8601 string.
+    "foodID": ...,            // The unique ID for the food item this review is referencing.
+    "userID": ...,            // The unique ID for the user who is creating this "review.
+    "quality": ...,           // The quality rating for the review. Represented as float value between 1-10.
+    "quantity": ...,          // The quantity rating for the review. Represented as an integer between 1-5.
+    "menuInstanceDate": ...   // The date of the menu instance this review is referencing. Represented as an ISO-8601 string.
 }
 ```
 
 These fields determine the various values of the newly created review. Upon receiving a request, a UUID will be generated and the overall rating will be calculated for the review. Checks are performed on the backend to ensure that no improper data is supplied in these fields.
 
-If invalid data is supplied, such as IDs referrencing users or foodItems that do not exist, invalid rating scores, or improperly formatted date strings, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
+If invalid data is supplied, such as IDs referrencing users or foodItems that do not exist, invalid rating scores, or improperly formatted date strings, the endpoint will return a 400 Bad Request error.
 
-### Users
+This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
 
-#### GET: /users
+> ## Users
+<a name="users"></a>
 
-This endpoint is used to retrieve all the users stored in the database. Users returned by this endpoint follows the following format:
+* ### GET: /users
+<a name="get-users"></a>
 
-```
-{
-    entityID: ...,          // The UUID used to identify the user.
-    userName: ...,          // The name of the user.
-    userEmail: ...,         // The email of the user.
-    userFlags:              // An object containing boolean flags which represent the permissions of the user.
-    {  
-        canSubmitReviews: ...,          // Determines if the user can submit reviews.
-        canSubmitFoodItems: ...,        // Determines if the user can submit food items.
-        canSubmitMenuInstances: ...     // Determines if the user can submit menu instances.
-    }
-}
-```
+This endpoint is used to retrieve all the users stored in the database.
 
 No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
 
-#### GET: /users/{id}
+* ### GET: /users/{id}
+<a name="get-users/{id}"></a>
 
-This endpoint is used to retrieve users with a given foodID, name, or email. Depending on the parameters supplied, this endpoint can return 0, 1, or many reviews. Providing a ID as a path parameter will result in users associated with the ID being returned. It is important to note, however, that the query parameter queryType will determine how results are queried.
+This endpoint is used to retrieve a user with a given userID. If the given ID does not match an existing user nothing will be returned.
 
-The queryType parameter accepts the following values: foodItem, name, email. As the names of these options imply, they will determine the type of ID you are supplying as the path parameter and, as previously mentioned, query the database differently. For instance, if you wanted to retrieve all users with a given name you would do the following: `/users/{name}/?queryType=name`
+No query parameters need to be supplied to this function, however, a criteria and filter can be supplied to filter for users with a given name or email. The provided criteria must be equal to `userName` or `userEmail` and be supplied with a filter, otherwise a 404 Bad Request error will be returned.
 
-The queryType is optional and if left unsupplied, the endpoint will assume you are querying using a specific userID. If you are not attempting to query for users with a userID, the queryType parameter will need to be supplied in order to retrieve correct results. The endpoint will return a 400 error if an unsupported queryType parameter is supplied.
+* ### GET: /users/{id}/reviews
+<a name="get-users/{id}/reviews"></a>
 
-> NOTE: If a request is made using the foodItem query type, only individual userIDs will be returned. These IDs can then be used in subsequent API queries to get user data.
+This endpoint is used to retrieve reviews by a user with a given userID. If the given ID does not match an existing user or the user has not submitted any reviews, nothing will be returned.
 
-#### POST: /users
+No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
+
+* ### GET: /users/{id}/foodItems
+<a name="get-users/{id}/foodItems"></a>
+
+This endpoint is used to retrieve food items reviewed by a user with a given userID. If the given ID does not match an existing user or the user has not reviewed any food items, nothing will be returned.
+
+No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
+
+* ### POST: /users
+<a name="post-users"></a>
 
 This endpoint is used for creating and storing new users in the database. This endpoint requires a valid Auth0 JWT token to be supplied in the authorization header, and expects a requests with a body containing the following fields:
 
 ```
 {
-    userName: ...,              // The name for the user.
-    userEmail: ...,             // The email for the user.
+    "userName": ...,              // The name for the user.
+    "userEmail": ...,             // The email for the user.
 }
 ```
 
@@ -122,40 +145,43 @@ The JWT token provided in the header is both used to verify that users are authe
 
 These fields in the body of the request determine the various values of the newly created user. Upon receiving a request, a user flags will be generated. Checks are performed on the backend to ensure that no improper data is supplied in these fields.
 
-If invalid data is supplied, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
+If invalid data is supplied, the endpoint will return a 400 Bad Request error.
 
-### Food Items
+This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
 
-#### GET: /foodItems
+>## Food Items
+<a name="foodItems"></a>
 
-This endpoint is used to retrieve all the food items stored in the database. Food items returned by this endpoint follows the following format:
+* ### GET: /foodItems
+<a name="get-foodItems"></a>
 
-```
-{
-    entityID: ...,          // The UUID used to identify the food item.
-    foodName: ...,          // The name of the food item.
-    foodOrigin: ...,        // The email of the food item.
-    foodAttributes:         // An object containing different attributes of the food item.
-    {
-        nutrients: ...,          // The nutritional information of the food item (calories, macros, etc).
-        description: ...,        // The description of the food item.
-    }
-}
-```
+This endpoint is used to retrieve all the food items stored in the database.
 
 No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
 
-#### GET: /foodItems/{id}
+* ### GET: /foodItems/{id}
+<a name="get-foodItems/{id}"></a>
 
-This endpoint is used to retrieve food items with a given userID, name, or origin. Depending on the parameters supplied, this endpoint can return 0, 1, or many reviews. Providing a ID as a path parameter will result in food items associated with the ID being returned. It is important to note, however, that the query parameter queryType will determine how results are queried.
+This endpoint is used to retrieve a food item with a given foodID. If the given ID does not match an existing food item nothing will be returned.
 
-The queryType parameter accepts the following values: user, name, origin. As the names of these options imply, they will determine the type of ID you are supplying as the path parameter and, as previously mentioned, query the database differently. For instance, if you wanted to retrieve all food items with a given name you would do the following: `/foodItems/{name}/?queryType=name`
+No query parameters need to be supplied to this function, however, a criteria and filter can be supplied to filter for food items with a given name or origin. The provided criteria must be equal to `foodName` or `foodOrigin` and be supplied with a filter, otherwise a 404 Bad Request error will be returned.
 
-The queryType is optional and if left unsupplied, the endpoint will assume you are querying using a specific foodID. If you are not attempting to query for food items with a foodID, the queryType parameter will need to be supplied in order to retrieve correct results. The endpoint will return a 400 error if an unsupported queryType parameter is supplied.
+* ### GET: /foodItems/{id}/reviews
+<a name="get-foodItems/{id}/reviews"></a>
 
-> NOTE: If a request is made using the user query type, only individual foodIDs will be returned. These IDs can then be used in subsequent API queries to get food item data.
+This endpoint is used to retrieve reviews of a food item with a given foodID. If the given ID does not match an existing food item or no reviews for the food item have bee submitted, nothing will be returned.
 
-#### POST: /foodItems
+No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
+
+* ### GET: /foodItems/{id}/users
+<a name="get-foodItems/{id}/users"></a>
+
+This endpoint is used to retrieve users who have reviewed a food item with a given foodID. If the given ID does not match an existing food item or no reviews for the food item have bee submitted, nothing will be returned.
+
+No query parameters need to be supplied to this function, however, a limit and a LastEvaulatedKey can be supplied to paginated results.
+
+* ### POST: /foodItems
+<a name="post-foodItems"></a>
 
 This endpoint is used for creating and storing new food items in the database. This endpoint expects a requests with a body containing the following fields:
 
@@ -173,4 +199,4 @@ This endpoint is used for creating and storing new food items in the database. T
 
 These fields determine the various values of the newly created food item. Both the nutrients and description found within the foodAttributes key can be empty, but the name, origin, and attributes must be supplied. Upon receiving a request, a UUID will be generated for the food item. 
 
-If invalid data is supplied, the endpoint will return a 400 error. In addtion, this endpoint accepts no query parameters and will return a 400 error if any are supplied.
+This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
