@@ -19,24 +19,29 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
         const dynamo = DynamoDBDocumentClient.from(client);
         const tableName = 'Review-Entities-Table';
 
+        // Get the reviewID from the request's path parameter.
+        const userID = event.pathParameters?.id;
+        if (!userID)
+            throw Error('UserID is undefined');
+
         // Get the request's query parameters.
         const queryParams = event.queryStringParameters;
         const limit: number = queryParams ? Number(queryParams.limit) : 30;
         const offsetParam: string | undefined = queryParams ? queryParams.offset : undefined;
         let offset: Record<string, any> | undefined;
-
         if (offsetParam) {
             offset = JSON.parse(decodeURIComponent(offsetParam));
         }
 
-        // Query the database.
-        const reviews = await dynamo.send(
+        // Query the database with the provided values.
+        const results = await dynamo.send(
             new QueryCommand({
                 TableName: tableName,
-                IndexName: 'GSI-entityType',
-                KeyConditionExpression: 'entityType = :pkValue',
+                IndexName: 'GSI-entityType-userID',
+                KeyConditionExpression: 'entityType = :pkValue AND userID = :skValue',
                 ExpressionAttributeValues: {
-                        ':pkValue': 'review'
+                    ':pkValue': 'review',
+                    ':skValue': userID
                 },
                 ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
                 ExclusiveStartKey: offset,
@@ -46,8 +51,8 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
 
         // Store the results of the query and the last evaluated key to the response body.
         body = {
-            Items: reviews.Items ? reviews.Items : [],
-            LastEvaluatedKey: reviews.LastEvaluatedKey
+            Items: results.Items ? results.Items : [],
+            LastEvaluatedKey: results.LastEvaluatedKey
         };
     }
     catch (err: any) {

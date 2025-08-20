@@ -1,5 +1,5 @@
 {
-    "name": "get-users-lambda",
+    "name": "get-user-lambda",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",

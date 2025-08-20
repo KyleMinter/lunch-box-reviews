@@ -77,33 +77,49 @@ export class DynamoDBStack extends cdk.Stack {
             }
         };
 
-        const GSI_FoodName: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-foodName',
+        const GSI_EntityType_FoodName: GlobalSecondaryIndexProps = {
+            indexName: 'GSI-entityType-foodName',
             partitionKey: {
+                name: 'entityType',
+                type: AttributeType.STRING,
+            },
+            sortKey: {
                 name: 'foodName',
                 type: AttributeType.STRING,
             }
         };
 
-        const GSI_FoodOrigin: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-foodOrigin',
+        const GSI_EntityType_FoodOrigin: GlobalSecondaryIndexProps = {
+            indexName: 'GSI-entityType-foodOrigin',
             partitionKey: {
+                name: 'entityType',
+                type: AttributeType.STRING,
+            },
+            sortKey: {
                 name: 'foodOrigin',
                 type: AttributeType.STRING,
             }
         };
 
-        const GSI_UserName: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-userName',
+        const GSI_EntityType_UserName: GlobalSecondaryIndexProps = {
+            indexName: 'GSI-entityType-userName',
             partitionKey: {
+                name: 'entityType',
+                type: AttributeType.STRING,
+            },
+            sortKey: {
                 name: 'userName',
                 type: AttributeType.STRING,
             }
         };
 
-        const GSI_UserEmail: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-userEmail',
+        const GSI_EntityType_UserEmail: GlobalSecondaryIndexProps = {
+            indexName: 'GSI-entityType-userEmail',
             partitionKey: {
+                name: 'entityType',
+                type: AttributeType.STRING,
+            },
+            sortKey: {
                 name: 'userEmail',
                 type: AttributeType.STRING,
             }
@@ -115,9 +131,9 @@ export class DynamoDBStack extends cdk.Stack {
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_UserID);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_MenuDate);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_ReviewDate);
-        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_FoodName);
-        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_FoodOrigin);
-        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_UserName);
-        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_UserEmail);
+        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodName);
+        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodOrigin);
+        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_UserName);
+        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_UserEmail);
     }
 }

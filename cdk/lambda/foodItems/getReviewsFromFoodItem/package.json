@@ -1,5 +1,5 @@
 {
-    "name": "get-review-lambda",
+    "name": "get-reviews-from-food-item-lambda",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",

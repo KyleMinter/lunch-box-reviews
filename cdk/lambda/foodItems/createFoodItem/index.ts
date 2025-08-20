@@ -19,7 +19,7 @@ export const handler = async (event: any) => {
         const tableName = 'Review-Entities-Table';
 
         const requestJSON = JSON.parse(event.body);
-        const foodAttributes = JSON.parse(requestJSON.foodAttributes);
+        const foodAttributes = requestJSON.foodAttributes;
         
         const uuid: string = uuidv4();
         const foodItem = {
