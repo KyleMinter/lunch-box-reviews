@@ -6,13 +6,17 @@ import {
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
+import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 
-export const handler = async (event: any) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
     const headers = {
         'Content-Type': 'application-json',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
     };
 
     const client = new DynamoDBClient({});
@@ -20,8 +24,12 @@ export const handler = async (event: any) => {
     const tableName = 'Review-Entities-Table';
     
     try {
+        console.log("ewadwadwadwa");
         // Get the raw JWT token.
-        const token: string = event.authorizationToken.replace('Bearer ', '');
+        const auth: string | undefined = event.headers.Authorization || event.headers.authorization;
+        if (auth === undefined)
+            throw new Error('Authorization header is undefined');
+        const token = auth.replace('Bearer ', '');
 
         // Configure Jwks client so we can obtain the key.
         const jwks = jwksClient({
@@ -38,7 +46,7 @@ export const handler = async (event: any) => {
         const decoded = jwt.verify(token, publicKey) as JwtPayload;
 
         // Construct a user entity.
-        const requestJSON = JSON.parse(event.body);
+        const requestJSON = JSON.parse(event.body!);
         const user = {
             entityID: decoded.sub,
             entityType: 'user',
