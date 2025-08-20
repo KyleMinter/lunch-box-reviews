@@ -17,13 +17,16 @@ export class ApiStack extends cdk.Stack {
         const httpApi = new HttpApi(this, 'Reviews-API', {
             apiName: 'Reviews-API',
             corsPreflight: {
+                allowOrigins: ['*'],
                 allowMethods: [
+                    CorsHttpMethod.OPTIONS,
                     CorsHttpMethod.POST,
                     CorsHttpMethod.GET,
                     CorsHttpMethod.PUT,
+                    CorsHttpMethod.PATCH,
                     CorsHttpMethod.DELETE,
                 ],
-                allowOrigins: ['*'], // be more specific in production
+                allowHeaders: ['Content-Type', 'Authorization'],
             }
         });
 

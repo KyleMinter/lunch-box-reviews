@@ -3,13 +3,36 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 function Profile() {
 
+    const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
+
     useEffect(() => {
-        async function token() {
+        async function validateUserInDatabase() {
+            try {
+                const token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: audience
+                    }
+                });
+                await fetch(`${audience}users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: `${user!.name}`,
+                        email: `${user!.email}`
+                    })
+                });
+            }
+            catch (error) {
+                console.log(error);
+            }
             setToken(await getAccessTokenSilently());
         }
 
         if (isAuthenticated)
-            token();
+            validateUserInDatabase();
     })
     const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
     const [token, setToken] = useState('');
