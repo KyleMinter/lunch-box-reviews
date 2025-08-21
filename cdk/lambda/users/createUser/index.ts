@@ -1,70 +1,53 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-    DynamoDBDocumentClient,
-    PutCommand,
-} from '@aws-sdk/lib-dynamodb';
-import * as jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
-import * as jwksClient from 'jwks-rsa';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+    getAuthorizationHeaders,
+    validateJwtToken,
+    User,
+    UserFlag,
+    EntityType,
+    createUser,
+    RequestError,
+    BadRequestError
+} from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',
-    };
-
-    const client = new DynamoDBClient({});
-    const dynamo = DynamoDBDocumentClient.from(client);
-    const tableName = 'Review-Entities-Table';
+    const headers = getAuthorizationHeaders('OPTIONS,POST');
     
     try {
-        console.log("ewadwadwadwa");
-        // Get the raw JWT token.
-        const auth: string | undefined = event.headers.Authorization || event.headers.authorization;
-        if (auth === undefined)
-            throw new Error('Authorization header is undefined');
-        const token = auth.replace('Bearer ', '');
+        // Validate user token.
+        const jwt = await validateJwtToken(event);
 
-        // Configure Jwks client so we can obtain the key.
-        const jwks = jwksClient({
-            jwksUri: 'https://dev-0jf5q4cnqlq566kt.us.auth0.com/.well-known/jwks.json'
-        });
-
-        // Obtain the public key so we can validate the token.
-        const jwtHeader = JSON.parse(atob(token.split('.')[0]));
-        const kid = jwtHeader.kid;
-        const signingKey = await jwks.getSigningKey(kid) as jwksClient.SigningKey;
-        const publicKey = signingKey.getPublicKey();
-        
-        // Verify the token.
-        const decoded = jwt.verify(token, publicKey) as JwtPayload;
+        // Ensure that a body was sent with the request.
+            if (!event.body)
+                throw new BadRequestError('No food item provided in request body');
 
         // Construct a user entity.
-        const requestJSON = JSON.parse(event.body!);
-        const user = {
-            entityID: decoded.sub,
-            entityType: 'user',
-            userName: requestJSON.name,
-            userEmail: requestJSON.email,
-        };
+        const user: User = JSON.parse(event.body!);
+        user.entityID = jwt.sub!;
+        user.entityType = EntityType.User,
+        user.userFlags = [
+            UserFlag.canSubmitReviews,
+            UserFlag.canDeleteReviews,
+            UserFlag.canSubmitFoodItems,
+            UserFlag.canDeleteFoodItems,
+            UserFlag.canSubmitMenuInstances,
+            UserFlag.canDeleteMenuInstances
+        ];
 
-        // Add the user to the database.
-        body = await dynamo.send(
-            new PutCommand({
-                TableName: tableName,
-                Item: user,
-            })
-        );
+        body = createUser(user);
     }
-    catch (err: any) {
-        statusCode = 400;
-        body = err.message;
+    catch (err) {
+        if (err instanceof RequestError) {
+            statusCode = err.statusCode;
+            body = err.message;
+        }
+        else {
+            statusCode = 500;
+            body = err;
+        }
     }
     finally {
         body = JSON.stringify(body);

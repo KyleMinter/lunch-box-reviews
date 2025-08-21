@@ -1,12 +1,11 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-    DynamoDBDocumentClient,
-    GetCommand
-} from '@aws-sdk/lib-dynamodb';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+    getReview,
+    RequestError
+} from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 
-export const handler = async (event: APIGatewayProxyEvent, _context: Context) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
     const headers = {
@@ -14,11 +13,6 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
     };
 
     try {
-        // Get database client info.
-        const client = new DynamoDBClient({});
-        const dynamo = DynamoDBDocumentClient.from(client);
-        const tableName = 'Review-Entities-Table';
-
         // Get the reviewID from the request's path parameter.
         const reviewID = event.pathParameters?.id;
         if (!reviewID)
@@ -29,23 +23,17 @@ export const handler = async (event: APIGatewayProxyEvent, _context: Context) =>
         if (queryParams)
             throw new Error('Query parameters are not supported for this endpoint');
 
-        // Get the review from the database.
-        const review = await dynamo.send(
-            new GetCommand({
-                TableName: tableName,
-                Key: {
-                    entityID: reviewID
-                },
-                ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            })
-        );
-
-        // Store the review in the response body.
-        body = review.Item;
+        body = await getReview(reviewID);
     }
-    catch (err: any) {
-        statusCode = 400;
-        body = err.message;
+    catch (err) {
+        if (err instanceof RequestError) {
+            statusCode = err.statusCode;
+            body = err.message;
+        }
+        else {
+            statusCode = 500;
+            body = err;
+        }
     }
     finally {
         body = JSON.stringify(body);

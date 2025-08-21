@@ -1,49 +1,50 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-    DynamoDBDocumentClient,
-    PutCommand,
-} from '@aws-sdk/lib-dynamodb';
+    EntityType,
+    UserFlag,
+    FoodItem,
+    validateJwtToken,
+    validateUserPermissions,
+    getAuthorizationHeaders,
+    createFoodItem,
+    RequestError,
+    BadRequestError
+} from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4} from 'uuid';
 
 
-export const handler = async (event: any) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-    };
+    const headers = getAuthorizationHeaders('OPTIONS,POST');
     
     try {
-        const client = new DynamoDBClient({});
-        const dynamo = DynamoDBDocumentClient.from(client);
-        const tableName = 'Review-Entities-Table';
+        // Validate user permissions.
+        const jwt = await validateJwtToken(event);
+        await validateUserPermissions(jwt.sub!, [
+            UserFlag.canSubmitFoodItems
+        ]);
 
-        const requestJSON = JSON.parse(event.body);
-        const foodAttributes = requestJSON.foodAttributes;
-        
-        const uuid: string = uuidv4();
-        const foodItem = {
-            entityID: uuid,
-            entityType: 'foodItem',
-            foodName: requestJSON.foodName,
-            foodOrigin: requestJSON.foodOrigin,
-            foodAttributes: foodAttributes,
-        };
+        // Ensure that a body was sent with the request.
+        if (!event.body)
+            throw new BadRequestError('No food item provided in request body');
 
-        await dynamo.send(
-            new PutCommand({
-                TableName: tableName,
-                Item: foodItem,
-            })
-        );
+        // Construct a new food item to add to the database.
+        const foodItem: FoodItem = JSON.parse(event.body);
+        foodItem.entityID = uuidv4();
+        foodItem.entityType = EntityType.FoodItem;
 
-        body = {
-            entityID: uuid,
-        };
+        body = await createFoodItem(foodItem);
     }
-    catch (err: any) {
-        statusCode = 400;
-        body = err.message;
+    catch (err) {
+        if (err instanceof RequestError) {
+            statusCode = err.statusCode;
+            body = err.message;
+        }
+        else {
+            statusCode = 500;
+            body = err;
+        }
     }
     finally {
         body = JSON.stringify(body);
