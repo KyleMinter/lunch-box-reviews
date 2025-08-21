@@ -1,12 +1,18 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-    DynamoDBDocumentClient,
-    PutCommand,
-} from '@aws-sdk/lib-dynamodb';
+    validateJwtToken,
+    validateUserPermissions,
+    Review,
+    UserFlag,
+    EntityType,
+    createReview,
+    RequestError,
+    BadRequestError,
+} from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4} from 'uuid';
 
 
-export const handler = async (event: any) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
     const headers = {
@@ -14,39 +20,34 @@ export const handler = async (event: any) => {
     };
 
     try {
-        const client = new DynamoDBClient({});
-        const dynamo = DynamoDBDocumentClient.from(client);
-        const tableName = 'Review-Entities-Table';
+        // Validate user permissions.
+        const jwt = await validateJwtToken(event);
+        await validateUserPermissions(jwt.sub!, [
+            UserFlag.canSubmitReviews
+        ]);
 
-        const requestJSON = JSON.parse(event.body);
-        
-        const uuid: string = uuidv4();
-        const review = {
-            entityID: uuid,
-            entityType: 'review',
-            foodID: requestJSON.foodID,
-            userID: requestJSON.userID,
-            quality: requestJSON.quality,
-            quantity: requestJSON.quantity,
-            rating: requestJSON.rating,
-            reviewDate: requestJSON.reviewDate,
-            menuDate: requestJSON.menuDate
-        };
+        // Ensure that a body was sent with the request.
+        if (!event.body)
+            throw new BadRequestError('No review provided in request body');
 
-        await dynamo.send(
-            new PutCommand({
-                TableName: tableName,
-                Item: review,
-            })
-        );
+        // Construct a new review to add to the database.
+        const review: Review = JSON.parse(event.body);
+        review.entityID = uuidv4();
+        review.entityType = EntityType.Review;
+        review.userID = jwt.sub!;
 
-        body = {
-            entityID: uuid,
-        };
+        // Add the review to the database.
+        body = createReview(review);
     }
-    catch (err: any) {
-        statusCode = 400;
-        body = err.message;
+    catch (err) {
+        if (err instanceof RequestError) {
+            statusCode = err.statusCode;
+            body = err.message;
+        }
+        else {
+            statusCode = 500;
+            body = err;
+        }
     }
     finally {
         body = JSON.stringify(body);

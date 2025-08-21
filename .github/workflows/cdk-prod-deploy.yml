@@ -30,6 +30,11 @@ jobs:
       - name: Install CDK dependencies
         run:  npm install
       
+      - name: Build Shared Utils package
+        run: |
+          echo "Building shared-utils package..."
+          (cd ../shared-utils && npm install && npm run build)
+      
       - name: Build Local Lambda Projects
         run: |
           for dir in ./lambda/*/*/; do
