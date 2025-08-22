@@ -1,9 +1,7 @@
 import {
     getAuthorizationHeaders,
     validateJwtToken,
-    User,
-    UserFlag,
-    EntityType,
+    constructUser,
     createUser,
     RequestError,
     BadRequestError
@@ -24,20 +22,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             if (!event.body)
                 throw new BadRequestError('No food item provided in request body');
 
-        // Construct a user entity.
-        const user: User = JSON.parse(event.body!);
-        user.entityID = jwt.sub!;
-        user.entityType = EntityType.User,
-        user.userFlags = [
-            UserFlag.canSubmitReviews,
-            UserFlag.canDeleteReviews,
-            UserFlag.canSubmitFoodItems,
-            UserFlag.canDeleteFoodItems,
-            UserFlag.canSubmitMenuInstances,
-            UserFlag.canDeleteMenuInstances
-        ];
-
-        body = createUser(user);
+        const user = await constructUser(event.body, jwt.sub!);
+        body = await createUser(user);
     }
     catch (err) {
         if (err instanceof RequestError) {

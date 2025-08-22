@@ -13,6 +13,7 @@ function Profile() {
                         audience: audience
                     }
                 });
+                setToken(token);
                 await fetch(`${audience}users`, {
                     method: 'POST',
                     headers: {
@@ -20,15 +21,14 @@ function Profile() {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        name: `${user!.name}`,
-                        email: `${user!.email}`
+                        userName: `${user!.name}`,
+                        userEmail: `${user!.email}`
                     })
                 });
             }
             catch (error) {
                 console.log(error);
             }
-            setToken(await getAccessTokenSilently());
         }
 
         if (isAuthenticated)

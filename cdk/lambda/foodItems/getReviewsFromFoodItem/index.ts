@@ -22,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         const { limit, offset } = getPaginationParameters(event);
 
         // Store the results of the query and the last evaluated key to the response body.
-        body = getReviewsFromFoodItem(foodID, limit, offset);
+        body = await getReviewsFromFoodItem(foodID, limit, offset);
     }
     catch (err) {
         if (err instanceof RequestError) {

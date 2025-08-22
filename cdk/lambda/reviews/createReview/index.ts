@@ -2,8 +2,8 @@ import {
     validateJwtToken,
     validateUserPermissions,
     Review,
-    UserFlag,
-    EntityType,
+    UserPermission,
+    constructReview,
     createReview,
     RequestError,
     BadRequestError,
@@ -23,21 +23,15 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         // Validate user permissions.
         const jwt = await validateJwtToken(event);
         await validateUserPermissions(jwt.sub!, [
-            UserFlag.canSubmitReviews
+            UserPermission.userReviewPermissions
         ]);
 
         // Ensure that a body was sent with the request.
         if (!event.body)
             throw new BadRequestError('No review provided in request body');
 
-        // Construct a new review to add to the database.
-        const review: Review = JSON.parse(event.body);
-        review.entityID = uuidv4();
-        review.entityType = EntityType.Review;
-        review.userID = jwt.sub!;
-
-        // Add the review to the database.
-        body = createReview(review);
+        const review: Review = await constructReview(event.body, jwt.sub!);
+        body = await createReview(review);
     }
     catch (err) {
         if (err instanceof RequestError) {

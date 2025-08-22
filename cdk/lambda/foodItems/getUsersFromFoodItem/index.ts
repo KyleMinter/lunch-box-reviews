@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (!foodID)
             throw new Error('FoodID is undefined');
 
-        const { limit, offset } = getPaginationParameters(event);
+        const { limit, offset } = await getPaginationParameters(event);
         body = await getUsersFromFoodItems(foodID, limit, offset);
     }
     catch (err) {
