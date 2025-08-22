@@ -5,7 +5,7 @@ import { GetCommand, GetCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { getDynamoDbClient, REVIEWS_TABLE } from '../database';
 import { UnauthorizedError } from '../errors';
-import { UserFlag } from '../types';
+import { UserPermission } from '../types';
 
 export function getAuthorizationHeaders(requestMethods: string) {
     return {
@@ -51,26 +51,26 @@ export async function validateJwtToken(event: APIGatewayProxyEvent): Promise<Jwt
  * Verifies that a user with a given userID has the provided permissions.
  * Throws an UnauthorizedError if the user does not exist or does not have one or more of the provided permissions.
  * @param userID the ID of the user
- * @param permissions a list of UserFlags to ensure the user has
+ * @param permissions a list of UserPermissions to ensure the user has
  */
-export async function validateUserPermissions(userID: string, permissions: UserFlag[]) {
+export async function validateUserPermissions(userID: string, permissions: UserPermission[]) {
     const dynamo = getDynamoDbClient();
 
-    const userFlags: UserFlag[] | undefined = await dynamo.send(
+    const userPermissions: UserPermission[] | undefined = await dynamo.send(
         new GetCommand({
             TableName: REVIEWS_TABLE,
             Key: {
                 entityID: userID
             },
-            ProjectionExpression: 'userFlags',
+            ProjectionExpression: 'userPermissions',
         })
-    ).then((result: GetCommandOutput) => result.Item?.userFlags);
+    ).then((result: GetCommandOutput) => result.Item?.userPermissions);
 
-    if (!userFlags)
+    if (!userPermissions)
         throw new UnauthorizedError('User does not exist');
 
     permissions.forEach(permission => {
-        if (!userFlags.includes(permission))
+        if (!userPermissions.includes(permission))
             throw new UnauthorizedError('User is not authorized for this action');
     });
 }

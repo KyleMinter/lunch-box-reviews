@@ -4,11 +4,13 @@ import {
     QueryCommand,
     QueryCommandOutput,
     GetCommand,
-    PutCommand
+    PutCommand,
+    UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
+import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
-import { EntityType, FoodItem, Review, User } from '../types';
+import { EntityType, FoodAttributes, FoodItem, Review, User, UserPermission } from '../types';
 
 
 /*
@@ -39,6 +41,19 @@ export function getDynamoDbClient(): DynamoDBDocumentClient {
     const client = new DynamoDBClient({});
     const dynamo = DynamoDBDocumentClient.from(client);
     return dynamo;
+}
+
+/**
+ * Calculates the overall rating given a quality and quantity rating
+ * @param quality the quality rating
+ * @param quantity the quantity rating
+ * @returns the overall rating
+ */
+export function calculateOverallRating(quality: number, quantity: number): number {
+    // Compute the overall rating and round it to one decimal place.
+    let rating = quality * Math.sqrt(quantity / 5);
+    rating = Math.round(rating * 10) / 10;
+    return rating;
 }
 
 /**
@@ -97,6 +112,25 @@ export function getFilterParameters(event: APIGatewayProxyEvent): FilterParamete
 
     ======================================================================================================
 */
+
+export async function constructFoodItem(jsonStr: string) {
+    const json = JSON.parse(jsonStr);
+
+    const foodAttributes: FoodAttributes = {
+        description: json.foodAttributes.description,
+        nutrition: json.foodAttributes.nutrition
+    };
+
+    const foodItem: FoodItem = {
+        entityID: uuidv4(),
+        entityType: EntityType.FoodItem,
+        foodName: json.foodName,
+        foodOrigin: json.foodOrigin,
+        foodAttributes: foodAttributes
+    }
+
+    return foodItem;
+}
 
 export async function createFoodItem(foodItem: FoodItem) {
     const dynamo = getDynamoDbClient();
@@ -234,7 +268,7 @@ export async function getUsersFromFoodItems(foodID: string, limit: number, offse
                     Key: {
                         entityID: userID
                     },
-                    ProjectionExpression: 'entityID, userName, userEmail, userFlags'
+                    ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
                 })
             );
 
@@ -258,6 +292,55 @@ export async function getUsersFromFoodItems(foodID: string, limit: number, offse
 
     ======================================================================================================
 */
+
+export async function constructReview(jsonStr: string, userID: string) {
+    const json = JSON.parse(jsonStr);
+
+    // Convert the ratings to numbers
+    let quality: number = Number(json.quality);
+    let quantity: number = Number(json.quantity);
+
+    // Round quality rating to one decimal place and truncate the quantity rating.
+    quality = Math.round(json.quality as number * 10) / 10;
+    quantity = Math.trunc(json.quantity as number);
+
+    // Valiate quality and quantity ratings.
+    if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
+    quality < 1 || quantity < 1 || quantity > 5)
+        throw new BadRequestError('Invalid review ratings provided');
+
+    // Get the food item specified in the review from the database.
+    const dynamo = getDynamoDbClient();
+    const foodItem = await dynamo.send(
+        new GetCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: json.foodID
+            },
+            ProjectionExpression: 'entityID'
+
+        })
+    );
+
+    // Validate foodID.
+    if (!foodItem.Item)
+        throw new BadRequestError('Invalid foodID provided');
+
+    // Construct the review.
+    const review: Review = {
+        entityID: uuidv4(),
+        entityType: EntityType.Review,
+        userID: userID,
+        foodID: json.foodID,
+        quality: quality,
+        quantity: quantity,
+        rating: calculateOverallRating(json.quality, json.quantity),
+        reviewDate: json.reviewDate,
+        menuDate: json.menuDate
+    }
+
+    return review;
+}
 
 export async function createReview(review: Review) {
     const dynamo = getDynamoDbClient();
@@ -313,14 +396,81 @@ export async function getReview(reviewID: string) {
     ======================================================================================================
 */
 
+export async function constructUser(jsonStr: string, userID: string) {
+    const json = JSON.parse(jsonStr);
+    const user: User = {
+        entityID: userID,
+        entityType: EntityType.User,
+        userName: json.userName,
+        userEmail: json.userEmail,
+        userPermissions: [
+            UserPermission.userReviewPermissions,
+            UserPermission.adminUserPermissions
+        ]
+    };
+
+    return user;
+}
+
 export async function createUser(user: User) {
     const dynamo = getDynamoDbClient();
-    await dynamo.send(
-        new PutCommand({
+
+    // Query database for an existing user.
+    let result: Record<string, any> | undefined = await dynamo.send(
+        new GetCommand({
             TableName: REVIEWS_TABLE,
-            Item: user,
+            Key: {
+                entityID: user.entityID
+            },
+            ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
         })
     );
+    result = result.Item;
+
+    // If the user is already in the database,
+    // we will do some checks to make sure their user data is up to date.
+    if (result) {
+        // If needed, update user name.
+        if (user.userName !== result.userName) {
+            await dynamo.send(
+                new UpdateCommand({
+                    TableName: REVIEWS_TABLE,
+                    Key: {
+                        entityID: user.entityID
+                    },
+                    UpdateExpression: 'SET userName = :newValue',
+                    ExpressionAttributeValues: {
+                        ':newValue': user.userName
+                    }
+                })
+            );
+        }
+
+        // If needed update user email
+        if (user.userEmail !== result.userEmail) {
+            await dynamo.send(
+                new UpdateCommand({
+                    TableName: REVIEWS_TABLE,
+                    Key: {
+                        entityID: user.entityID
+                    },
+                    UpdateExpression: 'SET userEmail = :newValue',
+                    ExpressionAttributeValues: {
+                        ':newValue': user.userEmail
+                    }
+                })
+            );
+        }
+    }
+    else {
+        // Add the new user to the database.
+        await dynamo.send(
+            new PutCommand({
+                TableName: REVIEWS_TABLE,
+                Item: user,
+            })
+        );
+    }
 
     return {
         entityID: user.entityID
@@ -345,7 +495,7 @@ export async function getAllUsers(filter: string | undefined, criteria: string |
                         ':pkValue': EntityType.User,
                         ':skValue': filter
                 },
-                ProjectionExpression: 'entityID, userName, userEmail, userFlags',
+                ProjectionExpression: 'entityID, userName, userEmail, userPermissions',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })
@@ -361,7 +511,7 @@ export async function getAllUsers(filter: string | undefined, criteria: string |
                 ExpressionAttributeValues: {
                         ':pkValue': EntityType.User
                 },
-                ProjectionExpression: 'entityID, userName, userEmail, userFlags',
+                ProjectionExpression: 'entityID, userName, userEmail, userPermissions',
                 ExclusiveStartKey: offset,
                 Limit: limit,
             })
@@ -462,7 +612,7 @@ export async function getUser(userID: string) {
             Key: {
                 entityID: userID
             },
-            ProjectionExpression: 'entityID, userName, userEmail, userFlags'
+            ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
         })
     );
     return user.Item;

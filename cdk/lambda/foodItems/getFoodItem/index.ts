@@ -23,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (queryParams)
             throw new Error('Query parameters are not supported for this endpoint');
 
-        body = getFoodItem(foodID);
+        body = await getFoodItem(foodID);
     }
     catch (err) {
         if (err instanceof RequestError) {

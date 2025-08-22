@@ -5,38 +5,36 @@ export enum EntityType {
     MenuInstace = 'menuInstace'
 }
 
-export interface Review {
+export interface Entity {
     entityID: string,
-    entityType: EntityType,
+    entityType: EntityType
+}
+
+export interface Review extends Entity {
     foodID: string,
     userID: string,
-    quality: string,
-    quantity: string,
-    rating: string,
+    quality: number,
+    quantity: number,
+    rating: number,
     reviewDate: string,
     menuDate: string
 }
 
-export interface User {
-    entityID: string;
-    entityType: EntityType,
+export interface User extends Entity {
     userName: string;
     userEmail: string;
-    userFlags: UserFlag[]
+    userPermissions: UserPermission[]
 }
 
-export enum UserFlag {
-    canSubmitReviews,
-    canDeleteReviews,
-    canSubmitFoodItems,
-    canDeleteFoodItems,
-    canSubmitMenuInstances,
-    canDeleteMenuInstances
+export enum UserPermission {
+    userReviewPermissions,
+    adminReviewPermissions,
+    adminFoodItemPermissions,
+    adminMenuInstancePermissions,
+    adminUserPermissions
 }
 
-export interface FoodItem {
-    entityID: string,
-    entityType: EntityType,
+export interface FoodItem extends Entity{
     foodName: string,
     foodOrigin: string,
     foodAttributes: FoodAttributes
