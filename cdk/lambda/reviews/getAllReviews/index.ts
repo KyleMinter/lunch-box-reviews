@@ -1,6 +1,8 @@
 import {
-    getDynamoDbClient,
+    getDateFilterParameters,
+    DateFilter,
     getPaginationParameters,
+    PaginationParameters,
     getAllReviews,
     RequestError,
 } from '@lunch-box-reviews/shared-utils';
@@ -15,9 +17,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
 
     try {
-        const { limit, offset } = getPaginationParameters(event);
+        const filter: DateFilter = getDateFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
         
-        body = await getAllReviews(limit, offset);
+        body = await getAllReviews(filter, pagination);
     }
     catch (err) {
         if (err instanceof RequestError) {

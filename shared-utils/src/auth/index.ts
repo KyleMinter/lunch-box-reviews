@@ -7,6 +7,12 @@ import { getDynamoDbClient, REVIEWS_TABLE } from '../database';
 import { UnauthorizedError } from '../errors';
 import { UserPermission } from '../types';
 
+
+/**
+ * Returns authorization headers for a request with a given string contianing the request methods.
+ * @param requestMethods the request methods to add to the authorization headers
+ * @returns the authorization headers
+ */
 export function getAuthorizationHeaders(requestMethods: string) {
     return {
         'Content-Type': 'application-json',
