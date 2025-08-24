@@ -1,8 +1,10 @@
 import {
-    getFilterParameters,
+    getCriteriaFilterParameters,
     getPaginationParameters,
     getAllUsers,
-    RequestError
+    RequestError,
+    CriteriaFilter,
+    PaginationParameters
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -15,10 +17,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
 
     try {
-        const { filter, criteria } = getFilterParameters(event);
-        const { limit, offset } = getPaginationParameters(event);
+        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
 
-        body = await getAllUsers(filter, criteria, limit, offset);
+        body = await getAllUsers(pagination, filter);
     }
     catch (err) {
         if (err instanceof RequestError) {

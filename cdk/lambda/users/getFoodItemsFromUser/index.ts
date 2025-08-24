@@ -1,7 +1,8 @@
 import {
     getPaginationParameters,
     getFoodItemsFromUser,
-    RequestError
+    RequestError,
+    PaginationParameters
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -20,9 +21,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (!userID)
             throw new Error('UserID is undefined');
 
-        const { limit, offset } = getPaginationParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
 
-        body = await getFoodItemsFromUser(userID, limit, offset);
+        body = await getFoodItemsFromUser(userID, pagination);
     }
     catch (err) {
         if (err instanceof RequestError) {

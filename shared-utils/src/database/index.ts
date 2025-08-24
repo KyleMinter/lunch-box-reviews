@@ -1,36 +1,48 @@
+export * from './foodItems';
+export * from './reviews';
+export * from './users';
+
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-    DynamoDBDocumentClient,
-    QueryCommand,
-    QueryCommandOutput,
-    GetCommand,
-    PutCommand,
-    UpdateCommand
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
-import { EntityType, FoodAttributes, FoodItem, Review, User, UserPermission } from '../types';
 
 
 /*
     ======================================================================================================
 
-    Database Utils
+    General Database Utils
     
     ======================================================================================================
 */
 
 export const REVIEWS_TABLE = 'Review-Entities-Table';
 
-interface PaginationParameters {
+/**
+ * Interface representing pagination query parameters.
+ * Contains a limit and offset parameter.
+ */
+export interface PaginationParameters {
     limit: number,
     offset: Record<string, any> | undefined
 }
 
-interface FilterParameters {
-    filter: string | undefined,
-    criteria: string | undefined
+/**
+ * Interface representing criteria filter query parameters.
+ * Contains a filter and criteria.
+ */
+export interface CriteriaFilter {
+    filter: string,
+    criteria: string,
+}
+
+/**
+ * Interface representing date filter query parameters.
+ * Contains a start date and end date.
+ */
+export interface DateFilter {
+    startDate: string | undefined,
+    endDate: string | undefined
 }
 
 /**
@@ -41,19 +53,6 @@ export function getDynamoDbClient(): DynamoDBDocumentClient {
     const client = new DynamoDBClient({});
     const dynamo = DynamoDBDocumentClient.from(client);
     return dynamo;
-}
-
-/**
- * Calculates the overall rating given a quality and quantity rating
- * @param quality the quality rating
- * @param quantity the quantity rating
- * @returns the overall rating
- */
-export function calculateOverallRating(quality: number, quantity: number): number {
-    // Compute the overall rating and round it to one decimal place.
-    let rating = quality * Math.sqrt(quantity / 5);
-    rating = Math.round(rating * 10) / 10;
-    return rating;
 }
 
 /**
@@ -88,532 +87,65 @@ export function getPaginationParameters(event: APIGatewayProxyEvent): Pagination
 }
 
 /**
- * Gets the filter (filter & criteria) query parameters for a given request.
+ * Gets the criteria filter query parameters for a given request.
  * @param event the request event
- * @returns the filter (filter & criteria) query parameters
+ * @returns the criteria filter query parameters
  */
-export function getFilterParameters(event: APIGatewayProxyEvent): FilterParameters {
+export function getCriteriaFilterParameters(event: APIGatewayProxyEvent): CriteriaFilter | undefined {
     const queryParams = event.queryStringParameters;
     const filter: string | undefined = queryParams ? queryParams.filter : undefined;
     const criteria: string | undefined = queryParams ? queryParams.criteria : undefined;
-    if ((filter && !criteria) || (!filter && criteria))
+
+    if ((!filter && criteria) || (filter && !criteria))
         throw new Error('An unsupported combination of query parameters was supplied');
 
-    return {
-        filter: filter,
-        criteria: criteria
-    }
-}
-
-/*
-    ======================================================================================================
-
-    /foodItems Database Queries
-
-    ======================================================================================================
-*/
-
-export async function constructFoodItem(jsonStr: string) {
-    const json = JSON.parse(jsonStr);
-
-    const foodAttributes: FoodAttributes = {
-        description: json.foodAttributes.description,
-        nutrition: json.foodAttributes.nutrition
-    };
-
-    const foodItem: FoodItem = {
-        entityID: uuidv4(),
-        entityType: EntityType.FoodItem,
-        foodName: json.foodName,
-        foodOrigin: json.foodOrigin,
-        foodAttributes: foodAttributes
-    }
-
-    return foodItem;
-}
-
-export async function createFoodItem(foodItem: FoodItem) {
-    const dynamo = getDynamoDbClient();
-    await dynamo.send(
-        new PutCommand({
-            TableName: REVIEWS_TABLE,
-            Item: foodItem,
-        })
-    );
-
-    return {
-        entityID: foodItem.entityID
-    };
-}
-
-export async function getAllFoodItems(filter: string | undefined, criteria: string | undefined, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-
-    let foodItems: QueryCommandOutput;
     if (filter && criteria) {
-        if (criteria !== 'foodName' && criteria !== 'foodOrigin')
-            throw new BadRequestError('Unsupported criteria');
-
-        // Query the database for food items using a criteria and filter.
-        foodItems = await dynamo.send(
-            new QueryCommand({
-                TableName: REVIEWS_TABLE,
-                IndexName: `GSI-entityType-${criteria}`,
-                KeyConditionExpression: `entityType = :pkValue AND begins_with(${criteria}, :skValue)`,
-                ExpressionAttributeValues: {
-                        ':pkValue': 'foodItem',
-                        ':skValue': filter
-                },
-                ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
-                ExclusiveStartKey: offset,
-                Limit: limit,
-            })
-        );
-    }
-    else {
-        // Query the database for all food items.
-        foodItems = await dynamo.send(
-            new QueryCommand({
-                TableName: REVIEWS_TABLE,
-                IndexName: 'GSI-entityType',
-                KeyConditionExpression: 'entityType = :pkValue',
-                ExpressionAttributeValues: {
-                        ':pkValue': 'foodItem'
-                },
-                ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
-                ExclusiveStartKey: offset,
-                Limit: limit,
-            })
-        );
-    }
-
-    // Return the results of the query and the last evaluated key.
-    return {
-        Items: foodItems.Items ? foodItems.Items : [],
-        LastEvaluatedKey: foodItems.LastEvaluatedKey
-    };
-}
-
-export async function getFoodItem(foodID: string) {
-    const dynamo = getDynamoDbClient();
-    const foodItem = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: foodID
-            },
-            ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
-        })
-    );
-    return foodItem.Item;
-}
-
-export async function getReviewsFromFoodItem(foodID: string, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
-        new QueryCommand({
-            TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType-foodID',
-            KeyConditionExpression: 'entityType = :pkValue AND foodID = :skValue',
-            ExpressionAttributeValues: {
-                ':pkValue': 'review',
-                ':skValue': foodID
-            },
-            ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: offset,
-            Limit: limit,
-        })
-    );
-
-    // Store the results of the query and the last evaluated key to the response body.
-    return {
-        Items: results.Items ? results.Items : [],
-        LastEvaluatedKey: results.LastEvaluatedKey
-    };
-}
-
-export async function getUsersFromFoodItems(foodID: string, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
-        new QueryCommand({
-            TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType-foodID',
-            KeyConditionExpression: 'entityType = :pkValue AND foodID = :skValue',
-            ExpressionAttributeValues: {
-                ':pkValue': 'review',
-                ':skValue': foodID
-            },
-            ProjectionExpression: 'userID',
-            ExclusiveStartKey: offset,
-            Limit: limit,
-        })
-    );
-
-    // If there are no results of the initial query we will return an empty list and not bother with the secondary queries.
-    if (!results.Items) {
-        return {
-            Items: [],
-            LastEvaluatedKey: results.LastEvaluatedKey
-        }
-    }
-    else {
-        // Retreive each food entity for every userID retrieved in the previous query.
-        const users: any[] = [];
-
-        const promises = results.Items.map(async (userID)  => {
-            userID = userID.userID;
-            const user = await dynamo.send(
-                new GetCommand({
-                    TableName: REVIEWS_TABLE,
-                    Key: {
-                        entityID: userID
-                    },
-                    ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
-                })
-            );
-
-            if (user.Item)
-                users.push(user.Item);
-        });
-        await Promise.all(promises);
-
-        // Store the results of the query and the last evaluated key to the response body.
-        return {
-            Items: users,
-            LastEvaluatedKey: results.LastEvaluatedKey
+        const criteriaFilter: CriteriaFilter = {
+            filter: filter,
+            criteria: criteria
         };
+        return criteriaFilter;
     }
+    else
+        return undefined;
 }
 
-/*
-    ======================================================================================================
+/**
+ * Gets the date filter query parameters for a given request.
+ * @param event the request event
+ * @returns the date filter parameters
+ */
+export function getDateFilterParameters(event: APIGatewayProxyEvent): DateFilter {
+    const queryParams = event.queryStringParameters;
+    const startDate: string | undefined = queryParams ? queryParams.startDate : undefined;
+    const endDate: string | undefined = queryParams ? queryParams.endDate : undefined;
 
-    /reviews Database Queries
-
-    ======================================================================================================
-*/
-
-export async function constructReview(jsonStr: string, userID: string) {
-    const json = JSON.parse(jsonStr);
-
-    // Convert the ratings to numbers
-    let quality: number = Number(json.quality);
-    let quantity: number = Number(json.quantity);
-
-    // Round quality rating to one decimal place and truncate the quantity rating.
-    quality = Math.round(json.quality as number * 10) / 10;
-    quantity = Math.trunc(json.quantity as number);
-
-    // Valiate quality and quantity ratings.
-    if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
-    quality < 1 || quantity < 1 || quantity > 5)
-        throw new BadRequestError('Invalid review ratings provided');
-
-    // Get the food item specified in the review from the database.
-    const dynamo = getDynamoDbClient();
-    const foodItem = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: json.foodID
-            },
-            ProjectionExpression: 'entityID'
-
-        })
-    );
-
-    // Validate foodID.
-    if (!foodItem.Item)
-        throw new BadRequestError('Invalid foodID provided');
-
-    // Construct the review.
-    const review: Review = {
-        entityID: uuidv4(),
-        entityType: EntityType.Review,
-        userID: userID,
-        foodID: json.foodID,
-        quality: quality,
-        quantity: quantity,
-        rating: calculateOverallRating(json.quality, json.quantity),
-        reviewDate: json.reviewDate,
-        menuDate: json.menuDate
-    }
-
-    return review;
-}
-
-export async function createReview(review: Review) {
-    const dynamo = getDynamoDbClient();
-    await dynamo.send(
-        new PutCommand({
-            TableName: REVIEWS_TABLE,
-            Item: review,
-        })
-    );
-
-    return {
-        entityID: review.entityID
-    };
-}
-
-export async function getAllReviews(limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-    const reviews = await dynamo.send(
-        new QueryCommand({
-            TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType',
-            KeyConditionExpression: 'entityType = :pkValue',
-            ExpressionAttributeValues: {
-                    ':pkValue': EntityType.Review
-            },
-            ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: offset,
-            Limit: limit,
-        })
-    );
-    return reviews.Items ? reviews.Items : [];
-}
-
-export async function getReview(reviewID: string) {
-    const dynamo = getDynamoDbClient();
-    const review = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: reviewID
-            },
-            ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-        })
-    );
-    return review.Item;
-}
-
-/*
-    ======================================================================================================
-
-    /users Database Queries
-
-    ======================================================================================================
-*/
-
-export async function constructUser(jsonStr: string, userID: string) {
-    const json = JSON.parse(jsonStr);
-    const user: User = {
-        entityID: userID,
-        entityType: EntityType.User,
-        userName: json.userName,
-        userEmail: json.userEmail,
-        userPermissions: [
-            UserPermission.userReviewPermissions,
-            UserPermission.adminUserPermissions
-        ]
+    const dateFilter: DateFilter = {
+        startDate: startDate,
+        endDate: endDate
     };
 
-    return user;
+    return dateFilter;
 }
 
-export async function createUser(user: User) {
-    const dynamo = getDynamoDbClient();
+/**
+ * Checks if a given string is a date in the ISO-8601 format.
+ * @param input the string to check
+ * @returns true if the string is in the ISO-8601 format, false if not.
+ */
+export function isValidISO8601(input: string): boolean {
+    // Attempt to create a date object from the string.
+    const date = new Date(input);
 
-    // Query database for an existing user.
-    let result: Record<string, any> | undefined = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: user.entityID
-            },
-            ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
-        })
-    );
-    result = result.Item;
+    // Check if the date is valid.
+    if (isNaN(date.getTime()))
+        return false;
 
-    // If the user is already in the database,
-    // we will do some checks to make sure their user data is up to date.
-    if (result) {
-        // If needed, update user name.
-        if (user.userName !== result.userName) {
-            await dynamo.send(
-                new UpdateCommand({
-                    TableName: REVIEWS_TABLE,
-                    Key: {
-                        entityID: user.entityID
-                    },
-                    UpdateExpression: 'SET userName = :newValue',
-                    ExpressionAttributeValues: {
-                        ':newValue': user.userName
-                    }
-                })
-            );
-        }
-
-        // If needed update user email
-        if (user.userEmail !== result.userEmail) {
-            await dynamo.send(
-                new UpdateCommand({
-                    TableName: REVIEWS_TABLE,
-                    Key: {
-                        entityID: user.entityID
-                    },
-                    UpdateExpression: 'SET userEmail = :newValue',
-                    ExpressionAttributeValues: {
-                        ':newValue': user.userEmail
-                    }
-                })
-            );
-        }
+    // Convert the valid date back into an ISO string and compare.
+    try {
+        return (date.toISOString() === input);
     }
-    else {
-        // Add the new user to the database.
-        await dynamo.send(
-            new PutCommand({
-                TableName: REVIEWS_TABLE,
-                Item: user,
-            })
-        );
+    catch {
+        return false;
     }
-
-    return {
-        entityID: user.entityID
-    };
-}
-
-export async function getAllUsers(filter: string | undefined, criteria: string | undefined, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-
-    let users: QueryCommandOutput;
-    if (filter && criteria) {
-        if (criteria !== 'userName' && criteria !== 'userEmail')
-            throw new Error('Unsupported criteria');
-
-        // Query the database for users using a criteria and filter.
-        users = await dynamo.send(
-            new QueryCommand({
-                TableName: REVIEWS_TABLE,
-                IndexName: `GSI-entityType-${criteria}`,
-                KeyConditionExpression: `entityType = :pkValue AND begins_with(${criteria}, :skValue)`,
-                ExpressionAttributeValues: {
-                        ':pkValue': EntityType.User,
-                        ':skValue': filter
-                },
-                ProjectionExpression: 'entityID, userName, userEmail, userPermissions',
-                ExclusiveStartKey: offset,
-                Limit: limit,
-            })
-        );
-    }
-    else {
-        // Query the database for all users.
-        users = await dynamo.send(
-            new QueryCommand({
-                TableName: REVIEWS_TABLE,
-                IndexName: 'GSI-entityType',
-                KeyConditionExpression: 'entityType = :pkValue',
-                ExpressionAttributeValues: {
-                        ':pkValue': EntityType.User
-                },
-                ProjectionExpression: 'entityID, userName, userEmail, userPermissions',
-                ExclusiveStartKey: offset,
-                Limit: limit,
-            })
-        );
-    }
-
-    // Return the results of the query and the last evaluated key.
-    return {
-        Items: users.Items ? users.Items : [],
-        LastEvaluatedKey: users.LastEvaluatedKey
-    };
-}
-
-export async function getFoodItemsFromUser(userID: string, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-
-    // Query the database for reviews with the provided userID.
-    const results = await dynamo.send(
-        new QueryCommand({
-            TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType-userID',
-            KeyConditionExpression: 'entityType = :pkValue AND userID = :skValue',
-            ExpressionAttributeValues: {
-                ':pkValue': EntityType.Review,
-                ':skValue': userID
-            },
-            ProjectionExpression: 'foodID',
-            ExclusiveStartKey: offset,
-            Limit: limit,
-        })
-    );
-
-    // If there are no results of the initial query we will return an empty list and not bother with the secondary queries.
-    if (!results.Items) {
-        return {
-            Items: [],
-            LastEvaluatedKey: results.LastEvaluatedKey
-        }
-    }
-    else {
-        // Retreive each food entity for every foodID retrieved in the previous query.
-        const foodItems: any[] = [];
-
-        const promises = results.Items.map(async (foodID) => {
-            foodID = foodID.foodID;
-            const foodObject = await dynamo.send(
-                new GetCommand({
-                    TableName: REVIEWS_TABLE,
-                    Key: {
-                        entityID: foodID
-                    },
-                    ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes'
-                })
-            );
-
-            if (foodObject.Item)
-                foodItems.push(foodObject.Item);
-        });
-        await Promise.all(promises);
-
-        // Return the results of the query and the last evaluated key.
-        return {
-            Items: foodItems,
-            LastEvaluatedKey: results.LastEvaluatedKey
-        };
-    }
-}
-
-export async function getReviewsFromUser(userID: string, limit: number, offset: Record<string, any> | undefined) {
-    const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
-        new QueryCommand({
-            TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType-userID',
-            KeyConditionExpression: 'entityType = :pkValue AND userID = :skValue',
-            ExpressionAttributeValues: {
-                ':pkValue': EntityType.Review,
-                ':skValue': userID
-            },
-            ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: offset,
-            Limit: limit,
-        })
-    );
-
-    // Return the results of the query and the last evaluated key.
-    return {
-        Items: results.Items ? results.Items : [],
-        LastEvaluatedKey: results.LastEvaluatedKey
-    };
-}
-
-export async function getUser(userID: string) {
-    const dynamo = getDynamoDbClient();
-    const user = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: userID
-            },
-            ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
-        })
-    );
-    return user.Item;
 }

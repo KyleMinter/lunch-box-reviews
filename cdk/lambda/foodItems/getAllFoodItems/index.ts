@@ -1,6 +1,8 @@
 import {
-    getFilterParameters,
+    getCriteriaFilterParameters,
+    CriteriaFilter,
     getPaginationParameters,
+    PaginationParameters,
     getAllFoodItems,
     RequestError
 } from '@lunch-box-reviews/shared-utils';
@@ -15,10 +17,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
 
     try {
-        const { filter, criteria } = getFilterParameters(event);
-        const { limit, offset } = getPaginationParameters(event);
+        const filter: CriteriaFilter| undefined = getCriteriaFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
 
-        body = await getAllFoodItems(filter, criteria, limit, offset);
+        body = await getAllFoodItems(pagination, filter);
     }
     catch (err) {
         if (err instanceof RequestError) {
