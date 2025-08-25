@@ -199,7 +199,7 @@ export async function updateReview(review: Review) {
             Key: {
                 id: review.entityID
             },
-            UpdateExpression: 'SET #quality = :newQuality, #quantity = :newQuantity, #rating = :newRating, #reviewDate = :newDate',
+            UpdateExpression: 'SET quality = :newQuality, quantity = :newQuantity, rating = :newRating, reviewDate = :newDate',
             ConditionExpression: 'attribute_exists(#quality) AND attribute_exists(#quantity) AND attribute_exists(#rating) AND attribute_exists(#reviewDate)',
             ExpressionAttributeValues: {
                 ':newQuality': review.quality,

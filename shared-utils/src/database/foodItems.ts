@@ -186,7 +186,7 @@ export async function updateFoodItem(foodItem: FoodItem) {
             Key: {
                 id: foodItem.entityID
             },
-            UpdateExpression: 'SET #foodName = :newName, #foodOrigin = :newOrigin, #foodAttributes = :newAttributes',
+            UpdateExpression: 'SET foodName = :newName, foodOrigin = :newOrigin, foodAttributes = :newAttributes',
             ConditionExpression: 'attribute_exists(#foodName) AND attribute_exists(#foodOrigin) AND attribute_exists(#foodAttributes)',
             ExpressionAttributeValues: {
                 ':newName': foodItem.foodName,
