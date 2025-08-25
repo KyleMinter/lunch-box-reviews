@@ -83,8 +83,11 @@ export async function constructReview(jsonStr: string, userID?: string, reviewID
 
     // Validate the date format.
     // This will probably need updating to ensure that the menuDate matches an existing menuInstance.
-    if (!isValidISO8601(json.reviewDate) || !isValidISO8601(json.menuDate))
-        throw new BadRequestError('Invalid date format. Ensure dates strings are using the ISO-8601 format.');
+    // if (!isValidISO8601(json.menuDate))
+        // throw new BadRequestError('Invalid date format. Ensure dates strings are using the ISO-8601 format.');
+
+    const reviewDate: string = new Date().toISOString();
+    const menuDate: string = new Date().toISOString().split('T')[0];
 
     // Construct the review.
     const review: Review = {
@@ -95,8 +98,9 @@ export async function constructReview(jsonStr: string, userID?: string, reviewID
         quality: quality,
         quantity: quantity,
         rating: calculateOverallRating(json.quality, json.quantity),
-        reviewDate: json.reviewDate,
-        menuDate: json.menuDate
+        reviewDate: reviewDate,
+        menuDate: menuDate // use this date instead of the one specified for testing purposes.
+        // menuDate: json.menuDate
     }
 
     return review;
