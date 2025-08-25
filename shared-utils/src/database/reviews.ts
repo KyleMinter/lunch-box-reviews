@@ -197,7 +197,7 @@ export async function updateReview(review: Review) {
         new UpdateCommand({
             TableName: REVIEWS_TABLE,
             Key: {
-                id: review.entityID
+                entityID: review.entityID
             },
             UpdateExpression: 'SET quality = :newQuality, quantity = :newQuantity, rating = :newRating, reviewDate = :newDate',
             ConditionExpression: 'attribute_exists(quality) AND attribute_exists(quantity) AND attribute_exists(rating) AND attribute_exists(reviewDate)',

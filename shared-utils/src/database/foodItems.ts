@@ -184,7 +184,7 @@ export async function updateFoodItem(foodItem: FoodItem) {
         new UpdateCommand({
             TableName: REVIEWS_TABLE,
             Key: {
-                id: foodItem.entityID
+                entityID: foodItem.entityID
             },
             UpdateExpression: 'SET foodName = :newName, foodOrigin = :newOrigin, foodAttributes = :newAttributes',
             ConditionExpression: 'attribute_exists(foodName) AND attribute_exists(foodOrigin) AND attribute_exists(foodAttributes)',
