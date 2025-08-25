@@ -7,7 +7,7 @@ printf "\nBuilding shared-utils package...\n"
 printf "\nInstalling Lambda dependencies...\n"
 for dir in ./cdk/lambda/*/*/; do
 if [ -d "$dir" ]; then
-    echo "\nInstalling dependencies for $dir \n"
+    printf "\nInstalling dependencies for $dir \n"
     (cd "$dir" && npm install)
 fi
 done
