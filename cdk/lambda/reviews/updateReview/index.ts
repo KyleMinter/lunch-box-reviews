@@ -1,0 +1,73 @@
+import {
+    UserPermission,
+    Review,
+    validateJwtToken,
+    validateUserPermissions,
+    getAuthorizationHeaders,
+    constructReview,
+    getReview,
+    updateReview,
+    RequestError,
+    BadRequestError
+} from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+
+
+export const handler = async (event: APIGatewayProxyEvent) => {
+    let body;
+    let statusCode = 200;
+    const headers = getAuthorizationHeaders('OPTIONS,PUT');
+    
+    try {
+        // Get the reviewID from the request's path parameter.
+        const reviewID = event.pathParameters?.id;
+        if (!reviewID)
+            throw new Error('ReviewID is undefined');
+
+        // Get the request's query parameters.
+        const queryParams = event.queryStringParameters;
+        if (queryParams)
+            throw new Error('Query parameters are not supported for this endpoint');
+
+        // Validate user permissions.
+        const reviewInDatabase = await getReview(reviewID);
+        if (reviewInDatabase) {
+            const jwt = await validateJwtToken(event);
+            if (reviewInDatabase.userID == jwt.sub!) {
+                await validateUserPermissions(jwt.sub!, [
+                    UserPermission.userReviewPermissions
+                ]);
+            }
+            else {
+                await validateUserPermissions(jwt.sub!, [
+                UserPermission.adminReviewPermissions
+            ]);
+            }
+        }
+
+        // Ensure that a body was sent with the request.
+        if (!event.body)
+            throw new BadRequestError('No review provided in request body');
+
+        const review: Review = await constructReview(event.body, reviewID);
+        body = await updateReview(review);
+    }
+    catch (err) {
+        if (err instanceof RequestError) {
+            statusCode = err.statusCode;
+            body = err.message;
+        }
+        else {
+            statusCode = 500;
+            body = err;
+        }
+    }
+    finally {
+        body = JSON.stringify(body);
+    }
+    return {
+        statusCode,
+        headers,
+        body,
+    };
+};

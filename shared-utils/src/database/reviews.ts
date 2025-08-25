@@ -2,6 +2,7 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
+    UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
@@ -46,7 +47,7 @@ function calculateOverallRating(quality: number, quantity: number): number {
  * @param userID the id of the user who is creating this review
  * @returns the newly constructed review
  */
-export async function constructReview(jsonStr: string, userID: string) {
+export async function constructReview(jsonStr: string, userID?: string, reviewID: string = uuidv4()) {
     const json = JSON.parse(jsonStr);
 
     // Convert the ratings to numbers
@@ -87,9 +88,9 @@ export async function constructReview(jsonStr: string, userID: string) {
 
     // Construct the review.
     const review: Review = {
-        entityID: uuidv4(),
+        entityID: reviewID,
         entityType: EntityType.Review,
-        userID: userID,
+        userID: userID ? userID : '',
         foodID: json.foodID,
         quality: quality,
         quantity: quantity,
@@ -185,4 +186,27 @@ export async function getReview(reviewID: string) {
         })
     );
     return review.Item;
+}
+
+export async function updateReview(review: Review) {
+    const dynamo = getDynamoDbClient();
+    const result = await dynamo.send(
+        new UpdateCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                id: review.entityID
+            },
+            UpdateExpression: 'SET #quality = :newQuality, #quantity = :newQuantity, #rating = :newRating, #reviewDate = :newDate',
+            ConditionExpression: 'attribute_exists(#quality) AND attribute_exists(#quantity) AND attribute_exists(#rating) AND attribute_exists(#reviewDate)',
+            ExpressionAttributeValues: {
+                ':newQuality': review.quality,
+                ':newQuantity': review.quantity,
+                ':newRating': review.rating,
+                ':newDate': review.reviewDate
+            },
+            ReturnValues: 'UPDATED_NEW'
+        })
+    );
+
+    return result.Attributes;
 }

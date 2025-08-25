@@ -224,3 +224,25 @@ export async function getFoodItemsFromUser(userID: string, pagination: Paginatio
         };
     }
 }
+
+export async function updateUser(user: User) {
+    const dynamo = getDynamoDbClient();
+    const result = await dynamo.send(
+        new UpdateCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                id: user.entityID
+            },
+            UpdateExpression: 'SET #userName = :newName, #userEmail = :newEmail, #userPermissions = :newPermissions',
+            ConditionExpression: 'attribute_exists(#userName) AND attribute_exists(#userEmail) AND attribute_exists(#userPermissions)',
+            ExpressionAttributeValues: {
+                ':newName': user.userName,
+                ':newEmail': user.userEmail,
+                ':newPermissions': user.userPermissions
+            },
+            ReturnValues: 'UPDATED_NEW'
+        })
+    );
+
+    return result.Attributes;
+}

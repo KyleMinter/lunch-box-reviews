@@ -2,6 +2,7 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
+    UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
@@ -17,7 +18,7 @@ import { CriteriaFilter, getDynamoDbClient, PaginationParameters, REVIEWS_TABLE 
     ======================================================================================================
 */
 
-export async function constructFoodItem(jsonStr: string) {
+export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4()) {
     const json = JSON.parse(jsonStr);
 
     const foodAttributes: FoodAttributes = {
@@ -26,7 +27,7 @@ export async function constructFoodItem(jsonStr: string) {
     };
 
     const foodItem: FoodItem = {
-        entityID: uuidv4(),
+        entityID: foodID,
         entityType: EntityType.FoodItem,
         foodName: json.foodName,
         foodOrigin: json.foodOrigin,
@@ -175,4 +176,26 @@ export async function getUsersFromFoodItems(foodID: string, pagination: Paginati
             LastEvaluatedKey: reviews.LastEvaluatedKey
         };
     }
+}
+
+export async function updateFoodItem(foodItem: FoodItem) {
+    const dynamo = getDynamoDbClient();
+    const result = await dynamo.send(
+        new UpdateCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                id: foodItem.entityID
+            },
+            UpdateExpression: 'SET #foodName = :newName, #foodOrigin = :newOrigin, #foodAttributes = :newAttributes',
+            ConditionExpression: 'attribute_exists(#foodName) AND attribute_exists(#foodOrigin) AND attribute_exists(#foodAttributes)',
+            ExpressionAttributeValues: {
+                ':newName': foodItem.foodName,
+                ':newOrigin': foodItem.foodOrigin,
+                ':newAttributes': foodItem.foodAttributes
+            },
+            ReturnValues: 'UPDATED_NEW'
+        })
+    );
+
+    return result.Attributes;
 }
