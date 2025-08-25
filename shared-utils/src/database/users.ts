@@ -239,7 +239,7 @@ export async function updateUser(user: User) {
                 entityID: user.entityID
             },
             UpdateExpression: 'SET userName = :newName, userEmail = :newEmail, userPermissions = :newPermissions',
-            ConditionExpression: 'attribute_exists(userName) AND attribute_exists(userEmail) AND attribute_exists(userPermissions)',
+            ConditionExpression: 'attribute_exists(entityID)',
             ExpressionAttributeValues: {
                 ':newName': user.userName,
                 ':newEmail': user.userEmail,
