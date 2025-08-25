@@ -236,7 +236,7 @@ export async function updateUser(user: User) {
         new UpdateCommand({
             TableName: REVIEWS_TABLE,
             Key: {
-                id: user.entityID
+                entityid: user.entityID
             },
             UpdateExpression: 'SET userName = :newName, userEmail = :newEmail, userPermissions = :newPermissions',
             ConditionExpression: 'attribute_exists(userName) AND attribute_exists(userEmail) AND attribute_exists(userPermissions)',
