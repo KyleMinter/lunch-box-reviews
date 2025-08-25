@@ -19,15 +19,20 @@ import { CriteriaFilter, getDynamoDbClient, PaginationParameters, REVIEWS_TABLE 
 
 export async function constructUser(jsonStr: string, userID: string) {
     const json = JSON.parse(jsonStr);
+
+    const userPermissions: UserPermission[] = json.userPermissions
+    ? json.userPermissions as UserPermission[]
+    : [
+        UserPermission.userReviewPermissions,
+        UserPermission.adminUserPermissions
+    ]
+
     const user: User = {
         entityID: userID,
         entityType: EntityType.User,
         userName: json.userName,
         userEmail: json.userEmail,
-        userPermissions: [
-            UserPermission.userReviewPermissions,
-            UserPermission.adminUserPermissions
-        ]
+        userPermissions: userPermissions
     };
 
     return user;
@@ -234,7 +239,7 @@ export async function updateUser(user: User) {
                 id: user.entityID
             },
             UpdateExpression: 'SET userName = :newName, userEmail = :newEmail, userPermissions = :newPermissions',
-            ConditionExpression: 'attribute_exists(#userName) AND attribute_exists(#userEmail) AND attribute_exists(#userPermissions)',
+            ConditionExpression: 'attribute_exists(userName) AND attribute_exists(userEmail) AND attribute_exists(userPermissions)',
             ExpressionAttributeValues: {
                 ':newName': user.userName,
                 ':newEmail': user.userEmail,
