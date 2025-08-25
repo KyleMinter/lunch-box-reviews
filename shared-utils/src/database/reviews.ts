@@ -171,7 +171,10 @@ export async function getAllReviews(Datefilter: DateFilter, pagination: Paginati
         })
     );
 
-    return reviews.Items ? reviews.Items : [];
+    return {
+        Items: reviews.Items ? reviews.Items : [],
+        LastEvaluatedKey: reviews.LastEvaluatedKey
+    };
 }
 
 export async function getReview(reviewID: string) {
