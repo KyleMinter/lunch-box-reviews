@@ -10,7 +10,6 @@ import {
     BadRequestError
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { v4 as uuidv4} from 'uuid';
 
 
 export const handler = async (event: APIGatewayProxyEvent) => {
