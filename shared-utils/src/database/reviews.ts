@@ -2,8 +2,9 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
+    UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
-import { v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4, validate} from 'uuid';
 import { BadRequestError } from '../errors';
 import { EntityType, Review } from '../types';
 import { DateFilter, getDynamoDbClient, isValidISO8601, PaginationParameters, REVIEWS_TABLE } from '.';
@@ -44,9 +45,11 @@ function calculateOverallRating(quality: number, quantity: number): number {
  * Constructs a new review with a given a JSON string.
  * @param jsonStr the JSON string to construct the review from
  * @param userID the id of the user who is creating this review
+ * @param validateFoodID a flag which determines if the foodID in the jsonStr should be validated
+ * @param reviewID the reviewID to supply to this review. If no ID is given, one will be generated
  * @returns the newly constructed review
  */
-export async function constructReview(jsonStr: string, userID: string) {
+export async function constructReview(jsonStr: string, userID: string, validateFoodID: boolean, reviewID: string = uuidv4()) {
     const json = JSON.parse(jsonStr);
 
     // Convert the ratings to numbers
@@ -62,45 +65,60 @@ export async function constructReview(jsonStr: string, userID: string) {
     quality = roundTo(json.quality as number, 2);
     quantity = Math.trunc(json.quantity as number);
 
-    // Get the food item specified in the review from the database.
-    // This could probably be changed to use the existing getFoodItem function.
-    const dynamo = getDynamoDbClient();
-    const foodItem = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: json.foodID
-            },
-            ProjectionExpression: 'entityID'
+    // If a food item is being supplied, we will verify it actually exists.
+    if (validateFoodID) {
+        if (!json.foodID)
+            throw new BadRequestError('No foodID provided in request body');
 
-        })
-    );
+        // Get the food item specified in the review from the database.
+        // This could probably be changed to use the existing getFoodItem function.
+        const dynamo = getDynamoDbClient();
+        const foodItem = await dynamo.send(
+            new GetCommand({
+                TableName: REVIEWS_TABLE,
+                Key: {
+                    entityID: json.foodID
+                },
+                ProjectionExpression: 'entityID'
 
-    // Validate foodID.
-    if (!foodItem.Item)
-        throw new BadRequestError('Invalid foodID provided');
+            })
+        );
+
+        // Validate foodID.
+        if (!foodItem.Item)
+            throw new BadRequestError('Invalid foodID provided');
+    }  
 
     // Validate the date format.
     // This will probably need updating to ensure that the menuDate matches an existing menuInstance.
-    if (!isValidISO8601(json.reviewDate) || !isValidISO8601(json.menuDate))
+    if (!isValidISO8601(json.menuDate))
         throw new BadRequestError('Invalid date format. Ensure dates strings are using the ISO-8601 format.');
+
+    const reviewDate: string = new Date().toISOString();
+    const menuDate: string = new Date().toISOString().split('T')[0];
 
     // Construct the review.
     const review: Review = {
-        entityID: uuidv4(),
+        entityID: reviewID,
         entityType: EntityType.Review,
         userID: userID,
         foodID: json.foodID,
         quality: quality,
         quantity: quantity,
         rating: calculateOverallRating(json.quality, json.quantity),
-        reviewDate: json.reviewDate,
-        menuDate: json.menuDate
+        reviewDate: reviewDate,
+        menuDate: menuDate // use this date instead of the one specified for testing purposes.
+        // menuDate: json.menuDate
     }
 
     return review;
 }
 
+/**
+ * Stores a review in the database.
+ * @param review the review to store
+ * @returns the ID of the review that was stored in this operation
+ */
 export async function createReview(review: Review) {
     const dynamo = getDynamoDbClient();
     await dynamo.send(
@@ -115,13 +133,19 @@ export async function createReview(review: Review) {
     };
 }
 
-export async function getAllReviews(Datefilter: DateFilter, pagination: PaginationParameters) {
+/**
+ * Gets a list of reviews in the database.
+ * @param Datefilter the date filter used to query the database
+ * @param pagination the pagination parameters used to query the database
+ * @returns a list of reviews and the last evaluated key
+ */
+export async function getAllReviews(dateFilter: DateFilter, pagination: PaginationParameters) {
     let indexName: string;
     let keyConditionExpression: string;
     let expressionAttributeValues: Record<string, string>;
 
-    const startDate = Datefilter.startDate;
-    const endDate = Datefilter.endDate;
+    const startDate = dateFilter.startDate;
+    const endDate = dateFilter.endDate;
 
     if (startDate && endDate) {
         indexName = `GSI-entityType-reviewDate`;
@@ -170,9 +194,17 @@ export async function getAllReviews(Datefilter: DateFilter, pagination: Paginati
         })
     );
 
-    return reviews.Items ? reviews.Items : [];
+    return {
+        Items: reviews.Items ? reviews.Items : [],
+        LastEvaluatedKey: reviews.LastEvaluatedKey
+    };
 }
 
+/**
+ * Retrieves a review from the database.
+ * @param reviewID the id of the review to retrieve
+ * @returns the review retrieved
+ */
 export async function getReview(reviewID: string) {
     const dynamo = getDynamoDbClient();
     const review = await dynamo.send(
@@ -185,4 +217,32 @@ export async function getReview(reviewID: string) {
         })
     );
     return review.Item;
+}
+
+/**
+ * Updates an existing review in the database.
+ * @param review a review containing the updated information
+ * @returns the updated values in the database
+ */
+export async function updateReview(review: Review) {
+    const dynamo = getDynamoDbClient();
+    const result = await dynamo.send(
+        new UpdateCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: review.entityID
+            },
+            UpdateExpression: 'SET quality = :newQuality, quantity = :newQuantity, rating = :newRating, reviewDate = :newDate',
+            ConditionExpression: 'attribute_exists(entityID)',
+            ExpressionAttributeValues: {
+                ':newQuality': review.quality,
+                ':newQuantity': review.quantity,
+                ':newRating': review.rating,
+                ':newDate': review.reviewDate
+            },
+            ReturnValues: 'UPDATED_NEW'
+        })
+    );
+
+    return result.Attributes;
 }
