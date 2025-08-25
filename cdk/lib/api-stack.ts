@@ -41,7 +41,7 @@ export class ApiStack extends cdk.Stack {
                 functions.forEach((funcName: string) => {
                     // Import the function's route info.
                     const functionDir = path.join(resourceDir, funcName);
-                    import(path.join(functionDir, './route.ts')).then(route => {
+                    import(path.join(functionDir, './route/route.ts')).then(route => {
                         // Define the lambda function.
                         const lambdaFunction = new lambda.Function(this, `${funcName}Function`, {
                             runtime: this.RUNTIME,
