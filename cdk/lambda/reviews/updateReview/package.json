@@ -1,5 +1,5 @@
 {
-    "name": "get-review-lambda",
+    "name": "update-user-lambda",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -8,7 +8,8 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-        "@lunch-box-reviews/shared-utils": "file:../../../../shared-utils"
+        "@lunch-box-reviews/shared-utils": "file:../../../../shared-utils",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.152",

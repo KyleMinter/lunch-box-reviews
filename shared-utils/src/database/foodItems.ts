@@ -2,6 +2,7 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
+    UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
@@ -17,7 +18,13 @@ import { CriteriaFilter, getDynamoDbClient, PaginationParameters, REVIEWS_TABLE 
     ======================================================================================================
 */
 
-export async function constructFoodItem(jsonStr: string) {
+/**
+ * Constructs a new food item with a given a JSON string.
+ * @param jsonStr the JSON string to construct the food item from
+ * @param reviewID the foodID to supply to this food item. If no ID is given, one will be generated
+ * @returns the newly constructed food item
+ */
+export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4()) {
     const json = JSON.parse(jsonStr);
 
     const foodAttributes: FoodAttributes = {
@@ -26,7 +33,7 @@ export async function constructFoodItem(jsonStr: string) {
     };
 
     const foodItem: FoodItem = {
-        entityID: uuidv4(),
+        entityID: foodID,
         entityType: EntityType.FoodItem,
         foodName: json.foodName,
         foodOrigin: json.foodOrigin,
@@ -36,6 +43,11 @@ export async function constructFoodItem(jsonStr: string) {
     return foodItem;
 }
 
+/**
+ * Stores a food item in the database.
+ * @param foodItem the food item to store
+ * @returns the ID of the food item that was stored in this operation
+ */
 export async function createFoodItem(foodItem: FoodItem) {
     const dynamo = getDynamoDbClient();
     await dynamo.send(
@@ -50,6 +62,12 @@ export async function createFoodItem(foodItem: FoodItem) {
     };
 }
 
+/**
+ * Gets a list of food items in the database.
+ * @param pagination the pagination parameters used to query the database
+ * @param criteriaFilter an optional criteria filter used to query the database
+ * @returns a list of food items and the last evaluated key
+ */
 export async function getAllFoodItems(pagination: PaginationParameters, criteriaFilter?: CriteriaFilter) {
     let indexName: string;
     let keyConditionExpression: string;
@@ -99,6 +117,11 @@ export async function getAllFoodItems(pagination: PaginationParameters, criteria
     };
 }
 
+/**
+ * Retrieves a food item from the database.
+ * @param reviewID the id of the food item to retrieve
+ * @returns the food item retrieved
+ */
 export async function getFoodItem(foodID: string) {
     const dynamo = getDynamoDbClient();
     const foodItem = await dynamo.send(
@@ -113,6 +136,12 @@ export async function getFoodItem(foodID: string) {
     return foodItem.Item;
 }
 
+/**
+ * Retrives a list of reviews with a given food item.
+ * @param foodID the ID of the food item that will be used to retrieve the list of reviews
+ * @param pagination the pagination parameters used to query the database
+ * @returns a list of reviews submitted for the given food item
+ */
 export async function getReviewsFromFoodItem(foodID: string, pagination: PaginationParameters) {
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
@@ -137,6 +166,12 @@ export async function getReviewsFromFoodItem(foodID: string, pagination: Paginat
     };
 }
 
+/**
+ * Retrieves a list of users with a given food item
+ * @param foodID the id of the food item that will be used to retrieve the list of users
+ * @param pagination the pagination parameters used to query the database
+ * @returns a list of users who have submitted a review for the given food item
+ */
 export async function getUsersFromFoodItems(foodID: string, pagination: PaginationParameters) {
     // Query the database for reviews with the provided foodID.
     const reviews = await getReviewsFromFoodItem(foodID, pagination);
@@ -175,4 +210,31 @@ export async function getUsersFromFoodItems(foodID: string, pagination: Paginati
             LastEvaluatedKey: reviews.LastEvaluatedKey
         };
     }
+}
+
+/**
+ * Updates an existing food item in the database.
+ * @param foodItem a food item containing the updated information
+ * @returns the updated values in the database
+ */
+export async function updateFoodItem(foodItem: FoodItem) {
+    const dynamo = getDynamoDbClient();
+    const result = await dynamo.send(
+        new UpdateCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: foodItem.entityID
+            },
+            UpdateExpression: 'SET foodName = :newName, foodOrigin = :newOrigin, foodAttributes = :newAttributes',
+            ConditionExpression: 'attribute_exists(entityID)',
+            ExpressionAttributeValues: {
+                ':newName': foodItem.foodName,
+                ':newOrigin': foodItem.foodOrigin,
+                ':newAttributes': foodItem.foodAttributes
+            },
+            ReturnValues: 'UPDATED_NEW'
+        })
+    );
+
+    return result.Attributes;
 }
