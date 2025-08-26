@@ -24,24 +24,37 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 - [Overview](#overview)
     - [Table of Contents](#table-of-contents)
     - [Pagination](#pagination)
-    - [Querying using dates](#querying-using-dates)
+    - [Date Filtering](#date-filtering)
+    - [Criteria Filtering](#criteria-filtering)
 - [Endpoints](#endpoints)
     - [Reviews](#reviews)
         - [GET: /reviews](#get-reviews)
         - [GET: /reviews/{id}](#get-reviewsid)
         - [POST: /reviews](#post-reviews)
+        - [PUT: /reviews/{id}](#put-reviewsid)
+        - [DELETE: /reviews/{id}](#delete-reviewsid)
     - [Users](#users)
         - [GET: /users](#get-users)
         - [GET: /users/{id}](#get-usersid)
         - [GET: /users/{id}/reviews](#get-usersidreviews)
         - [GET: /users/{id}/foodItems](#get-usersidfooditems)
         - [POST: /users](#post-users)
+        - [PUT: /users/{id}](#put-usersid)
+        - [DELETE: /users/{id}](#delete-usersid)
     - [Food Items](#food-items)
         - [GET: /foodItems](#get-fooditems)
         - [GET: /foodItems/{id}](#get-fooditemsid)
         - [GET: /foodItems/{id}/reviews](#get-fooditemsidreviews)
         - [GET: /foodItems/{id}/users](#get-fooditemsidusers)
         - [POST: /foodItems](#post-fooditems)
+        - [PUT: /foodItems/{id}](#put-fooditemsid)
+        - [DELETE: /foodItems/{id}](#delete-fooditemsid)
+    - [Menu Instances](#menu-instances)
+        - [GET: /menuInstances](#get-menuinstances)
+        - [GET: /menuInstances/{id}](#get-menuinstancesid)
+        - [POST: /menuInstances](#post-menuinstancesid)
+        - [PUT: /menuInstances/{id}](#put-menuinstancesid)
+        - [DELETE: /menuInstances/{id}](#delete-menuinstancesid)
 
 >## Pagination
 <a name="pagination"></a>
@@ -52,8 +65,13 @@ Instead, along with the results of an API query, the response body contains a La
 
 Both the limit and LastEvaulatedKey query parameters are optional, however, if not supplied, the endpoint will assume the lowest limit of 10, and that you are requesting the first pagination of results. The limit parameter defaults to 10, but can also be set to 30, 50, or 100 to retrieve more results in a single API call.
 
->## Querying using dates
-<a name="querying-using-dates"></a>
+>## Date Filtering
+<a name="date-filtering"></a>
+
+wasd
+
+>## Criteria Filtering
+<a name="criteria-filtering"></a>
 
 wasd
 
@@ -97,6 +115,16 @@ These fields determine the various values of the newly created review. Upon rece
 If invalid data is supplied, such as IDs referrencing users or foodItems that do not exist, invalid rating scores, or improperly formatted date strings, the endpoint will return a 400 Bad Request error.
 
 This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
+
+* ### PUT: /reviews/{id}
+<a name="put-reviews/{id}"></a>
+
+wasd
+
+* ### DELETE: /reviews/{id}
+<a name="delete-reviews/{id}"></a>
+
+wasd
 
 > ## Users
 <a name="users"></a>
@@ -149,6 +177,16 @@ If invalid data is supplied, the endpoint will return a 400 Bad Request error.
 
 This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
 
+* ### PUT: /users/{id}
+<a name="put-users/{id}"></a>
+
+wasd
+
+* ### DELETE: /users/{id}
+<a name="delete-users/{id}"></a>
+
+wasd
+
 >## Food Items
 <a name="foodItems"></a>
 
@@ -200,3 +238,41 @@ This endpoint is used for creating and storing new food items in the database. T
 These fields determine the various values of the newly created food item. Both the nutrients and description found within the foodAttributes key can be empty, but the name, origin, and attributes must be supplied. Upon receiving a request, a UUID will be generated for the food item. 
 
 This endpoint does not accept any query parameters and will return a 404 Bad Request error if any are supplied.
+
+* ### PUT: /foodItems/{id}
+<a name="put-foodItems/{id}"></a>
+
+wasd
+
+* ### DELETE: /foodItems/{id}
+<a name="delete-foodItems/{id}"></a>
+
+wasd
+
+>## Menu Instances
+<a name="menuInstances"></a>
+
+* ### GET: /menuInstances
+<a name="get-menuInstances"></a>
+
+wasd
+
+* ### GET: /menuInstances/{id}
+<a name="get-menuInstances/{id}"></a>
+
+wasd
+
+* ### POST: /menuInstances
+<a name="post-menuInstances"></a>
+
+wasd
+
+* ### PUT: /menuInstances/{id}
+<a name="put-menuInstances/{id}"></a>
+
+wasd
+
+* ### DELETE: /menuInstances/{id}
+<a name="delete-menuInstances/{id}"></a>
+
+wasd

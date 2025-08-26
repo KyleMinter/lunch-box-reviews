@@ -1,9 +1,9 @@
 import {
     QueryCommand,
-    QueryCommandOutput,
     GetCommand,
     PutCommand,
-    UpdateCommand
+    UpdateCommand,
+    DeleteCommand
 } from '@aws-sdk/lib-dynamodb';
 import { EntityType, User, UserPermission } from '../types';
 import { CriteriaFilter, getDynamoDbClient, PaginationParameters, REVIEWS_TABLE } from '.';
@@ -194,7 +194,7 @@ export async function getUser(userID: string) {
  * @param pagination the pagination parameters used to query the database
  * @returns a list of reviews submitted by the given user
  */
-export async function getReviewsFromUser(userID: string, pagination: PaginationParameters) {
+export async function getReviewsFromUser(userID: string, pagination: PaginationParameters | undefined) {
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
         new QueryCommand({
@@ -206,8 +206,8 @@ export async function getReviewsFromUser(userID: string, pagination: PaginationP
                 ':skValue': userID
             },
             ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: pagination.offset,
-            Limit: pagination.limit,
+            ExclusiveStartKey: pagination ? pagination.offset : undefined,
+            Limit: pagination ? pagination.limit : undefined,
         })
     );
 
@@ -289,4 +289,41 @@ export async function updateUser(user: User) {
     );
 
     return result.Attributes;
+}
+
+/**
+ * Removes an existing user and all of the reviews submitted by the user from the database.
+ * @param userID the ID of the user to remove
+ * @returns the ID of the user that was removed
+ */
+export async function deleteUser(userID: string) {
+    const dynamo = getDynamoDbClient();
+
+    // Delete all reviews for the provided food item.
+    const reviews = await getReviewsFromUser(userID, undefined);
+    const promises = reviews.Items.map(async (review)  => {
+        await dynamo.send(
+            new DeleteCommand({
+                TableName: REVIEWS_TABLE,
+                Key: {
+                    entityID: review.entityID
+                }
+            })
+        );
+    });
+    await Promise.all(promises);
+
+    // Delete the user.
+    await dynamo.send(
+        new DeleteCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: userID
+            }
+        })
+    );
+
+    return {
+        entityID: userID
+    };
 }

@@ -1,12 +1,10 @@
 import {
     UserPermission,
-    User,
     validateJwtToken,
     validateUserPermissions,
     getAuthorizationHeaders,
     getUser,
-    constructUser,
-    updateUser,
+    deleteUser,
     RequestError,
     BadRequestError
 } from '@lunch-box-reviews/shared-utils';
@@ -16,7 +14,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = getAuthorizationHeaders('OPTIONS,PUT');
+    const headers = getAuthorizationHeaders('OPTIONS,DELETE');
     
     try {
         // Get the request's query parameters.
@@ -29,11 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (!userID)
             throw new Error('UserID is undefined');
 
-        // Ensure that a body was sent with the request.
-        if (!event.body)
-            throw new BadRequestError('No user provided in request body');
-
-         // Ensure that a user with the provided ID exists.
+        // Ensure that a user with the provided ID exists.
         const userInDatabase = await getUser(userID);
         if (!userInDatabase) {
             throw new BadRequestError('Review with provided ID does not exist');
@@ -45,9 +39,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             UserPermission.adminUserPermissions
         ]);
 
-        // Update the user.
-        const user: User = await constructUser(event.body, userID);
-        body = await updateUser(user);
+        // Delete the user.
+        body = await deleteUser(userID);
     }
     catch (err) {
         if (err instanceof RequestError) {

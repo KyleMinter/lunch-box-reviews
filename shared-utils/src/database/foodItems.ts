@@ -2,12 +2,13 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
-    UpdateCommand
+    UpdateCommand,
+    DeleteCommand
 } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
 import { EntityType, FoodAttributes, FoodItem } from '../types';
-import { CriteriaFilter, getDynamoDbClient, PaginationParameters, REVIEWS_TABLE } from '.';
+import { CriteriaFilter, getDynamoDbClient, getReview, PaginationParameters, REVIEWS_TABLE } from '.';
 
 
 /*
@@ -142,7 +143,7 @@ export async function getFoodItem(foodID: string) {
  * @param pagination the pagination parameters used to query the database
  * @returns a list of reviews submitted for the given food item
  */
-export async function getReviewsFromFoodItem(foodID: string, pagination: PaginationParameters) {
+export async function getReviewsFromFoodItem(foodID: string, pagination: PaginationParameters | undefined) {
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
         new QueryCommand({
@@ -154,8 +155,8 @@ export async function getReviewsFromFoodItem(foodID: string, pagination: Paginat
                 ':skValue': foodID
             },
             ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: pagination.offset,
-            Limit: pagination.limit,
+            ExclusiveStartKey: pagination ? pagination.offset : undefined,
+            Limit: pagination ? pagination.limit : undefined,
         })
     );
 
@@ -237,4 +238,44 @@ export async function updateFoodItem(foodItem: FoodItem) {
     );
 
     return result.Attributes;
+}
+
+/**
+ * Removes an existing food item, along with all of the reviews submitted for the food item
+ * and the menu instances of the food item, from the database.
+ * @param foodID the ID of the food item to remove
+ * @returns the ID of the food item that was removed
+ */
+export async function deleteFoodItem(foodID: string) {
+    const dynamo = getDynamoDbClient();
+
+    // Delete all reviews for the provided food item.
+    const reviews = await getReviewsFromFoodItem(foodID, undefined);
+    const promises = reviews.Items.map(async (review)  => {
+        await dynamo.send(
+            new DeleteCommand({
+                TableName: REVIEWS_TABLE,
+                Key: {
+                    entityID: review.entityID
+                }
+            })
+        );
+    });
+    await Promise.all(promises);
+
+    // TODO: Will also need to delete any menu instances with the current foodID.
+
+    // Delete the food item.
+    await dynamo.send(
+        new DeleteCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: foodID
+            }
+        })
+    );
+
+    return {
+        entityID: foodID
+    };
 }
