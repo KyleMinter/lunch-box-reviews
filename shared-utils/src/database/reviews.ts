@@ -2,7 +2,8 @@ import {
     QueryCommand,
     GetCommand,
     PutCommand,
-    UpdateCommand
+    UpdateCommand,
+    DeleteCommand
 } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4, validate} from 'uuid';
 import { BadRequestError } from '../errors';
@@ -245,4 +246,25 @@ export async function updateReview(review: Review) {
     );
 
     return result.Attributes;
+}
+
+/**
+ * Removes an existing review from the database.
+ * @param reviewID the ID of the review to remove
+ * @returns the review that was removed
+ */
+export async function deleteReview(reviewID: string) {
+    const dynamo = getDynamoDbClient();
+    await dynamo.send(
+        new DeleteCommand({
+            TableName: REVIEWS_TABLE,
+            Key: {
+                entityID: reviewID
+            }
+        })
+    );
+
+    return {
+        entityID: reviewID
+    };
 }

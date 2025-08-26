@@ -1,14 +1,11 @@
 import {
     UserPermission,
-    User,
     validateJwtToken,
     validateUserPermissions,
     getAuthorizationHeaders,
-    getUser,
-    constructUser,
-    updateUser,
+    getFoodItem,
+    deleteFoodItem,
     RequestError,
-    BadRequestError
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -16,7 +13,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = getAuthorizationHeaders('OPTIONS,PUT');
+    const headers = getAuthorizationHeaders('OPTIONS,DELETE');
     
     try {
         // Get the request's query parameters.
@@ -25,29 +22,23 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             throw new Error('Query parameters are not supported for this endpoint');
 
         // Get the userID from the request's path parameter.
-        const userID = event.pathParameters?.id;
-        if (!userID)
-            throw new Error('UserID is undefined');
+        const foodID = event.pathParameters?.id;
+        if (!foodID)
+            throw new Error('FoodID is undefined');
 
-        // Ensure that a body was sent with the request.
-        if (!event.body)
-            throw new BadRequestError('No user provided in request body');
-
-         // Ensure that a user with the provided ID exists.
-        const userInDatabase = await getUser(userID);
-        if (!userInDatabase) {
-            throw new BadRequestError('Review with provided ID does not exist');
-        }
+        // Ensure that a food item with the provided ID exists.
+        const foodItem = await getFoodItem(foodID);
+        if (!foodItem)
+            throw new Error('Food item with provided ID does not exist');
 
         // Validate user permissions.
         const jwt = await validateJwtToken(event);
         await validateUserPermissions(jwt.sub!, [
-            UserPermission.adminUserPermissions
+            UserPermission.adminFoodItemPermissions
         ]);
 
-        // Update the user.
-        const user: User = await constructUser(event.body, userID);
-        body = await updateUser(user);
+        // Delete the food item.
+        body = await deleteFoodItem(foodID);
     }
     catch (err) {
         if (err instanceof RequestError) {

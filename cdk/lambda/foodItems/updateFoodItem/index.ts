@@ -5,6 +5,7 @@ import {
     validateUserPermissions,
     getAuthorizationHeaders,
     constructFoodItem,
+    getFoodItem,
     updateFoodItem,
     RequestError,
     BadRequestError
@@ -18,26 +19,32 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const headers = getAuthorizationHeaders('OPTIONS,PUT');
     
     try {
-        // Validate user permissions.
-        const jwt = await validateJwtToken(event);
-        await validateUserPermissions(jwt.sub!, [
-            UserPermission.adminFoodItemPermissions
-        ]);
+        // Get the request's query parameters.
+        const queryParams = event.queryStringParameters;
+        if (queryParams)
+            throw new Error('Query parameters are not supported for this endpoint');
 
         // Get the foodID from the request's path parameter.
         const foodID = event.pathParameters?.id;
         if (!foodID)
             throw new Error('FoodID is undefined');
 
-        // Get the request's query parameters.
-        const queryParams = event.queryStringParameters;
-        if (queryParams)
-            throw new Error('Query parameters are not supported for this endpoint');
-
         // Ensure that a body was sent with the request.
         if (!event.body)
             throw new BadRequestError('No food item provided in request body');
 
+        // Check to make sure that a food item with the provided ID exists.
+        const foodItemInDatabase = await getFoodItem(foodID);
+        if (!foodItemInDatabase)
+            throw new Error('Food item with provided ID does not exist');
+
+        // Validate user permissions.
+        const jwt = await validateJwtToken(event);
+        await validateUserPermissions(jwt.sub!, [
+            UserPermission.adminFoodItemPermissions
+        ]);
+
+        // Update the food item.
         const foodItem: FoodItem = await constructFoodItem(event.body, foodID);
         body = await updateFoodItem(foodItem);
     }

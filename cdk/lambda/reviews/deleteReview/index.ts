@@ -1,12 +1,10 @@
 import {
     UserPermission,
-    Review,
     validateJwtToken,
     validateUserPermissions,
     getAuthorizationHeaders,
-    constructReview,
     getReview,
-    updateReview,
+    deleteReview,
     RequestError,
     BadRequestError
 } from '@lunch-box-reviews/shared-utils';
@@ -16,24 +14,18 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = getAuthorizationHeaders('OPTIONS,PUT');
+    const headers = getAuthorizationHeaders('OPTIONS,DELETE');
     
     try {
         // Get the request's query parameters.
         const queryParams = event.queryStringParameters;
         if (queryParams)
             throw new Error('Query parameters are not supported for this endpoint');
-        
+
         // Get the reviewID from the request's path parameter.
         const reviewID = event.pathParameters?.id;
         if (!reviewID)
             throw new Error('ReviewID is undefined');
-
-        // Ensure that a body was sent with the request.
-        if (!event.body)
-            throw new BadRequestError('No review provided in request body');
-
-        
 
         // Ensure that a review with the provided ID exists.
         const reviewInDatabase = await getReview(reviewID);
@@ -54,9 +46,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             ]);
         }
 
-        // Update the review.
-        const review: Review = await constructReview(event.body, reviewInDatabase.userID, false, reviewID);
-        body = await updateReview(review);
+        // Delete the review.
+        body = await deleteReview(reviewID);
     }
     catch (err) {
         if (err instanceof RequestError) {
