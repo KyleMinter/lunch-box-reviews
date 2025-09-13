@@ -1,3 +1,7 @@
+function nameof<T>(name: keyof T) {
+    return name;
+}
+
 /**
  * An enum representing an entity type stored in the Reviews Table.
  * Can either one of the following: `Review`, `User`, `FoodItem`, `MenuInstance`.
@@ -6,7 +10,7 @@ export enum EntityType {
     Review = 'review',
     User = 'user',
     FoodItem = 'foodItem',
-    MenuInstace = 'menuInstace'
+    MenuInstance = 'menuInstace'
 }
 
 /**
@@ -15,7 +19,18 @@ export enum EntityType {
  */
 export interface Entity {
     entityID: string,
-    entityType: EntityType
+    entityType: EntityType | string
+}
+
+/**
+ * A class representing the properties of the Entity interface.
+ * Also contains a key property listing all of the interface's properties as string.
+ */
+export class EntityProps {
+    static readonly entityID: string = nameof<Entity>('entityID');
+    static readonly entityType: string = nameof<Entity>('entityType');
+
+    static readonly keys: string = `${this.entityID}, ${this.entityType}`;
 }
 
 /**
@@ -27,7 +42,6 @@ export interface Entity {
  * `quantity` - the quantity rating of the review.
  * `rating` - the overall rating of the review.
  * `reviewDate` - the date this review was last edited. Represented as an ISO-8601 string.
- * `menuDate` - the date of the menu instance this review is referencing. Represented as an ISO-8601 string.
  */
 export interface Review extends Entity {
     foodID: string,
@@ -35,8 +49,22 @@ export interface Review extends Entity {
     quality: number,
     quantity: number,
     rating: number,
-    reviewDate: string,
-    menuDate: string
+    reviewDate: string
+}
+
+/**
+ * A class representing the properties of the Review interface.
+ * Also contains a key property listing all of the interface's properties as string.
+ */
+export class ReviewProps extends EntityProps {
+    static readonly foodID: string = nameof<Review>('foodID');
+    static readonly userID: string = nameof<Review>('userID');
+    static readonly quality: string = nameof<Review>('quality');
+    static readonly quanitity: string = nameof<Review>('quantity');
+    static readonly rating: string = nameof<Review>('rating');
+    static readonly reviewDate: string = nameof<Review>('reviewDate');
+
+    static readonly keys: string = `${EntityProps.keys}, ${this.foodID}, ${this.userID}, ${this.quality}, ${this.quanitity}, ${this.rating}, ${this.reviewDate}`;
 }
 
 /**
@@ -50,6 +78,18 @@ export interface User extends Entity {
     userName: string;
     userEmail: string;
     userPermissions: UserPermission[]
+}
+
+/**
+ * A class representing the properties of the User interface.
+ * Also contains a key property listing all of the interface's properties as string.
+ */
+export class UserProps extends EntityProps {
+    static readonly userName: string = nameof<User>('userName');
+    static readonly userEmail: string = nameof<User>('userEmail');
+    static readonly userPermissions: string = nameof<User>('userPermissions');
+
+    static readonly keys: string = `${EntityProps.keys}, ${this.userName}, ${this.userEmail}, ${this.userPermissions}`;
 }
 
 /**
@@ -71,11 +111,21 @@ export enum UserPermission {
  * `foodName` - the name of the food item.
  * `foodOrigin` - the name of the origin/location the food item came from.
  * `foodAttributes` - an object containing various attributes of a food item.
+ * `foodOption` - the menu option of the food item.
+ * `averageRating` - the average rating of the food item.
+ * `location` - the office location of the food item.
+ * `cafe` - the office cafe of the food item.
+ * `foodDate` - the date the food item was featured on the menu.
  */
-export interface FoodItem extends Entity{
+export interface FoodItem extends Entity {
     foodName: string,
     foodOrigin: string,
-    foodAttributes: FoodAttributes
+    foodAttributes: FoodAttributes,
+    foodOption: FoodOption,
+    averageRating?: number,
+    location: OfficeLocation,
+    cafe?: OfficeCafe,
+    foodDate: string
 }
 
 /**
@@ -85,4 +135,51 @@ export interface FoodItem extends Entity{
 export interface FoodAttributes {
     description?: string,
     nutrition?: string
+}
+
+/**
+ * An enum representing the option a food item can be.
+ * Can either one of the following: `MainOption` or `ChilledOption`.
+ */
+export enum FoodOption {
+    MainOption,
+    ChilledOption
+}
+
+/**
+ * An enum representing the office location of a food item.
+ * Can either one of the following: `OKC_HQ`, `Grapevine`, `NTH`.
+ */
+export enum OfficeLocation {
+    OKC_HQ,
+    Grapevine,
+    NTH
+}
+
+/**
+ * An enum representing the office cafe of a food item.
+ * Can either one of the following: `CafeA`, `CafeB`, `CafeC`, `CafeD`, `CafeE`.
+ */
+export enum OfficeCafe {
+    CafeA,
+    CafeB,
+    CafeC,
+    CafeD,
+    CafeE,
+}
+
+/**
+ * A class representing the properties of the FoodItem interface.
+ * Also contains a key property listing all of the interface's properties as string.
+ */
+export class FoodItemProps extends EntityProps {
+    static readonly foodName: string = nameof<FoodItem>('foodName');
+    static readonly foodOrigin: string = nameof<FoodItem>('foodOrigin');
+    static readonly foodAttributes: string = nameof<FoodItem>('foodAttributes');
+    static readonly averageRating: string = nameof<FoodItem>('averageRating');
+    static readonly location: string = nameof<FoodItem>('location');
+    static readonly cafe: string = nameof<FoodItem>('cafe');
+    static readonly foodDate: string = nameof<FoodItem>('foodDate');
+
+    static readonly keys: string = `${EntityProps.keys}, ${this.foodName}, ${this.foodOrigin}, ${this.foodAttributes}, ${this.averageRating}, ${this.location}, ${this.cafe}, ${this.foodDate}`;
 }

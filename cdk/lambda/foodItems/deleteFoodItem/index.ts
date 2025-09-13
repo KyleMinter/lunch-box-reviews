@@ -21,7 +21,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (queryParams)
             throw new Error('Query parameters are not supported for this endpoint');
 
-        // Get the userID from the request's path parameter.
+        // Get the foodID from the request's path parameter.
         const foodID = event.pathParameters?.id;
         if (!foodID)
             throw new Error('FoodID is undefined');

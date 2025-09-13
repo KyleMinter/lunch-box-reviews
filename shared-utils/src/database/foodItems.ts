@@ -3,12 +3,24 @@ import {
     GetCommand,
     PutCommand,
     UpdateCommand,
-    DeleteCommand
+    DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { 
+    CriteriaFilter,
+    deleteReview,
+    getDynamoDbClient,
+    getUser,
+    IDeleteCommandOutput,
+    IGetCommandOutput,
+    IPutCommandOutput,
+    IQueryCommandOutput,
+    IUpdateCommandOutput,
+    PaginationParameters,
+    REVIEWS_TABLE
+} from '.';
 import { v4 as uuidv4} from 'uuid';
 import { BadRequestError } from '../errors';
-import { EntityType, FoodAttributes, FoodItem } from '../types';
-import { CriteriaFilter, getDynamoDbClient, getReview, PaginationParameters, REVIEWS_TABLE } from '.';
+import { EntityType, FoodAttributes, FoodItem, FoodItemProps, FoodOption, OfficeCafe, OfficeLocation, Review, ReviewProps, User } from '../types';
 
 
 /*
@@ -22,7 +34,7 @@ import { CriteriaFilter, getDynamoDbClient, getReview, PaginationParameters, REV
 /**
  * Constructs a new food item with a given a JSON string.
  * @param jsonStr the JSON string to construct the food item from
- * @param reviewID the foodID to supply to this food item. If no ID is given, one will be generated
+ * @param foodID the foodID to supply to this food item. If no ID is given, one will be generated
  * @returns the newly constructed food item
  */
 export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4()) {
@@ -33,12 +45,18 @@ export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4
         nutrition: json.foodAttributes.nutrition
     };
 
+    const foodDate: string = new Date().toISOString();
+
     const foodItem: FoodItem = {
         entityID: foodID,
         entityType: EntityType.FoodItem,
         foodName: json.foodName,
         foodOrigin: json.foodOrigin,
-        foodAttributes: foodAttributes
+        foodAttributes: foodAttributes,
+        foodOption: json.foodOption,
+        location: json.location,
+        cafe: json.cafe,
+        foodDate: foodDate
     }
 
     return foodItem;
@@ -47,20 +65,18 @@ export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4
 /**
  * Stores a food item in the database.
  * @param foodItem the food item to store
- * @returns the ID of the food item that was stored in this operation
+ * @returns the newly created food item
  */
 export async function createFoodItem(foodItem: FoodItem) {
     const dynamo = getDynamoDbClient();
-    await dynamo.send(
+    const results = await dynamo.send(
         new PutCommand({
             TableName: REVIEWS_TABLE,
             Item: foodItem,
         })
-    );
+    ) as IPutCommandOutput<FoodItem>;
 
-    return {
-        entityID: foodItem.entityID
-    };
+    return results.Attributes;
 }
 
 /**
@@ -69,7 +85,7 @@ export async function createFoodItem(foodItem: FoodItem) {
  * @param criteriaFilter an optional criteria filter used to query the database
  * @returns a list of food items and the last evaluated key
  */
-export async function getAllFoodItems(pagination: PaginationParameters, criteriaFilter?: CriteriaFilter) {
+export async function getAllFoodItems(pagination?: PaginationParameters, criteriaFilter?: CriteriaFilter) {
     let indexName: string;
     let keyConditionExpression: string;
     let expressionAttributeValues: Record<string, string>;
@@ -79,11 +95,11 @@ export async function getAllFoodItems(pagination: PaginationParameters, criteria
         const filter = criteriaFilter.filter;
         const criteria = criteriaFilter.criteria;
 
-        if (criteria !== 'foodName' && criteria !== 'foodOrigin')
+        if (criteria !== FoodItemProps.foodName && criteria !== FoodItemProps.foodOrigin)
             throw new BadRequestError('Unsupported criteria');
 
-        indexName = `GSI-entityType-${criteria}`;
-        keyConditionExpression = `entityType = :pkValue AND begins_with(${criteria}, :skValue)`;
+        indexName = `GSI-${FoodItemProps.entityType}-${criteria}`;
+        keyConditionExpression = `${FoodItemProps.entityType} = :pkValue AND begins_with(${criteria}, :skValue)`;
         expressionAttributeValues = {
                 ':pkValue': EntityType.FoodItem,
                 ':skValue': filter
@@ -91,50 +107,50 @@ export async function getAllFoodItems(pagination: PaginationParameters, criteria
     }
     // Query the database for all food items.
     else {
-        indexName = 'GSI-entityType';
-        keyConditionExpression = 'entityType = :pkValue';
+        indexName = `GSI-${FoodItemProps.entityType}`;
+        keyConditionExpression = `${FoodItemProps.entityType} = :pkValue`;
         expressionAttributeValues = {
                 ':pkValue': EntityType.FoodItem
         };
     }
 
     const dynamo = getDynamoDbClient();
-    const foodItems = await dynamo.send(
+    const results = await dynamo.send(
         new QueryCommand({
             TableName: REVIEWS_TABLE,
             IndexName: indexName,
             KeyConditionExpression: keyConditionExpression,
             ExpressionAttributeValues: expressionAttributeValues,
-            ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
-            ExclusiveStartKey: pagination.offset,
-            Limit: pagination.limit,
+            ProjectionExpression: `${FoodItemProps.keys}`,
+            ExclusiveStartKey: pagination?.offset,
+            Limit: pagination?.limit,
         })
-    );
+    ) as IQueryCommandOutput<FoodItem>;
 
-    // Return the results of the query and the last evaluated key.
     return {
-        Items: foodItems.Items ? foodItems.Items : [],
-        LastEvaluatedKey: foodItems.LastEvaluatedKey
+        Items: results.Items ? results.Items : [],
+        LastEvaluatedKey: results.LastEvaluatedKey
     };
 }
 
 /**
  * Retrieves a food item from the database.
- * @param reviewID the id of the food item to retrieve
+ * @param foodID the id of the food item to retrieve
  * @returns the food item retrieved
  */
 export async function getFoodItem(foodID: string) {
     const dynamo = getDynamoDbClient();
-    const foodItem = await dynamo.send(
+    const results = await dynamo.send(
         new GetCommand({
             TableName: REVIEWS_TABLE,
             Key: {
                 entityID: foodID
             },
-            ProjectionExpression: 'entityID, foodName, foodOrigin, foodAttributes',
+            ProjectionExpression: FoodItemProps.keys,
         })
-    );
-    return foodItem.Item;
+    ) as IGetCommandOutput<FoodItem>;
+
+    return results.Item;
 }
 
 /**
@@ -143,24 +159,23 @@ export async function getFoodItem(foodID: string) {
  * @param pagination the pagination parameters used to query the database
  * @returns a list of reviews submitted for the given food item
  */
-export async function getReviewsFromFoodItem(foodID: string, pagination: PaginationParameters | undefined) {
+export async function getReviewsFromFoodItem(foodID: string, pagination?: PaginationParameters) {
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
         new QueryCommand({
             TableName: REVIEWS_TABLE,
-            IndexName: 'GSI-entityType-foodID',
-            KeyConditionExpression: 'entityType = :pkValue AND foodID = :skValue',
+            IndexName: `GSI-${ReviewProps.entityType}-${ReviewProps.foodID}`,
+            KeyConditionExpression: `${ReviewProps.entityType} = :pkValue AND ${ReviewProps.foodID} = :skValue`,
             ExpressionAttributeValues: {
                 ':pkValue': EntityType.Review,
                 ':skValue': foodID
             },
-            ProjectionExpression: 'entityID, foodID, userID, quality, quantity, rating, reviewDate, menuDate',
-            ExclusiveStartKey: pagination ? pagination.offset : undefined,
-            Limit: pagination ? pagination.limit : undefined,
+            ProjectionExpression: ReviewProps.keys,
+            ExclusiveStartKey: pagination?.offset,
+            Limit: pagination?.limit,
         })
-    );
+    ) as IQueryCommandOutput<Review>;
 
-    // Store the results of the query and the last evaluated key to the response body.
     return {
         Items: results.Items ? results.Items : [],
         LastEvaluatedKey: results.LastEvaluatedKey
@@ -173,7 +188,7 @@ export async function getReviewsFromFoodItem(foodID: string, pagination: Paginat
  * @param pagination the pagination parameters used to query the database
  * @returns a list of users who have submitted a review for the given food item
  */
-export async function getUsersFromFoodItems(foodID: string, pagination: PaginationParameters) {
+export async function getUsersFromFoodItem(foodID: string, pagination?: PaginationParameters) {
     // Query the database for reviews with the provided foodID.
     const reviews = await getReviewsFromFoodItem(foodID, pagination);
 
@@ -182,41 +197,29 @@ export async function getUsersFromFoodItems(foodID: string, pagination: Paginati
         return {
             Items: [],
             LastEvaluatedKey: reviews.LastEvaluatedKey
-        }
-    }
-    else {
-        // Retreive each food entity for every userID retrieved in the previous query.
-        const users: any[] = [];
-        
-        const dynamo = getDynamoDbClient();
-        const promises = reviews.Items.map(async (review)  => {
-            const user = await dynamo.send(
-                new GetCommand({
-                    TableName: REVIEWS_TABLE,
-                    Key: {
-                        entityID: review.userID
-                    },
-                    ProjectionExpression: 'entityID, userName, userEmail, userPermissions'
-                })
-            );
-
-            if (user.Item)
-                users.push(user.Item);
-        });
-        await Promise.all(promises);
-
-        // Store the results of the query and the last evaluated key to the response body.
-        return {
-            Items: users,
-            LastEvaluatedKey: reviews.LastEvaluatedKey
         };
     }
+
+    // Retreive each food entity for every userID retrieved in the previous query.
+    const users: User[] = [];
+    const promises = reviews.Items.map(async (review)  => {
+        const user = await getUser(review.userID);
+        if (user && !users.find(u => u.entityID === u.entityID))
+            users.push(user);
+    });
+    await Promise.all(promises);
+
+    // Store the results of the query and the last evaluated key to the response body.
+    return {
+        Items: users,
+        LastEvaluatedKey: reviews.LastEvaluatedKey
+    };
 }
 
 /**
  * Updates an existing food item in the database.
  * @param foodItem a food item containing the updated information
- * @returns the updated values in the database
+ * @returns the updated attributes of the food item
  */
 export async function updateFoodItem(foodItem: FoodItem) {
     const dynamo = getDynamoDbClient();
@@ -226,16 +229,25 @@ export async function updateFoodItem(foodItem: FoodItem) {
             Key: {
                 entityID: foodItem.entityID
             },
-            UpdateExpression: 'SET foodName = :newName, foodOrigin = :newOrigin, foodAttributes = :newAttributes',
-            ConditionExpression: 'attribute_exists(entityID)',
+            UpdateExpression: `SET
+                ${FoodItemProps.foodName} = :newName,
+                ${FoodItemProps.foodOrigin} = :newOrigin,
+                ${FoodItemProps.foodAttributes} = :newAttributes,
+                ${FoodItemProps.averageRating} = :newAverageRating,
+                ${FoodItemProps.location} = :newLocation,
+                ${FoodItemProps.cafe} = :newCafe`,
+            ConditionExpression: `attribute_exists(${FoodItemProps.entityID})`,
             ExpressionAttributeValues: {
                 ':newName': foodItem.foodName,
                 ':newOrigin': foodItem.foodOrigin,
-                ':newAttributes': foodItem.foodAttributes
+                ':newAttributes': foodItem.foodAttributes,
+                ':newAverageRating': foodItem.averageRating,
+                ':newLocation': foodItem.location,
+                ':newCafe': foodItem.cafe
             },
             ReturnValues: 'UPDATED_NEW'
         })
-    );
+    ) as IUpdateCommandOutput<FoodItem>;
 
     return result.Attributes;
 }
@@ -244,38 +256,29 @@ export async function updateFoodItem(foodItem: FoodItem) {
  * Removes an existing food item, along with all of the reviews submitted for the food item
  * and the menu instances of the food item, from the database.
  * @param foodID the ID of the food item to remove
- * @returns the ID of the food item that was removed
+ * @returns the removed food item
  */
 export async function deleteFoodItem(foodID: string) {
     const dynamo = getDynamoDbClient();
 
     // Delete all reviews for the provided food item.
-    const reviews = await getReviewsFromFoodItem(foodID, undefined);
-    const promises = reviews.Items.map(async (review)  => {
-        await dynamo.send(
-            new DeleteCommand({
-                TableName: REVIEWS_TABLE,
-                Key: {
-                    entityID: review.entityID
-                }
-            })
-        );
-    });
-    await Promise.all(promises);
-
-    // TODO: Will also need to delete any menu instances with the current foodID.
+    const reviews = await getReviewsFromFoodItem(foodID);
+    if (reviews.Items) {
+        const promises = reviews.Items.map(async (review) => {
+            await deleteReview(review.entityID)
+        });
+        await Promise.all(promises);
+    }
 
     // Delete the food item.
-    await dynamo.send(
+    const results = await dynamo.send(
         new DeleteCommand({
             TableName: REVIEWS_TABLE,
             Key: {
                 entityID: foodID
             }
         })
-    );
+    ) as IDeleteCommandOutput<FoodItem>;
 
-    return {
-        entityID: foodID
-    };
+    return results.Attributes;
 }
