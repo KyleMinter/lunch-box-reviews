@@ -11,5 +11,6 @@ for dir in ./cdk/lambda/*/*/; do
 if [ -d "$dir" ]; then
     printf "\nCleaning $dir package\n"
     (cd "$dir" && rm *.js && rm *.d.ts)
+    (cd "$dir/route" && rm *.js && rm *.d.ts)
 fi
 done
