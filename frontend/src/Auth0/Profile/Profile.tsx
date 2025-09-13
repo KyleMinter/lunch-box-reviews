@@ -21,7 +21,7 @@ function Profile() {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        userName: `${user!.name}`,
+                        userName: `${user!.username}`,
                         userEmail: `${user!.email}`
                     })
                 });
@@ -45,7 +45,7 @@ function Profile() {
         return (
             <div>
                 <img src={user!.picture} alt={user!.name} />
-                <h2>{user!.name}</h2>
+                <h2>{user!.username}</h2>
                 <p>{user!.email}</p>
                 <p>{token}</p>
             </div>

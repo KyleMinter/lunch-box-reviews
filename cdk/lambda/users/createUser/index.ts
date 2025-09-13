@@ -22,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
         // Ensure that a body was sent with the request.
         if (!event.body)
-            throw new BadRequestError('No food item provided in request body');
+            throw new BadRequestError('No user provided in request body');
 
         // Construct a new user using the request body.
         const user = await constructUser(event.body, jwt.sub!);
