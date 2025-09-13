@@ -45,7 +45,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         ]);
 
         // Update the food item.
-        const foodItem: FoodItem = await constructFoodItem(event.body, foodID);
+        const json = JSON.parse(event.body);
+        const foodItem: FoodItem = await constructFoodItem(json, foodItemInDatabase);
         body = await updateFoodItem(foodItem);
     }
     catch (err) {

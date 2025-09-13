@@ -33,8 +33,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (!event.body)
             throw new BadRequestError('No review provided in request body');
 
-        
-
         // Ensure that a review with the provided ID exists.
         const reviewInDatabase = await getReview(reviewID);
         if (!reviewInDatabase) {
@@ -55,8 +53,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         }
 
         // Update the review.
-        const review: Review = await constructReview(event.body, reviewInDatabase.userID, false, reviewID);
-        body = await updateReview(review);
+        const json = JSON.parse(event.body);
+        const review: Review = await constructReview(json, reviewInDatabase);
+        body = await updateReview(review, reviewInDatabase);
     }
     catch (err) {
         if (err instanceof RequestError) {

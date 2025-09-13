@@ -47,7 +47,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         }
 
         // Delete the review.
-        body = await deleteReview(reviewID);
+        body = await deleteReview(reviewInDatabase);
     }
     catch (err) {
         if (err instanceof RequestError) {

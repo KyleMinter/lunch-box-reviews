@@ -28,7 +28,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         if (!event.body)
             throw new BadRequestError('No food item provided in request body');
 
-        const foodItem: FoodItem = await constructFoodItem(event.body);
+        const json = JSON.parse(event.body);
+        const foodItem: FoodItem = await constructFoodItem(json);
         body = await createFoodItem(foodItem);
     }
     catch (err) {
