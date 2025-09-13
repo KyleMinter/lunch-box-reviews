@@ -31,13 +31,10 @@ import { EntityType, FoodItem, Review, ReviewProps, User, UserPermission, UserPr
 
 /**
  * Constructs a new user with a given a JSON string.
- * @param jsonStr the JSON string to construct the user from
- * @param userID the userID to supply to this user.
+ * @param json the JSON object to construct the user from
  * @returns the newly constructed user
  */
-export async function constructUser(jsonStr: string, userID: string) {
-    const json = JSON.parse(jsonStr);
-
+export async function constructUser(json: any) {
     const userPermissions: UserPermission[] = json.userPermissions
     ? json.userPermissions as UserPermission[]
     : [
@@ -46,7 +43,7 @@ export async function constructUser(jsonStr: string, userID: string) {
     ]
 
     const user: User = {
-        entityID: userID,
+        entityID: json.entityID,
         entityType: EntityType.User,
         userName: json.userName,
         userEmail: json.userEmail,
@@ -251,7 +248,7 @@ export async function deleteUser(userID: string) {
     const reviews = await getReviewsFromUser(userID);
     if (reviews.Items) {
         const promises = reviews.Items.map(async (review)  => {
-            await deleteReview(review.entityID);
+            await deleteReview(review);
         });
         await Promise.all(promises);
     }

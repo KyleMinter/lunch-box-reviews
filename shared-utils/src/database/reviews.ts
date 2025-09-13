@@ -15,11 +15,12 @@ import {
     IQueryCommandOutput,
     IUpdateCommandOutput,
     PaginationParameters,
-    REVIEWS_TABLE
+    REVIEWS_TABLE,
+    updateFoodItem
 } from '.';
 import { v4 as uuidv4 } from 'uuid';
 import { BadRequestError } from '../errors';
-import { EntityType, Review, ReviewProps } from '../types';
+import { EntityType, FoodItem, Review, ReviewProps } from '../types';
 
 
 /*
@@ -41,6 +42,26 @@ function roundTo(num: number, places: number): number {
     return Math.round(num * factor) / factor;
 }
 
+function convertAndValidateRatingNumbers(qualityStr: string, quantityStr: string) {
+    // Convert the ratings to numbers
+    let quality: number = Number(qualityStr);
+    let quantity: number = Number(quantityStr);
+
+    // Valiate quality and quantity ratings.
+    if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
+    quality < 1 || quantity < 1 || quantity > 5)
+        throw new BadRequestError('Invalid review ratings provided');
+
+    // Round quality rating to two decimal places and truncate the quantity rating.
+    quality = roundTo(quality as number, 2);
+    quantity = Math.trunc(quantity as number);
+
+    return {
+        quality,
+        quantity
+    };
+}
+
 /**
  * Calculates the overall rating given a quality and quantity rating
  * @param quality the quality rating
@@ -56,47 +77,22 @@ function calculateOverallRating(quality: number, quantity: number): number {
 
 /**
  * Constructs a new review with a given a JSON string.
- * @param jsonStr the JSON string to construct the review from
- * @param userID the id of the user who is creating this review
- * @param validateFoodID a flag which determines if the foodID in the jsonStr should be validated
- * @param reviewID the reviewID to supply to this review. If no ID is given, one will be generated
+ * @param jsonStr the JSON object to construct the review from
+ * @param oldReview an already existing review used to supply values to the newly constructed review.
+ * If this value is provided the existing entityID, userID, and foodID will used. If no review is given, values will instead be sourced from the provided json.
  * @returns the newly constructed review
  */
-export async function constructReview(jsonStr: string, userID: string, validateFoodID: boolean, reviewID: string = uuidv4()) {
-    const json = JSON.parse(jsonStr);
-
-    // Convert the ratings to numbers
-    let quality: number = Number(json.quality);
-    let quantity: number = Number(json.quantity);
-
-    // Valiate quality and quantity ratings.
-    if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
-    quality < 1 || quantity < 1 || quantity > 5)
-        throw new BadRequestError('Invalid review ratings provided');
-
-    // Round quality rating to two decimal places and truncate the quantity rating.
-    quality = roundTo(json.quality as number, 2);
-    quantity = Math.trunc(json.quantity as number);
-
-    // If a food item is being supplied, we will verify it actually exists.
-    if (validateFoodID) {
-        if (!json.foodID)
-            throw new BadRequestError(`No ${ReviewProps.foodID} provided in request body`);
-
-        // Validate foodID.
-        const foodItem = await getFoodItem(json.foodID);
-        if (!foodItem)
-            throw new BadRequestError(`Provided ${ReviewProps.foodID} matches no existing elements`);
-    }
+export async function constructReview(json: any, oldReview?: Review) {
+    const { quality, quantity } = convertAndValidateRatingNumbers(json.quality, json.quantity);
 
     const reviewDate: string = new Date().toISOString();
 
     // Construct the review.
     const review: Review = {
-        entityID: reviewID,
+        entityID: oldReview ? oldReview.entityID : uuidv4(),
         entityType: EntityType.Review,
-        userID: userID,
-        foodID: json.foodID,
+        userID: oldReview ? oldReview.userID : json.userID,
+        foodID: oldReview ? oldReview.foodID : json.foodID,
         quality: quality,
         quantity: quantity,
         rating: calculateOverallRating(json.quality, json.quantity),
@@ -109,9 +105,15 @@ export async function constructReview(jsonStr: string, userID: string, validateF
 /**
  * Stores a review in the database.
  * @param review the review to store
+ * @param foodItem the food item the review is for
  * @returns the newly created menu instance
  */
-export async function createReview(review: Review) {
+export async function createReview(review: Review, foodItem: FoodItem) {
+    // Update the total rating for the corresponding food item.
+    foodItem.totalRating += review.rating;
+    foodItem.numReviews++;
+    await updateFoodItem(foodItem);
+
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
         new PutCommand({
@@ -213,9 +215,16 @@ export async function getReview(reviewID: string) {
 /**
  * Updates an existing review in the database.
  * @param review a review containing the updated information
+ * @param oldReview the old review containing the outdated information
  * @returns the updated attributes of the review
  */
-export async function updateReview(review: Review) {
+export async function updateReview(review: Review, oldReview: Review) {
+    // Update the total rating for the corresponding food item.
+    const foodItem: FoodItem = (await getFoodItem(review.foodID))!;
+    foodItem.totalRating -= oldReview.rating;
+    foodItem.totalRating += review.rating;
+    await updateFoodItem(foodItem);
+
     const dynamo = getDynamoDbClient();
     const result = await dynamo.send(
         new UpdateCommand({
@@ -244,16 +253,26 @@ export async function updateReview(review: Review) {
 
 /**
  * Removes an existing review from the database.
- * @param reviewID the ID of the review to remove
+ * @param review the review to remove
+ * @param updateFoodItemRating a flag which determines if the corresponding food item should have it's total rating updated upon this review's deletion.
+ * This flag is optional and is set to true by default, and should only be set to false when this function is called as the result of a food items deletion.
  * @returns the removed review
  */
-export async function deleteReview(reviewID: string) {
+export async function deleteReview(review: Review, updateFoodItemRating: boolean = true) {
+    // Update the total rating for the corresponding food item.
+    if (updateFoodItemRating) {
+        const foodItem = (await getFoodItem(review.foodID))!;
+        foodItem.totalRating -= review.rating;
+        foodItem.numReviews--;
+        await updateFoodItem(foodItem);
+    }
+
     const dynamo = getDynamoDbClient();
     const results = await dynamo.send(
         new DeleteCommand({
             TableName: REVIEWS_TABLE,
             Key: {
-                entityID: reviewID
+                entityID: review.entityID
             }
         })
     ) as IDeleteCommandOutput<Review>;

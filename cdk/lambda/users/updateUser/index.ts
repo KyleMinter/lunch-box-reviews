@@ -36,7 +36,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
          // Ensure that a user with the provided ID exists.
         const userInDatabase = await getUser(userID);
         if (!userInDatabase) {
-            throw new BadRequestError('Review with provided ID does not exist');
+            throw new BadRequestError('User with provided ID does not exist');
         }
 
         // Validate user permissions.
@@ -46,7 +46,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         ]);
 
         // Update the user.
-        const user: User = await constructUser(event.body, userID);
+        const json = JSON.parse(event.body);
+        json.entityID = userInDatabase.entityID;
+        const user: User = await constructUser(json);
         body = await updateUser(user);
     }
     catch (err) {

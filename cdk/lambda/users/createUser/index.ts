@@ -25,7 +25,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
             throw new BadRequestError('No user provided in request body');
 
         // Construct a new user using the request body.
-        const user = await constructUser(event.body, jwt.sub!);
+        const json = JSON.parse(event.body);
+        json.entityID = jwt.sub!;
+        const user = await constructUser(json);
 
         // Check if the user is already in the database.
         const userInDatabase = await getUser(jwt.sub!)

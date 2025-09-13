@@ -30,7 +30,10 @@ export class EntityProps {
     static readonly entityID: string = nameof<Entity>('entityID');
     static readonly entityType: string = nameof<Entity>('entityType');
 
-    static readonly keys: string = `${this.entityID}, ${this.entityType}`;
+    static readonly keys: string = `
+        ${this.entityID},
+        ${this.entityType}
+    `;
 }
 
 /**
@@ -64,7 +67,15 @@ export class ReviewProps extends EntityProps {
     static readonly rating: string = nameof<Review>('rating');
     static readonly reviewDate: string = nameof<Review>('reviewDate');
 
-    static readonly keys: string = `${EntityProps.keys}, ${this.foodID}, ${this.userID}, ${this.quality}, ${this.quanitity}, ${this.rating}, ${this.reviewDate}`;
+    static readonly keys: string = `
+        ${EntityProps.keys},
+        ${this.foodID},
+        ${this.userID},
+        ${this.quality},
+        ${this.quanitity},
+        ${this.rating},
+        ${this.reviewDate}
+    `;
 }
 
 /**
@@ -89,7 +100,12 @@ export class UserProps extends EntityProps {
     static readonly userEmail: string = nameof<User>('userEmail');
     static readonly userPermissions: string = nameof<User>('userPermissions');
 
-    static readonly keys: string = `${EntityProps.keys}, ${this.userName}, ${this.userEmail}, ${this.userPermissions}`;
+    static readonly keys: string = `
+        ${EntityProps.keys},
+        ${this.userName},
+        ${this.userEmail},
+        ${this.userPermissions}
+    `;
 }
 
 /**
@@ -112,9 +128,10 @@ export enum UserPermission {
  * `foodOrigin` - the name of the origin/location the food item came from.
  * `foodAttributes` - an object containing various attributes of a food item.
  * `foodOption` - the menu option of the food item.
- * `averageRating` - the average rating of the food item.
- * `location` - the office location of the food item.
- * `cafe` - the office cafe of the food item.
+ * `totalRating` - the total overall rating of the food item.
+ * `numReviews` - the number of reviews for the food item.
+ * `officeLocation` - the office location of the food item.
+ * `officeCafe` - the office cafe of the food item.
  * `foodDate` - the date the food item was featured on the menu.
  */
 export interface FoodItem extends Entity {
@@ -122,9 +139,10 @@ export interface FoodItem extends Entity {
     foodOrigin: string,
     foodAttributes: FoodAttributes,
     foodOption: FoodOption,
-    averageRating?: number,
-    location: OfficeLocation,
-    cafe?: OfficeCafe,
+    totalRating: number,
+    numReviews: number,
+    officeLocation: OfficeLocation,
+    officeCafe?: OfficeCafe,
     foodDate: string
 }
 
@@ -176,10 +194,21 @@ export class FoodItemProps extends EntityProps {
     static readonly foodName: string = nameof<FoodItem>('foodName');
     static readonly foodOrigin: string = nameof<FoodItem>('foodOrigin');
     static readonly foodAttributes: string = nameof<FoodItem>('foodAttributes');
-    static readonly averageRating: string = nameof<FoodItem>('averageRating');
-    static readonly location: string = nameof<FoodItem>('location');
-    static readonly cafe: string = nameof<FoodItem>('cafe');
+    static readonly totalRating: string = nameof<FoodItem>('totalRating');
+    static readonly numReviews: string = nameof<FoodItem>('numReviews');
+    static readonly officeLocation: string = nameof<FoodItem>('officeLocation');
+    static readonly officeCafe: string = nameof<FoodItem>('officeCafe');
     static readonly foodDate: string = nameof<FoodItem>('foodDate');
 
-    static readonly keys: string = `${EntityProps.keys}, ${this.foodName}, ${this.foodOrigin}, ${this.foodAttributes}, ${this.averageRating}, ${this.location}, ${this.cafe}, ${this.foodDate}`;
+    static readonly keys: string = `
+        ${EntityProps.keys},
+        ${this.foodName},
+        ${this.foodOrigin},
+        ${this.foodAttributes},
+        ${this.totalRating},
+        ${this.numReviews},
+        ${this.officeLocation},
+        ${this.officeCafe},
+        ${this.foodDate}
+    `;
 }

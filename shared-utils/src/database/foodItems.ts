@@ -33,13 +33,12 @@ import { EntityType, FoodAttributes, FoodItem, FoodItemProps, FoodOption, Office
 
 /**
  * Constructs a new food item with a given a JSON string.
- * @param jsonStr the JSON string to construct the food item from
- * @param foodID the foodID to supply to this food item. If no ID is given, one will be generated
+ * @param jsonStr the JSON object to construct the food item from
+ * @param oldFooditem an already existing food item used to supply values to the newly constructed food item.
+ * If this value is provided the existing entityID, totalRating, numReviews, and foodDate will used. If no food item is given, default values will instead be used/generated.
  * @returns the newly constructed food item
  */
-export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4()) {
-    const json = JSON.parse(jsonStr);
-
+export async function constructFoodItem(json: any, oldFoodItem?: FoodItem) {
     const foodAttributes: FoodAttributes = {
         description: json.foodAttributes.description,
         nutrition: json.foodAttributes.nutrition
@@ -48,15 +47,17 @@ export async function constructFoodItem(jsonStr: string, foodID: string = uuidv4
     const foodDate: string = new Date().toISOString();
 
     const foodItem: FoodItem = {
-        entityID: foodID,
+        entityID: oldFoodItem ? oldFoodItem.entityID : uuidv4(),
         entityType: EntityType.FoodItem,
         foodName: json.foodName,
         foodOrigin: json.foodOrigin,
         foodAttributes: foodAttributes,
+        totalRating: oldFoodItem ? oldFoodItem.totalRating : 0,
+        numReviews: oldFoodItem ? oldFoodItem.numReviews : 0,
         foodOption: json.foodOption,
-        location: json.location,
-        cafe: json.cafe,
-        foodDate: foodDate
+        officeLocation: json.officeLocation,
+        officeCafe: json.officeCafe,
+        foodDate: oldFoodItem ? oldFoodItem.foodDate : foodDate
     }
 
     return foodItem;
@@ -233,17 +234,19 @@ export async function updateFoodItem(foodItem: FoodItem) {
                 ${FoodItemProps.foodName} = :newName,
                 ${FoodItemProps.foodOrigin} = :newOrigin,
                 ${FoodItemProps.foodAttributes} = :newAttributes,
-                ${FoodItemProps.averageRating} = :newAverageRating,
-                ${FoodItemProps.location} = :newLocation,
-                ${FoodItemProps.cafe} = :newCafe`,
+                ${FoodItemProps.totalRating} = :newTotalRating,
+                ${FoodItemProps.numReviews} = :newNumReviews,
+                ${FoodItemProps.officeLocation} = :newLocation,
+                ${FoodItemProps.officeCafe} = :newCafe`,
             ConditionExpression: `attribute_exists(${FoodItemProps.entityID})`,
             ExpressionAttributeValues: {
                 ':newName': foodItem.foodName,
                 ':newOrigin': foodItem.foodOrigin,
                 ':newAttributes': foodItem.foodAttributes,
-                ':newAverageRating': foodItem.averageRating,
-                ':newLocation': foodItem.location,
-                ':newCafe': foodItem.cafe
+                ':newTotalRating': foodItem.totalRating,
+                ':newNumReviews': foodItem.numReviews,
+                ':newLocation': foodItem.officeLocation,
+                ':newCafe': foodItem.officeCafe
             },
             ReturnValues: 'UPDATED_NEW'
         })
@@ -265,7 +268,7 @@ export async function deleteFoodItem(foodID: string) {
     const reviews = await getReviewsFromFoodItem(foodID);
     if (reviews.Items) {
         const promises = reviews.Items.map(async (review) => {
-            await deleteReview(review.entityID)
+            await deleteReview(review, false)
         });
         await Promise.all(promises);
     }
