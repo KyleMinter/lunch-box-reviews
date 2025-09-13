@@ -3,7 +3,15 @@ export * from './reviews';
 export * from './users';
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import {
+    DynamoDBDocumentClient,
+    ScanCommandOutput,
+    QueryCommandOutput,
+    GetCommandOutput,
+    PutCommandOutput,
+    UpdateCommandOutput,
+    DeleteCommandOutput
+ } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { BadRequestError } from '../errors';
 
@@ -148,4 +156,35 @@ export function isValidISO8601(input: string): boolean {
     catch {
         return false;
     }
+}
+
+/** A ScanCommandOutput of a given type T. */
+export type IScanCommandOutput<T> = Omit<ScanCommandOutput, 'Items'> & {
+    Items?: T
+}
+
+/** A QueryCommandOutput of a given type T. */
+export type IQueryCommandOutput<T> = Omit<QueryCommandOutput, 'Items' | 'LastEvaluatedKey'> & {
+    Items?: T[]
+    LastEvaluatedKey?: T
+}
+
+/** A GetCommandOutput of a given type T. */
+export type IGetCommandOutput<T> = Omit<GetCommandOutput, 'Item'> & {
+    Item?: T
+}
+
+/** A PutCommandOutput of a given type T. */
+export type IPutCommandOutput<T> = Omit<PutCommandOutput, 'Attribute'> & {
+    Attributes?: T
+}
+
+/** A DeleteCommandOutput of a given type T. */
+export type IDeleteCommandOutput<T> = Omit<DeleteCommandOutput, 'Attributes'> & {
+    Attributes?: T
+}
+
+/** A UpdateCommandOutput of a given type T. */
+export type IUpdateCommandOutput<T> = Omit<UpdateCommandOutput, 'Attributes'> & {
+    Attributes?: T
 }

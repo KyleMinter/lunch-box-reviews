@@ -17,7 +17,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
 
     try {
-        const filter: CriteriaFilter| undefined = getCriteriaFilterParameters(event);
+        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
         const pagination: PaginationParameters = getPaginationParameters(event);
 
         body = await getAllFoodItems(pagination, filter);

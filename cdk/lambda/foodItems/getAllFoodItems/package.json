@@ -1,5 +1,5 @@
 {
-    "name": "get-all-users-lambda",
+    "name": "get-all-food-items-lambda",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",

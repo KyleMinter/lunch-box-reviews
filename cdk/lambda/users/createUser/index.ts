@@ -3,6 +3,8 @@ import {
     validateJwtToken,
     constructUser,
     createUser,
+    getUser,
+    updateUser,
     RequestError,
     BadRequestError
 } from '@lunch-box-reviews/shared-utils';
@@ -19,11 +21,25 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         const jwt = await validateJwtToken(event);
 
         // Ensure that a body was sent with the request.
-            if (!event.body)
-                throw new BadRequestError('No food item provided in request body');
+        if (!event.body)
+            throw new BadRequestError('No food item provided in request body');
 
+        // Construct a new user using the request body.
         const user = await constructUser(event.body, jwt.sub!);
-        body = await createUser(user);
+
+        // Check if the user is already in the database.
+        const userInDatabase = await getUser(jwt.sub!)
+        if (userInDatabase) {
+            // If needed, update the user in the database.
+            if (user.userName !== userInDatabase.userName ||
+                user.userEmail !== userInDatabase.userEmail)
+                    body = await updateUser(user);
+                
+        }
+        else {
+            // If the user is not in the database, we will add them to it.
+            body = await createUser(user);
+        }
     }
     catch (err) {
         if (err instanceof RequestError) {
