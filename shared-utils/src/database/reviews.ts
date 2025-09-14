@@ -106,7 +106,7 @@ export async function constructReview(json: any, oldReview?: Review) {
  * Stores a review in the database.
  * @param review the review to store
  * @param foodItem the food item the review is for
- * @returns the newly created menu instance
+ * @returns the newly created review
  */
 export async function createReview(review: Review, foodItem: FoodItem) {
     // Update the total rating for the corresponding food item.
@@ -115,14 +115,14 @@ export async function createReview(review: Review, foodItem: FoodItem) {
     await updateFoodItem(foodItem);
 
     const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
+    await dynamo.send(
         new PutCommand({
             TableName: REVIEWS_TABLE,
             Item: review,
         })
     ) as IPutCommandOutput<Review>;
 
-    return results.Attributes;
+    return review;
 }
 
 /**

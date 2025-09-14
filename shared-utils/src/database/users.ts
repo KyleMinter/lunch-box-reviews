@@ -61,14 +61,14 @@ export async function constructUser(json: any) {
 export async function createUser(user: User) {
     // Add the new user to the database.
     const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
+    await dynamo.send(
         new PutCommand({
             TableName: REVIEWS_TABLE,
             Item: user,
         })
     ) as IPutCommandOutput<User>;
 
-    return results.Attributes;
+    return user;
 }
 
 /**
