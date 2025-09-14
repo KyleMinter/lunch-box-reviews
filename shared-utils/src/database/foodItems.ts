@@ -70,14 +70,14 @@ export async function constructFoodItem(json: any, oldFoodItem?: FoodItem) {
  */
 export async function createFoodItem(foodItem: FoodItem) {
     const dynamo = getDynamoDbClient();
-    const results = await dynamo.send(
+    await dynamo.send(
         new PutCommand({
             TableName: REVIEWS_TABLE,
             Item: foodItem,
         })
     ) as IPutCommandOutput<FoodItem>;
 
-    return results.Attributes;
+    return foodItem;
 }
 
 /**
