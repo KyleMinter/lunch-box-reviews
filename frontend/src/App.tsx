@@ -1,32 +1,29 @@
 import './App.css';
-import { Auth0Provider } from '@auth0/auth0-react';
-import Profile from './Auth0/Profile/Profile';
-import AuthenticationButton from './Auth0/AuthenticationButton/AuthenticationButton';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Route, Routes } from 'react-router-dom';
+import HomePage from './Pages/HomePage/HomePage';
+import NotFoundPage from './Pages/NotFoundPage/NotFoundPage';
+import LoadingPage from './Pages/LoadingPage/LoadingPage';
+import VerifyEmailPage from './Pages/VerifyEmailPage/VerifyEmailPage';
 
 
+const App = () => {
+    const { isLoading } = useAuth0()
 
-
-function App() {
-    const domain = process.env.REACT_APP_AUTH0_DOMAIN;
-    const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
-    const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-    console.log(domain);
-    console.log(clientId);
-    console.log(audience);
+    if (isLoading) {
+        return (
+            <div className="page-layout">
+                <LoadingPage />
+            </div>
+        )
+    }
 
     return (
-        <Auth0Provider
-            domain={domain!}
-            clientId={clientId!}
-            authorizationParams={{
-                redirect_uri: window.location.origin,
-            }}
-        >
-            <div className="App">
-                <AuthenticationButton />
-                <Profile />
-            </div>
-        </Auth0Provider>
+        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/verifyEmail" element={<VerifyEmailPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+        </Routes>
     );
 }
 
