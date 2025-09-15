@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Auth0ProviderWithNavigate from './Auth0/Auth0ProviderWithNavigate';
+import Navbar from './Navigation/Navbar';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
@@ -13,6 +14,7 @@ root.render(
     <React.StrictMode>
         <BrowserRouter>
             <Auth0ProviderWithNavigate>
+                <Navbar />
                 <App />
             </Auth0ProviderWithNavigate>
         </BrowserRouter>
