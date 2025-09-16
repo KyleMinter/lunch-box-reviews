@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
 
@@ -8,6 +8,7 @@ interface Auth0ProviderWithNavigateProps {
 
 const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const domain = process.env.REACT_APP_AUTH0_DOMAIN;
     const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
@@ -25,6 +26,7 @@ const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ c
             clientId={clientId!}
             authorizationParams={{
                 redirect_uri: window.location.origin,
+                acr_values: `${window.location.origin}${location.pathname}`
             }}
             onRedirectCallback={onRedirectCallback}
         >
