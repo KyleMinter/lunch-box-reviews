@@ -5,6 +5,7 @@ import './Modal.css';
 interface ModalProps {
     title: string;
     description: string;
+    backdropColor?: string;
     modalSize?: ModalSize;
     closeOnLossOfFocus: boolean;
     isOpen: boolean;
@@ -25,6 +26,7 @@ const defaultModalSize: ModalSize = {
 const Modal: React.FC<ModalProps> = ({
     title,
     description,
+    backdropColor = 'rgba(0, 0, 0, 0.4)',
     modalSize = defaultModalSize,
     closeOnLossOfFocus,
     isOpen,
@@ -35,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({
         return null;
 
     return ReactDOM.createPortal(
-        <div className="modal-backdrop" onClick={closeOnLossOfFocus ? () => onClose() : undefined}>
+        <div className="modal-backdrop" style={{backgroundColor: backdropColor}} onClick={closeOnLossOfFocus ? () => onClose() : undefined}>
             <div className="modal-container" style={modalSize} onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <div>
