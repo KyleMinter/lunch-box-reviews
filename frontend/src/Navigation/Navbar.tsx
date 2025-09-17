@@ -1,18 +1,23 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import AuthenticationButton from "../Auth0/AuthenticationButton";
+import './Navbar.css'
 
 const Navbar = () => {
-    const navigate = useNavigate();
-
-    const onHomeClick = () => {
-        navigate('/');
-    }
-
     return (
-        <div>
-            <button onClick={onHomeClick}>Home</button>
-            <AuthenticationButton />
-        </div>
+        <header className="navbar">
+            <img src="logo192.png" />
+            <nav className="navbar-buttons">
+                <ul>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/">Home</Link></li>
+                </ul>
+            </nav>
+            <div className="menu-button">
+                <AuthenticationButton />
+            </div>
+        </header>
     );
 }
 
