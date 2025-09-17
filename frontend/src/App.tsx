@@ -10,11 +10,13 @@ import useModal from './Modals/useModal';
 
 
 const App = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { isOpen: isVerifyEmailModalOpen, setIsOpen: setIsVerifyEmailModalOpen } = useModal(searchParams.has('verifyEmail'));
 
-    const onClose = () => {
+    const onVerifyEmailModalClose = () => {
         setIsVerifyEmailModalOpen(false);
+        searchParams.delete('verifyEmail');
+        setSearchParams(searchParams)
     }
 
     return (
@@ -22,9 +24,9 @@ const App = () => {
             <Navbar />
             <PageRoutes />
             <VerifyEmailModal
-                shouldCloseOnLossOfFocus={true}
+                closeOnLossOfFocus={true}
                 isOpen={isVerifyEmailModalOpen}
-                onClose={onClose}
+                onClose={onVerifyEmailModalClose}
             />
         </>
     );

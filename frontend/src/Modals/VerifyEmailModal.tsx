@@ -2,20 +2,27 @@ import Modal from "./Modal";
 
 
 interface VerifyEmailModalProps {
-    shouldCloseOnLossOfFocus: boolean;
+    closeOnLossOfFocus: boolean;
     isOpen: boolean;
     onClose: () => void;
 }
 
-const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ shouldCloseOnLossOfFocus, isOpen, onClose }) => {
+const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ closeOnLossOfFocus, isOpen, onClose }) => {
+    const modalSize = {
+        width: '600px',
+        height: '300px'
+    };
+
     return (
         <Modal
             title="Verify Email"
-            description="You must verify your email before logging in."
-            shouldCloseOnLossOfFocus={shouldCloseOnLossOfFocus}
+            description="Email verification required."
+            modalSize={modalSize}
+            closeOnLossOfFocus={closeOnLossOfFocus}
             isOpen={isOpen}
             onClose={onClose}
         >
+            <p>You must verify your email before logging in.</p>
             <button>Send verification email</button>
         </Modal>
     )
