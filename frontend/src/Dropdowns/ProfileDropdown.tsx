@@ -8,7 +8,7 @@ const ProfileDropdown = () => {
     return (
         <Dropdown
             alignment='right'
-            parent={<img style={{height: "50px", margin: "5px"}}src="logo192.png" />}
+            parent={<img style={{height: "50px", margin: "5px"}} src="logo192.png" alt=""/>}
         >
             <ProfileDropdownItem link="/">Profile</ProfileDropdownItem>
             <ProfileDropdownItem link="/"><AuthenticationButton /></ProfileDropdownItem>

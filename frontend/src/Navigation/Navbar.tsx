@@ -5,7 +5,7 @@ import ProfileDropdown from "../Dropdowns/ProfileDropdown";
 const Navbar = () => {
     return (
         <header className="navbar">
-            <img src="logo192.png" />
+            <img src="logo192.png" alt=""/>
             <nav className="navbar-buttons">
                 <ul>
                     <li><Link to="/">Home</Link></li>
