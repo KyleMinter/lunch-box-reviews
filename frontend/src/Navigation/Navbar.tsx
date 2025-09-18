@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import AuthenticationButton from "../Auth0/AuthenticationButton";
 import './Navbar.css'
+import ProfileDropdown from "../Dropdowns/ProfileDropdown";
 
 const Navbar = () => {
     return (
@@ -14,9 +14,7 @@ const Navbar = () => {
                     <li><Link to="/">Home</Link></li>
                 </ul>
             </nav>
-            <div className="menu-button">
-                <AuthenticationButton />
-            </div>
+            <ProfileDropdown />
         </header>
     );
 }
