@@ -1,3 +1,5 @@
+import useOutsideClick from '../Hooks/useOutsideClick';
+import usePopupElement from '../Hooks/usePopupElement';
 import './Dropdown.css';
 
 
@@ -14,31 +16,28 @@ const Dropdown: React.FC<DropdownProps> = ({
     parent,
     children
 }) => {
+    const { isOpen, setIsOpen, toggle } = usePopupElement();
+    const ref = useOutsideClick(() => setIsOpen(false));
 
-    interface DropdownStyle {
+    const dropdownStyle: {
+        display: string;
         minWidth: string;
         right?: number;
-        left?: number;
-    }
+        left?: number
+    } = {
+        display: isOpen ? 'block' : 'none',
+        minWidth: minWidth
+    };
 
-    const dropdownContentStyle: DropdownStyle = {
-        minWidth: minWidth,
-    }
-
-    switch (alignment) {
-        case 'right':
-            dropdownContentStyle.right = 0;
-            break;
-        case 'left':
-            dropdownContentStyle.left = 0;
-            break;
-    }
-
+    if (alignment === 'right')
+        dropdownStyle.right = 0;
+    else if (alignment === 'left')
+        dropdownStyle.left = 0;
 
     return (
-        <div className="dropdown">
-            {parent}
-            <div className="dropdown-content" style={dropdownContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div className="dropdown" ref={ref}>
+            <div onClick={toggle}>{parent}</div>
+            <div className="dropdown-content" style={dropdownStyle} >
                 {children}
             </div>
         </div>
