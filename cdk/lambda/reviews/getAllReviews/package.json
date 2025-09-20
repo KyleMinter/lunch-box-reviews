@@ -8,12 +8,12 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
+        "@lunch-box-reviews/shared-types": "file:../../../../shared-types",
         "@lunch-box-reviews/shared-utils": "file:../../../../shared-utils"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.152",
         "@types/node": "^20.0.0",
-        "@types/uuid": "^10.0.0",
         "typescript": "^5.0.0"
     }
 }

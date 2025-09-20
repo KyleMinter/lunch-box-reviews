@@ -18,7 +18,7 @@ import {
     PaginationParameters,
     REVIEWS_TABLE
 } from '.';
-import { EntityType, FoodItem, Review, ReviewProps, User, UserPermission, UserProps } from '../types';
+import { EntityType, FoodItem, Review, ReviewProps, User, UserPermission, UserProps } from '@lunch-box-reviews/shared-types';
 
 
 /*

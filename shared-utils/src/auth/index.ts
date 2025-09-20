@@ -5,7 +5,7 @@ import { GetCommand, GetCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { getDynamoDbClient, REVIEWS_TABLE } from '../database';
 import { UnauthorizedError } from '../errors';
-import { UserPermission } from '../types';
+import { UserPermission } from '@lunch-box-reviews/shared-types';
 
 
 /**

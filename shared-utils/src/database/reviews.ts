@@ -20,7 +20,7 @@ import {
 } from '.';
 import { v4 as uuidv4 } from 'uuid';
 import { BadRequestError } from '../errors';
-import { EntityType, FoodItem, Review, ReviewProps } from '../types';
+import { EntityType, FoodItem, Review, ReviewProps } from '@lunch-box-reviews/shared-types';
 
 
 /*

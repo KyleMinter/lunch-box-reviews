@@ -8,6 +8,7 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
+        "@lunch-box-reviews/shared-types": "file:../../../../shared-types",
         "@lunch-box-reviews/shared-utils": "file:../../../../shared-utils",
         "uuid": "^11.1.0"
     },

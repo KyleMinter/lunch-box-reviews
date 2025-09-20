@@ -29,6 +29,11 @@ jobs:
       
       - name: Install CDK dependencies
         run:  npm install
+
+      - name: Build Shared Types package
+        run: |
+          echo "Building shared-types package..."
+          (cd ../shared-types && npm install && npm run build)
       
       - name: Build Shared Utils package
         run: |

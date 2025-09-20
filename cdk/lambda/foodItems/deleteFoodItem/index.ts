@@ -1,5 +1,4 @@
 import {
-    UserPermission,
     validateJwtToken,
     validateUserPermissions,
     getAuthorizationHeaders,
@@ -7,6 +6,7 @@ import {
     deleteFoodItem,
     RequestError,
 } from '@lunch-box-reviews/shared-utils';
+import { UserPermission } from '@lunch-box-reviews/shared-types';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
 

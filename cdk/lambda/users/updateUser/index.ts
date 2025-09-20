@@ -1,6 +1,4 @@
 import {
-    UserPermission,
-    User,
     validateJwtToken,
     validateUserPermissions,
     getAuthorizationHeaders,
@@ -10,6 +8,10 @@ import {
     RequestError,
     BadRequestError
 } from '@lunch-box-reviews/shared-utils';
+import {
+    UserPermission,
+    User
+} from '@lunch-box-reviews/shared-types';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
 
