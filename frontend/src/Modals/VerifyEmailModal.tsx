@@ -7,7 +7,7 @@ interface VerifyEmailModalProps {
     onClose: () => void;
 }
 
-const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ closeOnLossOfFocus, isOpen, onClose }) => {
+const VerifyEmailModal: React.FC<VerifyEmailModalProps> = ({ closeOnLossOfFocus = false, isOpen, onClose }) => {
     const modalSize = {
         width: '600px',
         height: '300px'

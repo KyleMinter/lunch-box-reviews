@@ -7,7 +7,7 @@ interface ModalProps {
     description: string;
     backdropColor?: string;
     modalSize?: ModalSize;
-    closeOnLossOfFocus: boolean;
+    closeOnLossOfFocus?: boolean;
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
@@ -28,7 +28,7 @@ const Modal: React.FC<ModalProps> = ({
     description,
     backdropColor = 'rgba(0, 0, 0, 0.4)',
     modalSize = defaultModalSize,
-    closeOnLossOfFocus,
+    closeOnLossOfFocus = false,
     isOpen,
     onClose,
     children

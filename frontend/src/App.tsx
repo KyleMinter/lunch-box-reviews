@@ -6,12 +6,12 @@ import NotFoundPage from './Pages/NotFoundPage/NotFoundPage';
 import LoadingPage from './Pages/LoadingPage/LoadingPage';
 import Navbar from './Navigation/Navbar';
 import VerifyEmailModal from './Modals/VerifyEmailModal';
-import useModal from './Modals/useModal';
+import usePopupElement from './Hooks/usePopupElement';
 
 
 const App = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const { isOpen: isVerifyEmailModalOpen, setIsOpen: setIsVerifyEmailModalOpen } = useModal(searchParams.has('verifyEmail'));
+    const { isOpen: isVerifyEmailModalOpen, setIsOpen: setIsVerifyEmailModalOpen } = usePopupElement(searchParams.has('verifyEmail'));
 
     const onVerifyEmailModalClose = () => {
         setIsVerifyEmailModalOpen(false);
