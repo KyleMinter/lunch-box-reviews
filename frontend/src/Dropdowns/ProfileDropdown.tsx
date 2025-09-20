@@ -10,7 +10,7 @@ const ProfileDropdown = () => {
             alignment='right'
             parent={<ProfileDropdownParent />}
         >
-            <ProfileDropdownItem link="/">Profile</ProfileDropdownItem>
+            <ProfileDropdownItem link="/profile">Profile</ProfileDropdownItem>
             <ProfileDropdownItem link="/"><AuthenticationButton /></ProfileDropdownItem>
         </Dropdown>
     );
