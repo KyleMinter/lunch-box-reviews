@@ -7,6 +7,10 @@ import LoadingPage from './Pages/LoadingPage/LoadingPage';
 import Navbar from './Navigation/Navbar';
 import VerifyEmailModal from './Modals/VerifyEmailModal';
 import usePopupElement from './Hooks/usePopupElement';
+import AuthenticationGuard from './Auth0/AuthenticationGuard';
+import { UserPermission } from '@lunch-box-reviews/shared-types';
+import AdminPage from './Pages/AdminPage/AdminPage';
+import ProfilePage from './Pages/ProfilePage/PagePage';
 
 
 const App = () => {
@@ -37,15 +41,26 @@ const PageRoutes = () => {
 
     if (isLoading) {
         return (
-            <div className="page-layout">
-                <LoadingPage />
-            </div>
+            <LoadingPage />
         )
     }
 
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route
+                path="/profile"
+                element={<AuthenticationGuard component={ProfilePage} />}
+            />
+            <Route
+                path="/admin"
+                element={
+                    <AuthenticationGuard
+                        component={AdminPage}
+                        permission={UserPermission.adminFoodItemPermissions}
+                    />
+                }
+            />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );
