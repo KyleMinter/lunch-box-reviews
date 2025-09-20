@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import {
+    getAuthorizationHeaders,
     getPaginationParameters,
     getReviewsFromFoodItem,
     PaginationParameters,
@@ -10,9 +11,7 @@ import {
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-    };
+    const headers = getAuthorizationHeaders('OPTIONS,GET');
 
     try {
         // Get the foodID from the request's path parameter.

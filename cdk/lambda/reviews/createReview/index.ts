@@ -6,6 +6,7 @@ import {
     RequestError,
     BadRequestError,
     getFoodItem,
+    getAuthorizationHeaders,
 } from '@lunch-box-reviews/shared-utils';
 import {
     Review,
@@ -18,9 +19,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-    };
+    const headers = getAuthorizationHeaders('OPTIONS,POST');
 
     try {
         // Validate user permissions.

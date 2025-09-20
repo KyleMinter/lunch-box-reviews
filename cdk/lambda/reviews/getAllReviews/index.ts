@@ -5,6 +5,7 @@ import {
     PaginationParameters,
     getAllReviews,
     RequestError,
+    getAuthorizationHeaders,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -12,9 +13,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-    };
+    const headers = getAuthorizationHeaders('OPTIONS,GET');
 
     try {
         const filter: DateFilter = getDateFilterParameters(event);

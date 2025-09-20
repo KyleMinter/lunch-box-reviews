@@ -1,4 +1,5 @@
 import {
+    getAuthorizationHeaders,
     getPaginationParameters,
     getReviewsFromUser,
     PaginationParameters,
@@ -10,9 +11,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 export const handler = async (event: APIGatewayProxyEvent) => {
     let body;
     let statusCode = 200;
-    const headers = {
-        'Content-Type': 'application-json',
-    };
+    const headers = getAuthorizationHeaders('OPTIONS,GET');
 
     try {
         // Get the reviewID from the request's path parameter.

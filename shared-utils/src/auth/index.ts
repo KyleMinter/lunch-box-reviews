@@ -15,7 +15,7 @@ import { UserPermission } from '@lunch-box-reviews/shared-types';
  */
 export function getAuthorizationHeaders(requestMethods: string) {
     return {
-        'Content-Type': 'application-json',
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': `${requestMethods}`,
