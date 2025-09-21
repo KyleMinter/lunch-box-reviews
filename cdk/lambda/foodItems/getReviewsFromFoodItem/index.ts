@@ -1,4 +1,3 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
 import {
     getAuthorizationHeaders,
     getPaginationParameters,
@@ -6,6 +5,7 @@ import {
     PaginationParameters,
     RequestError
 } from '@lunch-box-reviews/shared-utils';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 
 export const handler = async (event: APIGatewayProxyEvent) => {

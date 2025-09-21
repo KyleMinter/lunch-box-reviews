@@ -46,7 +46,9 @@ export class ApiStack extends cdk.Stack {
                         const lambdaFunction = new lambda.Function(this, `${funcName}Function`, {
                             runtime: this.RUNTIME,
                             handler: 'index.handler',
-                            code: lambda.Code.fromAsset(functionDir),
+                            code: lambda.Code.fromAsset(functionDir, {
+                                followSymlinks: cdk.SymlinkFollowMode.ALWAYS
+                            }),
                             environment: {
                                 REGION: this.REGION
                             }

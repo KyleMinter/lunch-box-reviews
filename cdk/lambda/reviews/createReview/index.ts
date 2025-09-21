@@ -1,4 +1,7 @@
 import {
+    Review,
+    UserPermission,
+    ReviewProps,
     validateJwtToken,
     validateUserPermissions,
     constructReview,
@@ -8,11 +11,6 @@ import {
     getFoodItem,
     getAuthorizationHeaders,
 } from '@lunch-box-reviews/shared-utils';
-import {
-    Review,
-    UserPermission,
-    ReviewProps
-} from '@lunch-box-reviews/shared-types';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
 
