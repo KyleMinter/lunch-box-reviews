@@ -28,14 +28,15 @@ const AuthenticationGuard: React.FC<AuthenticationGuardProps> = ({ component, pe
                 console.error(error);
             }
         }
-
+        
         if (isAuthenticated) {
             if (permission)
                 validateUserPermissions();
             else
                 setAuthorized(true);
         }
-    }, [isAuthenticated, user, permission])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated])
 
     const Component = withAuthenticationRequired(component, {
         onRedirecting: () => (
