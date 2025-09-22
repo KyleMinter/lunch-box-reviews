@@ -1,4 +1,4 @@
-import Profile from "../../Auth0/Profile";
+import Profile from "./Profile";
 
 const ProfilePage = () => {
     return (
