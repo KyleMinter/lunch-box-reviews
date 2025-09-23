@@ -1,9 +1,9 @@
-import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react"
-import { ComponentType, useEffect, useState } from "react";
+import { withAuthenticationRequired } from "@auth0/auth0-react"
+import { ComponentType } from "react";
 import LoadingPage from "../Pages/LoadingPage/LoadingPage";
-import { User, UserPermission } from '@lunch-box-reviews/shared-types';
-import axios, { AxiosResponse } from "axios";
+import { UserPermission } from '@lunch-box-reviews/shared-types';
 import UnauthorizedPage from "../Pages/UnauthorizedPage/UnauthorizedPage";
+import useAuth from "./useAuth";
 
 
 interface AuthenticationGuardProps {
@@ -12,31 +12,7 @@ interface AuthenticationGuardProps {
 }
 
 const AuthenticationGuard: React.FC<AuthenticationGuardProps> = ({ component, permission }) => {
-    const { user, isAuthenticated } = useAuth0();
-    const [isAuthorized, setAuthorized] = useState(false)
-
-    useEffect(() => {
-        async function validateUserPermissions() {
-            try {
-                const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-                const response: AxiosResponse<User> = await axios.get(`${audience}users/${user?.sub}`);
-                
-                if (response.data.userPermissions.includes(permission!))
-                    setAuthorized(true);
-            }
-            catch (error) {
-                console.error(error);
-            }
-        }
-        
-        if (isAuthenticated) {
-            if (permission)
-                validateUserPermissions();
-            else
-                setAuthorized(true);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthenticated])
+    const { user, isAuthenticated, isAuthorized } = useAuth();
 
     const Component = withAuthenticationRequired(component, {
         onRedirecting: () => (
@@ -48,8 +24,10 @@ const AuthenticationGuard: React.FC<AuthenticationGuardProps> = ({ component, pe
     // First check if user is authenticated with Auth0, becuase if they are not routing them to the provided route component will redirect them to the login page.
     if (!isAuthenticated)
         return <Component />;
+    else if (!user)
+        return <LoadingPage />;
     // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
-    else if (!isAuthorized)
+    else if (!isAuthorized(permission))
         return <UnauthorizedPage />;
     else
         return <Component />;

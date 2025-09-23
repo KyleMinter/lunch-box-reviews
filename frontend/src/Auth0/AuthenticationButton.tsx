@@ -1,26 +1,26 @@
-import { useAuth0 } from '@auth0/auth0-react';
+import useAuth from './useAuth';
 
 const AuthenticationButton = () => {
-    const { isAuthenticated } = useAuth0();
+    const { isAuthenticated } = useAuth();
 
     return isAuthenticated ? <LogoutButton /> : <LoginButton />;
 };
 
 const LoginButton = () => {
-    const { loginWithRedirect } = useAuth0();
+    const { login } = useAuth();
 
     return (
-        <button onClick={() => loginWithRedirect()}>
+        <button onClick={() => login()}>
             Log In
         </button>
     );
 };
 
 const LogoutButton = () => {
-    const { logout } = useAuth0();
+    const { logout } = useAuth();
 
     return (
-        <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+        <button onClick={() => logout()}>
             Log Out
         </button>
     );
