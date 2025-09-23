@@ -33,10 +33,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         const userInDatabase = await getUser(jwt.sub!)
         if (userInDatabase) {
             // If needed, update the user in the database.
-            if (user.userName !== userInDatabase.userName ||
-                user.userEmail !== userInDatabase.userEmail)
-                    body = await updateUser(user);
-                
+            if (user.userName !== userInDatabase.userName || user.userEmail !== userInDatabase.userEmail) {
+                await updateUser(user);
+                body = user;
+            }
+            else
+                body = userInDatabase;    
         }
         else {
             // If the user is not in the database, we will add them to it.
