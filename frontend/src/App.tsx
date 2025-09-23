@@ -11,16 +11,24 @@ import AuthenticationGuard from './Auth0/AuthenticationGuard';
 import { UserPermission } from '@lunch-box-reviews/shared-types';
 import AdminPage from './Pages/AdminPage/AdminPage';
 import ProfilePage from './Pages/ProfilePage/PagePage';
+import AuthErrorModal from './Modals/AuthErrorModal';
 
 
 const App = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { isOpen: isVerifyEmailModalOpen, setIsOpen: setIsVerifyEmailModalOpen } = usePopupElement(searchParams.has('verifyEmail'));
+    const { isOpen: isAuthErrorModalOpen, setIsOpen: setIsAuthErrorModalOpen } = usePopupElement(searchParams.has('authError'));
 
     const onVerifyEmailModalClose = () => {
         setIsVerifyEmailModalOpen(false);
         searchParams.delete('verifyEmail');
         setSearchParams(searchParams)
+    }
+
+    const onAuthErrorModalClose = () => {
+        setIsAuthErrorModalOpen(false);
+        searchParams.delete('authError');
+        setSearchParams(searchParams);
     }
 
     return (
@@ -31,6 +39,11 @@ const App = () => {
                 closeOnLossOfFocus={true}
                 isOpen={isVerifyEmailModalOpen}
                 onClose={onVerifyEmailModalClose}
+            />
+            <AuthErrorModal
+                closeOnLossOfFocus={true}
+                isOpen={isAuthErrorModalOpen}
+                onClose={onAuthErrorModalClose}
             />
         </>
     );
