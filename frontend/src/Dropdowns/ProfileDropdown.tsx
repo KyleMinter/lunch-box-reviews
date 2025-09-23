@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import AuthenticationButton from "../Auth0/AuthenticationButton"
+import AuthButton from "../Navigation/AuthButton"
 import Dropdown from "./Dropdowns"
 import './ProfileDropdown.css';
 
@@ -11,7 +11,7 @@ const ProfileDropdown = () => {
             parent={<ProfileDropdownParent />}
         >
             <ProfileDropdownItem link="/profile">Profile</ProfileDropdownItem>
-            <ProfileDropdownItem link="/"><AuthenticationButton /></ProfileDropdownItem>
+            <ProfileDropdownItem link="/"><AuthButton /></ProfileDropdownItem>
         </Dropdown>
     );
 }

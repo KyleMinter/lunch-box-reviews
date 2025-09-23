@@ -6,12 +6,12 @@ import UnauthorizedPage from "../Pages/UnauthorizedPage/UnauthorizedPage";
 import useAuth from "./useAuth";
 
 
-interface AuthenticationGuardProps {
+interface AuthGuardProps {
     component: ComponentType<object>;
     permission?: UserPermission;
 }
 
-const AuthenticationGuard: React.FC<AuthenticationGuardProps> = ({ component, permission }) => {
+const AuthGuard: React.FC<AuthGuardProps> = ({ component, permission }) => {
     const { user, isAuthenticated, isAuthorized } = useAuth();
 
     const Component = withAuthenticationRequired(component, {
@@ -33,4 +33,4 @@ const AuthenticationGuard: React.FC<AuthenticationGuardProps> = ({ component, pe
         return <Component />;
 }
 
-export default AuthenticationGuard;
+export default AuthGuard;

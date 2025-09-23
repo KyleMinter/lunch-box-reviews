@@ -1,6 +1,6 @@
-import useAuth from './useAuth';
+import useAuth from '../Auth/useAuth';
 
-const AuthenticationButton = () => {
+const AuthButton = () => {
     const { isAuthenticated } = useAuth();
 
     return isAuthenticated ? <LogoutButton /> : <LoginButton />;
@@ -26,4 +26,4 @@ const LogoutButton = () => {
     );
 };
 
-export default AuthenticationButton;
+export default AuthButton;

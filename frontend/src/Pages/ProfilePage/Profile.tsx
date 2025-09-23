@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useAuth from "../../Auth0/useAuth";
+import useAuth from "../../Auth/useAuth";
 
 function Profile() {
     const { user, getAccessTokenSilently, isAuthenticated, isLoading } = useAuth();
