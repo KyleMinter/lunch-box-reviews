@@ -1,0 +1,9 @@
+.page-layout {
+    width: 800px;
+    margin-top: 35px;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+    box-shadow: 0px 0px 16px 8px rgba(0,0,0,0.2);
+}
