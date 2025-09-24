@@ -1,3 +1,3 @@
 import { HttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
-export const PATH = '/foodItems/{id}';
+export const PATH = '/foods/{id}';
 export const METHODS = [HttpMethod.PUT];
