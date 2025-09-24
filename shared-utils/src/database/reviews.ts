@@ -92,6 +92,7 @@ export async function constructReview(json: any, oldReview?: Review) {
         entityID: oldReview ? oldReview.entityID : uuidv4(),
         entityType: EntityType.Review,
         userID: oldReview ? oldReview.userID : json.userID,
+        menuID: oldReview ? oldReview.menuID : json.menuID,
         foodID: oldReview ? oldReview.foodID : json.foodID,
         quality: quality,
         quantity: quantity,
