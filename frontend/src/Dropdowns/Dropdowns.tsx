@@ -5,6 +5,7 @@ import './Dropdown.css';
 
 interface DropdownProps {
     minWidth?: string;
+    marginTop?: string
     alignment?: string;
     parent: React.ReactElement;
     children: React.ReactNode;
@@ -12,6 +13,7 @@ interface DropdownProps {
 
 const Dropdown: React.FC<DropdownProps> = ({
     minWidth = '100px',
+    marginTop,
     alignment = undefined,
     parent,
     children
@@ -22,11 +24,13 @@ const Dropdown: React.FC<DropdownProps> = ({
     const dropdownStyle: {
         display: string;
         minWidth: string;
+        marginTop?: string;
         right?: number;
         left?: number
     } = {
         display: isOpen ? 'block' : 'none',
-        minWidth: minWidth
+        minWidth: minWidth,
+        marginTop: marginTop
     };
 
     if (alignment === 'right')
