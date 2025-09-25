@@ -1,11 +1,11 @@
-.profile-dropdown-item {
+.navbar-dropdown-item {
     padding: 5px;
     border-bottom: 1px solid lightgray;
     text-decoration: none;
     color: black;
 }
 
-.profile-dropdown-item:hover {
+.navbar-dropdown-item:hover {
     border-bottom: 1px solid gray;
     box-shadow: 0 5px 5px -5px black;
 }
