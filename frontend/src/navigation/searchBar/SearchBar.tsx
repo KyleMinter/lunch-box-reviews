@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import SearchFilterDropdown from "./SearchFilterDropdown";
 import './searchBar.css';
 
@@ -13,8 +14,14 @@ const SearchBar = () => {
 };
 
 const SearchButton = () => {
+    const navigate = useNavigate();
+
+    const onSearchButtonClick = () => {
+        navigate('/search');
+    }
+
     return (
-        <button className="search-button">search</button>
+        <button className="search-button" onClick={onSearchButtonClick}>search</button>
     )
 }
 

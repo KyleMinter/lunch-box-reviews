@@ -10,6 +10,8 @@ import ProfilePage from './pages/ProfilePage';
 import VerifyEmailModal from './components/modal/VerifyEmailModal';
 import AuthErrorModal from './components/modal/AuthErrorModal';
 import useAuth from './auth/useAuth';
+import SearchPage from './pages/searchPage/SearchPage';
+import './pages/pages.css';
 
 
 const App = () => {
@@ -59,6 +61,7 @@ const PageRoutes = () => {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route
                 path="/profile"
                 element={<AuthGuard Component={ProfilePage} />}
