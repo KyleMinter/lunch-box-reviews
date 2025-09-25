@@ -1,17 +1,15 @@
 import './App.css';
 import { Route, Routes, useSearchParams } from 'react-router-dom';
-import HomePage from './Pages/HomePage/HomePage';
-import NotFoundPage from './Pages/NotFoundPage/NotFoundPage';
-import LoadingPage from './Pages/LoadingPage/LoadingPage';
-import Navbar from './Navigation/Navbar';
-import VerifyEmailModal from './Modals/VerifyEmailModal';
-import usePopupElement from './Hooks/usePopupElement';
-import AuthGuard from './Auth/AuthGuard';
-import { UserPermission } from '@lunch-box-reviews/shared-types';
-import AdminPage from './Pages/AdminPage/AdminPage';
-import ProfilePage from './Pages/ProfilePage/PagePage';
-import AuthErrorModal from './Modals/AuthErrorModal';
-import useAuth from './Auth/useAuth';
+import HomePage from './pages/homePage/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
+import LoadingPage from './pages/LoadingPage';
+import Navbar from './navigation/Navbar';
+import usePopupElement from './hooks/usePopupElement';
+import AuthGuard from './auth/AuthGuard';
+import ProfilePage from './pages/ProfilePage';
+import VerifyEmailModal from './components/modal/VerifyEmailModal';
+import AuthErrorModal from './components/modal/AuthErrorModal';
+import useAuth from './auth/useAuth';
 
 
 const App = () => {
@@ -64,15 +62,6 @@ const PageRoutes = () => {
             <Route
                 path="/profile"
                 element={<AuthGuard Component={ProfilePage} />}
-            />
-            <Route
-                path="/admin"
-                element={
-                    <AuthGuard
-                        Component={AdminPage}
-                        permission={UserPermission.adminFoodItemPermissions}
-                    />
-                }
             />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>

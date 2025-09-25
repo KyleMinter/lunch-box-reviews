@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import useAuth from "../../Auth/useAuth";
-import UserPage from "../UserPage/UserPage";
+import useAuth from "../auth/useAuth";
+import UserPage from "./userPage/UserPage";
 
 const ProfilePage = () => {
     const { isEnabled, user, getAccessTokenSilently } = useAuth();

@@ -1,6 +1,6 @@
 import { User, UserPermission } from "@lunch-box-reviews/shared-types";
-import useAuth from "../../../Auth/useAuth";
-import './UserInfo.css';
+import './userInfo.css';
+import useAuth from "../../auth/useAuth";
 
 
 interface UserInfoProps {

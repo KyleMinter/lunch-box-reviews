@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import './Navbar.css'
-import ProfileDropdown from "../Dropdowns/ProfileDropdown";
-import SearchBar from "./SearchBar/SearchBar";
+import './navbar.css'
+import ProfileDropdown from "./profileDropdown/ProfileDropdown";
+import SearchBar from "./searchBar/SearchBar";
 
 const Navbar = () => {
     return (
