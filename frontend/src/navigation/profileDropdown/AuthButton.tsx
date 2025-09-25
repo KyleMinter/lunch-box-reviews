@@ -11,9 +11,9 @@ const LoginButton = () => {
     const { login } = useAuth();
 
     return (
-        <button onClick={() => login()}>
+        <div onClick={() => login()}>
             Log In
-        </button>
+        </div>
     );
 };
 
@@ -21,9 +21,9 @@ const LogoutButton = () => {
     const { logout } = useAuth();
 
     return (
-        <button onClick={() => logout()}>
+        <div onClick={() => logout()}>
             Log Out
-        </button>
+        </div>
     );
 };
 
