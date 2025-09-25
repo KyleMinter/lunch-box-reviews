@@ -68,9 +68,15 @@ const AuthProvider = (opts: AuthProviderOptions) => {
                 const fakeUser: User = {
                     entityID: '',
                     entityType: EntityType.User,
-                    userName: 'user name',
-                    userEmail: 'user email',
-                    userPermissions: []
+                    userName: 'User Name',
+                    userEmail: 'user.email@gmail.com',
+                    userPermissions: [
+                        UserPermission.adminUserPermissions,
+                        UserPermission.adminFoodItemPermissions,
+                        UserPermission.adminReviewPermissions,
+                        UserPermission.adminMenuInstancePermissions,
+                        UserPermission.userReviewPermissions
+                    ]
                 };
                 setUser(fakeUser);
             }
