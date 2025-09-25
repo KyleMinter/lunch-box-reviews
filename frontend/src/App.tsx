@@ -1,5 +1,4 @@
 import './App.css';
-import { useAuth0 } from '@auth0/auth0-react';
 import { Route, Routes, useSearchParams } from 'react-router-dom';
 import HomePage from './Pages/HomePage/HomePage';
 import NotFoundPage from './Pages/NotFoundPage/NotFoundPage';
@@ -12,6 +11,7 @@ import { UserPermission } from '@lunch-box-reviews/shared-types';
 import AdminPage from './Pages/AdminPage/AdminPage';
 import ProfilePage from './Pages/ProfilePage/PagePage';
 import AuthErrorModal from './Modals/AuthErrorModal';
+import useAuth from './Auth/useAuth';
 
 
 const App = () => {
@@ -50,7 +50,7 @@ const App = () => {
 }
 
 const PageRoutes = () => {
-    const { isLoading } = useAuth0()
+    const { isLoading } = useAuth()
 
     if (isLoading) {
         return (
@@ -63,13 +63,13 @@ const PageRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route
                 path="/profile"
-                element={<AuthGuard component={ProfilePage} />}
+                element={<AuthGuard Component={ProfilePage} />}
             />
             <Route
                 path="/admin"
                 element={
                     <AuthGuard
-                        component={AdminPage}
+                        Component={AdminPage}
                         permission={UserPermission.adminFoodItemPermissions}
                     />
                 }

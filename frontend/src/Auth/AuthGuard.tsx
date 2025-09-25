@@ -7,14 +7,18 @@ import useAuth from "./useAuth";
 
 
 interface AuthGuardProps {
-    component: ComponentType<object>;
+    Component: ComponentType<object>;
     permission?: UserPermission;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ component, permission }) => {
-    const { user, isAuthenticated, isAuthorized } = useAuth();
+const AuthGuard: React.FC<AuthGuardProps> = ({ Component, permission }) => {
+    const { isEnabled, user, isAuthenticated, isAuthorized } = useAuth();
 
-    const Component = withAuthenticationRequired(component, {
+    // If authentication is disabled we will simply permit navigation to the provided component.
+    if (!isEnabled)
+        return (<Component />);
+
+    const Page = withAuthenticationRequired(Component, {
         onRedirecting: () => (
             <LoadingPage />
         )
@@ -23,14 +27,14 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ component, permission }) => {
     // Yes, I know this is a bit weird, but it works so who cares.
     // First check if user is authenticated with Auth0, becuase if they are not routing them to the provided route component will redirect them to the login page.
     if (!isAuthenticated)
-        return <Component />;
+        return <Page />;
     else if (!user)
         return <LoadingPage />;
     // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
     else if (!isAuthorized(permission))
         return <UnauthorizedPage />;
     else
-        return <Component />;
+        return <Page />;
 }
 
 export default AuthGuard;
