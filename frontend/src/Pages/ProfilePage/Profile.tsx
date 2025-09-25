@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import useAuth from "../../Auth/useAuth";
 
 function Profile() {
-    const { user, getAccessTokenSilently, isAuthenticated, isLoading } = useAuth();
+    const { isEnabled, user, getAccessTokenSilently, isAuthenticated, isLoading } = useAuth();
     const [token, setToken] = useState<string>('');
     
     useEffect(() => {
         (async () => {
-            setToken(await getAccessTokenSilently());
+            if (isEnabled)
+                setToken(await getAccessTokenSilently());
         })();
-    }, [getAccessTokenSilently]);
+    }, [getAccessTokenSilently, isEnabled]);
 
     if (isLoading) {
         return <div>Loading ...</div>;
@@ -18,8 +19,8 @@ function Profile() {
     if (isAuthenticated) {
         return (
             <div>
-                <h2>{user!.userName}</h2>
-                <p>{user!.userEmail}</p>
+                <h2>{user?.userName}</h2>
+                <p>{user?.userEmail}</p>
                 <p>{token}</p>
             </div>
         );

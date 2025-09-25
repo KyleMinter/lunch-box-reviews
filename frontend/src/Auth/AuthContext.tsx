@@ -4,6 +4,7 @@ import { createContext } from "react";
 
 
 export interface AuthContextInterface {
+    isEnabled: boolean;
     isAuthenticated: boolean;
     isLoading: boolean;
     getAccessTokenSilently: (options?: GetTokenSilentlyOptions | undefined) => Promise<string>;
@@ -18,6 +19,7 @@ const stub = (): never => {
 };
 
 const init: AuthContextInterface = {
+    isEnabled: true,
     isAuthenticated: false,
     isLoading: true,
     getAccessTokenSilently: stub,

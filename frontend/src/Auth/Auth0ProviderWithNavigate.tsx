@@ -1,19 +1,26 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import AuthProvider from './AuthProvider';
 
 interface Auth0ProviderWithNavigateProps {
     children: React.ReactNode;
+    authParams: {
+        domain?: string;
+        clientId?: string;
+        audience?: string;
+    }
+    
 }
 
-const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ children }) => {
+const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ children, authParams }) => {
+    const {
+        domain,
+        clientId,
+        audience
+    } = authParams;
+
     const navigate = useNavigate();
     const location = useLocation();
-
-    const domain = process.env.REACT_APP_AUTH0_DOMAIN;
-    const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
-    const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
 
     const onRedirectCallback = (appState?: AppState) => {
         navigate(appState?.returnTo || window.location.pathname);
@@ -33,9 +40,7 @@ const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ c
             }}
             onRedirectCallback={onRedirectCallback}
         >
-            <AuthProvider>
-                {children}
-            </AuthProvider>
+            {children}
         </Auth0Provider>
     );
 };
