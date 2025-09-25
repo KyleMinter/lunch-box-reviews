@@ -10,8 +10,9 @@ const ProfileDropdown = () => {
             alignment='right'
             parent={<ProfileDropdownParent />}
         >
-            <ProfileDropdownItem link="/profile">Profile</ProfileDropdownItem>
-            <ProfileDropdownItem link="/"><AuthButton /></ProfileDropdownItem>
+            <ProfileDropdownItem>Home</ProfileDropdownItem>
+            <ProfileDropdownItem link='/profile'>Profile</ProfileDropdownItem>
+            <ProfileDropdownItem><AuthButton /></ProfileDropdownItem>
         </Dropdown>
     );
 }
@@ -23,13 +24,15 @@ const ProfileDropdownParent = () => {
 }
 
 interface ProfileDropdownItemProps {
-    link: string;
+    link?: string;
     children: React.ReactNode;
 }
 
-const ProfileDropdownItem: React.FC<ProfileDropdownItemProps> = ({ link, children }) => {
+const ProfileDropdownItem: React.FC<ProfileDropdownItemProps> = ({ link = '/', children }) => {
     return (
-        <Link to={link} className="profile-dropdown-item">{children}</Link>
+        <Link to={link} className="profile-dropdown-item">
+            {children}
+        </Link>
     );
 }
 

@@ -4,3 +4,8 @@
     text-decoration: none;
     color: black;
 }
+
+.profile-dropdown-item:hover {
+    border-bottom: 1px solid gray;
+    box-shadow: 0 5px 5px -5px black;
+}
