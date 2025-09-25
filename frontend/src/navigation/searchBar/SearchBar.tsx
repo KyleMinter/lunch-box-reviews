@@ -1,5 +1,5 @@
 import SearchFilterDropdown from "./SearchFilterDropdown";
-import './SearchBar.css';
+import './searchBar.css';
 
 
 const SearchBar = () => {

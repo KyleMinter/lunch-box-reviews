@@ -1,8 +1,8 @@
 import { Context, useCallback, useEffect, useMemo, useState } from "react";
-import AuthContext, { AuthContextInterface } from "./AuthContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { EntityType, User, UserPermission } from "@lunch-box-reviews/shared-types";
 import axios, { AxiosResponse } from "axios";
+import AuthContext, { AuthContextInterface } from "./AuthContext";
 
 
 // Returns auth values based on whether or not authenticaion is enabled/disabled

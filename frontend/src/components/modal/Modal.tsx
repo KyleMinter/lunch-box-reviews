@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import './Modal.css';
+import './modal.css';
 
 
 interface ModalProps {

@@ -1,6 +1,7 @@
-import useOutsideClick from '../Hooks/useOutsideClick';
-import usePopupElement from '../Hooks/usePopupElement';
-import './Dropdown.css';
+
+import useOutsideClick from '../../hooks/useOutsideClick';
+import usePopupElement from '../../hooks/usePopupElement';
+import './dropdown.css';
 
 
 interface DropdownProps {

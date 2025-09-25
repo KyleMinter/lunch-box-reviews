@@ -1,8 +1,8 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react"
 import { ComponentType } from "react";
-import LoadingPage from "../Pages/LoadingPage/LoadingPage";
+import LoadingPage from "../pages/LoadingPage";
 import { UserPermission } from '@lunch-box-reviews/shared-types';
-import UnauthorizedPage from "../Pages/UnauthorizedPage/UnauthorizedPage";
+import UnauthorizedPage from "../pages/UnauthorizedPage";
 import useAuth from "./useAuth";
 
 

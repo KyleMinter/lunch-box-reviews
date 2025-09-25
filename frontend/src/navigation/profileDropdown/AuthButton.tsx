@@ -1,4 +1,5 @@
-import useAuth from '../Auth/useAuth';
+import useAuth from "../../auth/useAuth";
+
 
 const AuthButton = () => {
     const { isAuthenticated } = useAuth();

@@ -1,6 +1,5 @@
 import { User } from "@lunch-box-reviews/shared-types";
-import UserInfo from "./UserInfo/UserInfo";
-import '../Pages.css';
+import UserInfo from "./UserInfo";
 
 
 interface UserPageProps {

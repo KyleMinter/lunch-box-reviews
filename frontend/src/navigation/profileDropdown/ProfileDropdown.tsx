@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
-import AuthButton from "../Navigation/AuthButton"
-import Dropdown from "./Dropdowns"
-import './ProfileDropdown.css';
+import './profileDropdown.css';
+import Dropdown from "../../components/dropdown/Dropdown";
+import AuthButton from "./AuthButton";
 
 
 const ProfileDropdown = () => {

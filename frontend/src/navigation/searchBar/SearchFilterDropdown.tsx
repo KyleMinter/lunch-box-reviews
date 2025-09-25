@@ -1,4 +1,4 @@
-import Dropdown from "../../Dropdowns/Dropdowns";
+import Dropdown from "../../components/dropdown/Dropdown"
 
 
 const SearchFilterButton = () => {
