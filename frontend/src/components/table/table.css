@@ -54,3 +54,12 @@
     cursor: pointer;
     background-color: #ececec;
 }
+
+.table-row-subtext {
+    padding-left: 10px;
+    color: gray;
+}
+
+.table-row-subtext > span {
+    font-style: italic;
+}
