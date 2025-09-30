@@ -11,13 +11,23 @@
     padding-left: 15px;
 }
 
-.navbar > img {
+.navbar-home {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-home > *:hover {
+    cursor: pointer;
+    color: lightgray;
+}
+
+.navbar-home > img {
     height: 50px;
     margin: 5px;
 }
 
-.navbar > h2 {
-    flex-grow: 1;
+.navbar-home > h2 {
     color: white;
     margin: 5px;
 }
