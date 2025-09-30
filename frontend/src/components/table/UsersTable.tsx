@@ -17,15 +17,17 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
             </colgroup>
             <thead>
                 <tr>
-                    <th/>
-                    <th>Name</th>
+                    <th className="table-header-no-left-border" style={{ paddingLeft: 0 }} />
+                    <th className="table-header-no-left-border">
+                        Name
+                    </th>
                     <th>Email</th>
                 </tr>
             </thead>
             <tbody>
-                {users.map((user) => {
+                {users.map((user, index) => {
                     return (
-                        <UserEntry user={user} />
+                        <UserEntry key={index} user={user} />
                     )
                 })}
             </tbody>
@@ -52,8 +54,13 @@ const UserEntry: React.FC<UserEntryProps> = ({ user }) => {
     }
 
     return (
-        <tr className="table-row" onClick={onRowClick}>
-            <td><img style={userPictureStyle} src="logo192.png" alt="" /></td>
+        <tr
+            className="table-row-hover"
+            onClick={onRowClick}
+        >
+            <td style={{ paddingLeft: 0 }}>
+                <img style={userPictureStyle} src="logo192.png" alt="" />
+            </td>
             <td>{user.userName}</td>
             <td>{user.userEmail}</td>
         </tr>

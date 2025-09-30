@@ -5,26 +5,52 @@
 
 .table th, td {
     padding: 0;
+    padding-left: 15px;
     border-bottom: 1px solid lightgray;
 }
 
 .table th {
     text-align: left;
+    border-left: 1px solid lightgray;
     padding-top: 10px;
     padding-bottom: 10px;
     background-color: #f6f6f6;
-    
 }
 
-.table th:not(:first-child), td:not(:first-child) {
-    padding-left: 10px;
+.table td {
+    height: 50px;
+}
+
+.table td > a {
+    color: black;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.table td > a:hover {
+    color: #13904D;
 }
 
 .table th:last-child, td:last-child {
-    padding-right: 10px;
+    padding-right: 15px;
 }
 
-.table-row:hover {
+.table-header-no-left-border {
+    border-left: none !important;
+}
+
+.table-colspan-header {
+    text-align: center !important;
+    padding-left: 0 !important;
+}
+
+.table-subheaders > th {
+    font-size: .7em;
+    padding-left: 8px !important;
+    padding-right: 5px;
+}
+
+.table-row-hover:hover {
     cursor: pointer;
     background-color: #ececec;
 }
