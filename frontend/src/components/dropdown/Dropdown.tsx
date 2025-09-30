@@ -41,7 +41,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
     return (
         <div className="dropdown" ref={ref}>
-            <div onClick={toggle}>{parent}</div>
+            <div className="dropdown-parent" onClick={toggle}> {parent}</div>
             <div className="dropdown-content" style={dropdownStyle} >
                 {children}
             </div>

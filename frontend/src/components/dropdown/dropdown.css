@@ -2,6 +2,10 @@
     position: relative;
 }
 
+.dropdown-parent :hover {
+    cursor: pointer;
+}
+
 .dropdown-content {
     position: absolute;
     background-color: white;
