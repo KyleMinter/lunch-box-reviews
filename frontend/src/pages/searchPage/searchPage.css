@@ -2,27 +2,3 @@
     border-bottom: 1px solid lightgray;
     padding: 5px 25px 0px 25px;
 }
-
-.search-results-headers {
-    display: flex;
-    padding: 10px 25px 10px 25px; 
-    border-bottom: 1px solid lightgray;
-}
-
-.search-results-headers > h4 {
-    margin: auto 50px auto 0px;
-}
-
-.search-results {
-    display: flex;
-    flex-direction: column;
-}
-
-.search-results-row {
-    padding: 0px 25px 0px 25px;
-    border-bottom: 1px solid lightgray;
-}
-
-.search-results-row:hover {
-    box-shadow: 0 0 0 1px gray inset;
-}
