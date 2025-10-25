@@ -6,16 +6,11 @@ import { ResultsContext, ResultsContextInterface } from "../utils/search/SearchC
 /**
  * ```js
  * const = {
- *      isAuthenticated,
+ *      searchResults,
  *      isLoading,
- *      getAccessTokenSilently,
- *      user,
- *      login,
- *      logout,
- *      isAuthorized
- * } = useAuth();
+ * } = useSearchFilters();
  * ```
- * Used to access auth state and methods.
+ * Used to access search results states.
  */
 const useSearchResults = (context = ResultsContext): ResultsContextInterface => {
     return useContext(context) as ResultsContextInterface

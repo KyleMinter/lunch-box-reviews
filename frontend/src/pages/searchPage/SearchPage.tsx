@@ -2,37 +2,32 @@ import { EntityType, FoodItem, Review, User } from '@lunch-box-reviews/shared-ty
 import UsersTable from '../../components/table/UsersTable';
 import ReviewsTable from '../../components/table/ReviewsTable';
 import FoodTable from '../../components/table/FoodTable';
-import './searchPage.css';
 import useSearchResults from '../../hooks/useSearchResults';
+import './searchPage.css';
 
 
 const SearchPage = () => {
         const { searchResults } = useSearchResults();
         
-        let table;
-        if (searchResults && searchResults.length > 0) {
-            switch (searchResults[0].entityType) {
+        const Table = () => {
+            switch (searchResults && searchResults[0].entityType) {
                 case EntityType.Review:
-                    table = <ReviewsTable reviews={searchResults as Review[]} />;
-                    break;
+                    return <ReviewsTable reviews={searchResults as Review[]} />;
                 case EntityType.User:
-                    table = <UsersTable users={searchResults as User[]} />;
-                    break;
+                    return  <UsersTable users={searchResults as User[]} />;
                 case EntityType.FoodItem:
-                    table = <FoodTable foodItems={searchResults as FoodItem[]}/>;
-                    break;
+                    return <FoodTable foodItems={searchResults as FoodItem[]}/>;
             }
-        }
-        else {
-            table = <div>no results</div>;
-        }
+
+            return <div>no results</div>;
+        };
 
         return (
             <div className="page-layout">
                 <div className="search-results-title">
                     <h1>Search Results</h1>
                 </div>
-                { table }
+                <Table />
             </div>
     )
 }
