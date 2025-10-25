@@ -6,16 +6,12 @@ import { FiltersContext, FiltersContextInterface } from "../utils/search/SearchC
 /**
  * ```js
  * const = {
- *      isAuthenticated,
- *      isLoading,
- *      getAccessTokenSilently,
- *      user,
- *      login,
- *      logout,
- *      isAuthorized
- * } = useAuth();
+ *      filters,
+ *      setFilters,
+ *      search,
+ * } = useSearchFilters();
  * ```
- * Used to access auth state and methods.
+ * Used to access search filters state and methods.
  */
 const useSearchFilters = (context = FiltersContext): FiltersContextInterface => {
     return useContext(context) as FiltersContextInterface

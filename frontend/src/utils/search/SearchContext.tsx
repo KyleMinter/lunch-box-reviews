@@ -6,11 +6,12 @@ import SearchFilters from "./searchFilters";
 export interface FiltersContextInterface {
     filters: SearchFilters;
     setFilters: (filters: SearchFilters) => void;
+    search: () => Promise<void>;
 };
 
 export interface ResultsContextInterface {
     searchResults: Review[] | User[] | FoodItem[] | undefined;
-    search: () => Promise<void>
+    isLoading: boolean;
 };
 
 export const defaultFilters: SearchFilters = {
@@ -23,12 +24,13 @@ const stub = (): never => {
 
 const initFilters: FiltersContextInterface = {
     filters: defaultFilters,
-    setFilters: stub
+    setFilters: stub,
+    search: stub
 };
 
 const initResults: ResultsContextInterface = {
     searchResults: undefined,
-    search: stub
+    isLoading: false
 };
 
 export const FiltersContext = createContext(initFilters);

@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import SearchFilterDropdown from "./SearchFilterDropdown";
+import useSearchFilters from "../../hooks/useSearchFilters";
 import './searchBar.css';
-import useSearchResults from "../../hooks/useSearchResults";
 
 
 const SearchBar = () => {
@@ -17,7 +17,7 @@ const SearchBar = () => {
 const SearchButton = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { search } = useSearchResults();
+    const { search } = useSearchFilters();
 
     const onSearchButtonClick = async () => {
         await search();

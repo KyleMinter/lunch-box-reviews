@@ -13,6 +13,7 @@ import useAuth from './auth/useAuth';
 import SearchPage from './pages/searchPage/SearchPage';
 import './pages/pages.css';
 import SearchProvider from './utils/search/SearchProvider';
+import useSearchResults from './hooks/useSearchResults';
 
 
 const App = () => {
@@ -53,9 +54,10 @@ const App = () => {
 }
 
 const PageRoutes = () => {
-    const { isLoading } = useAuth()
+    const { isLoading: isLoadingAuth } = useAuth()
+    const { isLoading: isLoadingSearch } = useSearchResults();
 
-    if (isLoading) {
+    if (isLoadingAuth || isLoadingSearch) {
         return (
             <LoadingPage />
         )
