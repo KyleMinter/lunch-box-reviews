@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SearchFilterDropdown from "./SearchFilterDropdown";
 import './searchBar.css';
+import useSearchResults from "../../hooks/useSearchResults";
 
 
 const SearchBar = () => {
@@ -15,9 +16,13 @@ const SearchBar = () => {
 
 const SearchButton = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { search } = useSearchResults();
 
-    const onSearchButtonClick = () => {
-        navigate('/search');
+    const onSearchButtonClick = async () => {
+        await search();
+        if (location.pathname !== '/search')
+            navigate('/search');
     }
 
     return (
