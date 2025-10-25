@@ -1,4 +1,6 @@
+import { EntityType } from "@lunch-box-reviews/shared-types"
 import Dropdown from "../../components/dropdown/Dropdown"
+import useSearchFilters from "../../hooks/useSearchFilters"
 
 
 const SearchFilterButton = () => {
@@ -8,9 +10,45 @@ const SearchFilterButton = () => {
 }
 
 const SearchFilterContent = () => {
+    const { filters, setFilters } = useSearchFilters();
+    
     return (
         <div className="search-filter-content">
-            content
+            <p>review</p>
+            <input 
+                type="radio"
+                name="balls"
+                value="review"
+                checked={filters.entityType === EntityType.Review}
+                onChange={() => setFilters({
+                    ...filters,
+                    entityType: EntityType.Review
+                })}
+            />
+            <br />
+            <p>user</p>
+            <input 
+                type="radio"
+                name="balls"
+                value="user"
+                checked={filters.entityType === EntityType.User}
+                onChange={() => setFilters({
+                    ...filters,
+                    entityType: EntityType.User
+                })}
+            />
+            <br />
+            <p>food item</p>
+            <input 
+                type="radio"
+                name="balls"
+                value="foodItem"
+                checked={filters.entityType === EntityType.FoodItem}
+                onChange={() => setFilters({
+                    ...filters,
+                    entityType: EntityType.FoodItem
+                })}
+            />
         </div>
     )
 }

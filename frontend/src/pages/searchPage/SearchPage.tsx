@@ -3,33 +3,37 @@ import UsersTable from '../../components/table/UsersTable';
 import ReviewsTable from '../../components/table/ReviewsTable';
 import FoodTable from '../../components/table/FoodTable';
 import './searchPage.css';
+import useSearchResults from '../../hooks/useSearchResults';
 
 
 const SearchPage = () => {
-        const users: User[] = [
-            {userName: 'name', userEmail: 'email', entityID: 'uid1', entityType: EntityType.User, userPermissions: []},
-            {userName: 'name', userEmail: 'email', entityID: 'uid2', entityType: EntityType.User, userPermissions: []}
-        ];
-
-        const reviews: Review[] = [
-            {entityID: 'rid1', foodID: 'food', menuID: '01/01/2025', userID: 'user', quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review},
-            {entityID: 'rid2', foodID: 'food', menuID: '01/01/2025', userID: 'user', quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review}
-        ];
-
-        const foods: FoodItem[] = [
-            {entityID: 'fid1', foodName: 'name', foodOrigin: 'origin', foodAttributes: {nutrition: 'nutrition', description: 'description'}, totalRating: 20, numReviews: 2, entityType: EntityType.FoodItem},
-            {entityID: 'fid1', foodName: 'name', foodOrigin: 'origin', foodAttributes: {}, totalRating: 15, numReviews: 3, entityType: EntityType.FoodItem}
-        ];
+        const { searchResults } = useSearchResults();
+        
+        let table;
+        if (searchResults && searchResults.length > 0) {
+            switch (searchResults[0].entityType) {
+                case EntityType.Review:
+                    table = <ReviewsTable reviews={searchResults as Review[]} />;
+                    break;
+                case EntityType.User:
+                    table = <UsersTable users={searchResults as User[]} />;
+                    break;
+                case EntityType.FoodItem:
+                    table = <FoodTable foodItems={searchResults as FoodItem[]}/>;
+                    break;
+            }
+        }
+        else {
+            table = <div>no results</div>;
+        }
 
         return (
-        <div className="page-layout">
-            <div className="search-results-title">
-                <h1>Search Results</h1>
+            <div className="page-layout">
+                <div className="search-results-title">
+                    <h1>Search Results</h1>
+                </div>
+                { table }
             </div>
-            <UsersTable users={users} />
-            <ReviewsTable reviews={reviews} />
-            <FoodTable foodItems={foods}/>
-        </div>
     )
 }
 

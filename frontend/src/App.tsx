@@ -12,6 +12,7 @@ import AuthErrorModal from './components/modal/AuthErrorModal';
 import useAuth from './auth/useAuth';
 import SearchPage from './pages/searchPage/SearchPage';
 import './pages/pages.css';
+import SearchProvider from './utils/search/SearchProvider';
 
 
 const App = () => {
@@ -33,8 +34,10 @@ const App = () => {
 
     return (
         <>
-            <Navbar />
-            <PageRoutes />
+            <SearchProvider>
+                <Navbar />
+                <PageRoutes />
+            </SearchProvider>
             <VerifyEmailModal
                 closeOnLossOfFocus={true}
                 isOpen={isVerifyEmailModalOpen}
