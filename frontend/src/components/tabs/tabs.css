@@ -1,0 +1,25 @@
+.tabs-header {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid lightgray;
+    margin-bottom: 8px;
+}
+
+.tabs-header > div {
+    padding: 8px 15px 8px 15px;
+    border-radius: 5px 5px 0px 0px;
+    border: solid transparent;
+    border-width: 1px 1px 0px 1px;
+}
+
+.tabs-header > div:hover {
+    border: solid gray;
+    border-width: 1px 1px 0px 1px;
+    cursor: pointer;
+}
+
+.selected-option {
+    background-color: #f6f6f6;
+    border: solid lightgray !important;
+    border-width: 1px 1px 0px 1px !important;
+}
