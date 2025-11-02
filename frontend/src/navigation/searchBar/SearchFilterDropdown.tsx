@@ -1,51 +1,19 @@
 import { EntityType } from "@lunch-box-reviews/shared-types"
 import Dropdown from "../../components/dropdown/Dropdown"
 import useSearchFilters from "../../hooks/useSearchFilters"
-import Tabs, { TabOption } from "../../components/tabs/Tabs";
+import Tabs, { Tab } from "../../components/tabs/Tabs";
+import SearchFilterCriteria from "./SearchFilterCriteria";
 
-
-
-interface SearchFilterContentProps {
-    selected: EntityType
-}
-
-const SearchFilterContent: React.FC<SearchFilterContentProps> = ({ selected }) => {
-    switch (selected) {
-        case EntityType.Review:
-            return (
-                <div className="search-filter-content">
-                    review specific filters
-                </div>
-            );
-        case EntityType.User:
-            return (
-                <div className="search-filter-content">
-                    user specific filters
-                </div>
-            );
-        case EntityType.FoodItem:
-            return (
-                <div className="search-filter-content">
-                    food specific filters
-                </div>
-            );
-        default:
-            return (
-                <div className="search-filter-content">
-                    empty
-                </div>
-            );
-    }
-}
 
 const SearchFilterDropdown = () => {
     const { filters, setFilters } = useSearchFilters();
 
-    const setEntityFilter = (option: TabOption) => {
-        if (filters.entityType !== option.key as EntityType)
+    const setEntityFilter = (id: string) => {
+        const entityType = id as EntityType;
+        if (filters.entityType !== entityType)
             setFilters({
                 ...filters,
-                entityType: option.key as EntityType
+                entityType: entityType
             })
     }
 
@@ -56,18 +24,154 @@ const SearchFilterDropdown = () => {
             parent={<button className="search-filter-button">filter</button>}
         >
             <div className="search-filter-container">
-                <div>
-                    <Tabs
-                        options={[
-                            { name: 'Review', key: EntityType.Review, selected: filters.entityType === EntityType.Review },
-                            { name: 'User', key: EntityType.User, selected: filters.entityType === EntityType.User },
-                            { name: 'Food', key: EntityType.FoodItem, selected: filters.entityType === EntityType.FoodItem }
-                        ]}
-                        onOptionSelect={setEntityFilter}
-                    >
-                        <SearchFilterContent selected={filters.entityType} />
-                    </Tabs>
-                </div>
+                <Tabs defaultSelected={filters.entityType} onTabSelect={setEntityFilter}>
+                    <Tab id={EntityType.Review} header="Review">
+                        <div className="search-filter-content">
+                            <SearchFilterCriteria
+                                name="Start Date"
+                                id="startDate"
+                                categoryName="reviewCriteria"
+                                selected={filters.selectedReviewCriteria === 'START_DATE'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedReviewCriteria: 'START_DATE'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedReviewCriteria: 'START_DATE',
+                                        startDate: value
+                                    })
+                                }}
+                            />
+                            <SearchFilterCriteria
+                                name="End Date"
+                                id="endDate"
+                                categoryName="reviewCriteria"
+                                selected={filters.selectedReviewCriteria === 'END_DATE'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedReviewCriteria: 'END_DATE'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedReviewCriteria: 'END_DATE',
+                                        endDate: value
+                                    })
+                                }}
+                            />
+                        </div>
+                    </Tab>
+                    <Tab id={EntityType.User} header="User">
+                        <div className="search-filter-content">
+                            <SearchFilterCriteria
+                                name="Name"
+                                id="userName"
+                                categoryName="userCriteria"
+                                selected={filters.selectedUserCriteria === 'NAME'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedUserCriteria: 'NAME'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedUserCriteria: 'NAME',
+                                        userName: value
+                                    })
+                                }}
+                            />
+                            <SearchFilterCriteria
+                                name="Email"
+                                id="userEmail"
+                                categoryName="userCriteria"
+                                selected={filters.selectedUserCriteria === 'EMAIL'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedUserCriteria: 'EMAIL'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedUserCriteria: 'EMAIL',
+                                        userEmail: value
+                                    })
+                                }}
+                            />
+                        </div>
+                    </Tab>
+                    <Tab id={EntityType.FoodItem} header="Food">
+                        <div className="search-filter-content">
+                            <SearchFilterCriteria
+                                name="Name"
+                                id="foodName"
+                                categoryName="foodCriteria"
+                                selected={filters.selectedFoodCriteria === 'NAME'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'NAME'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'NAME',
+                                        foodName: value
+                                    })
+                                }}
+                            />
+                            <SearchFilterCriteria
+                                name="Origin"
+                                id="foodOrigin"
+                                categoryName="foodCriteria"
+                                selected={filters.selectedFoodCriteria === 'ORIGIN'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'ORIGIN'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'ORIGIN',
+                                        foodOrigin: value
+                                    })
+                                }}
+                            />
+                            <SearchFilterCriteria
+                                name="Average Rating"
+                                id="averageRating"
+                                categoryName="foodCriteria"
+                                selected={filters.selectedFoodCriteria === 'RATING'}
+                                onSelect={() => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'RATING'
+                                    })
+                                }}
+                                onEdit={(value: string) => {
+                                    setFilters({
+                                        ...filters,
+                                        selectedFoodCriteria: 'RATING',
+                                        averageRating: value
+                                    })
+                                }}
+                            />
+                        </div>
+                    </Tab>
+                </Tabs>
+
             </div>
         </Dropdown>
     );

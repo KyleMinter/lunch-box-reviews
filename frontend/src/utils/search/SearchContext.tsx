@@ -15,7 +15,17 @@ export interface ResultsContextInterface {
 };
 
 export const defaultFilters: SearchFilters = {
-    entityType: EntityType.Review
+    entityType: EntityType.Review,
+    startDate: '',
+    endDate: '',
+    userName: '',
+    userEmail: '',
+    foodName: '',
+    foodOrigin: '',
+    averageRating: '5',
+    selectedReviewCriteria: 'START_DATE',
+    selectedUserCriteria: 'NAME',
+    selectedFoodCriteria: 'NAME'
 };
 
 const stub = (): never => {
