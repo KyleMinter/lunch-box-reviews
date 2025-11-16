@@ -45,7 +45,7 @@ const Tabs: React.FC<TabsProps> = ({
                     return (
                         <div
                             onClick={() => onSelect(tab.id)}
-                            className={selectedTabId === tab.id ? 'selected-tab' : undefined}
+                            className={selectedTabId === tab.id ? 'selected-option' : undefined}
                             key={tab.id}
                         >
                             {tab.header}

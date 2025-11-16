@@ -1,40 +1,39 @@
-
+import './searchBar.css';
 
 
 interface SearchFilterCriteriaProps {
     name: string;
-    id: string;
-    categoryName: string;
+    group: string;
     selected: boolean;
-    onSelect: () => void;
-    onEdit: (value: string) => void;
+    selectionType?: 'radio' | 'checkbox';
+    inputType?: 'text' | 'date';
+    onInteract: (value?: string) => void;
 }
 
 const SearchFilterCriteria = (props: SearchFilterCriteriaProps) => {
     const {
         name,
-        id,
-        categoryName,
+        group,
         selected,
-        onSelect,
-        onEdit,
+        selectionType = 'radio',
+        inputType = 'text',
+        onInteract,
     } = props;
 
     return (
             <div className="search-filter-criteria">
                 <input
-                    type="radio"
-                    name={categoryName}
+                    type={selectionType}
+                    name={group}
                     checked={selected}
-                    onChange={() => onSelect()}
+                    onChange={() => onInteract()}
                 />
                 <div>
-                    <label htmlFor={id}>{name}</label>
+                    <label>{name}</label>
                     <input
-                        name={id}
-                        type="text"
+                        type={inputType}
                         onChange={(e) => {
-                            onEdit(e.target.value);
+                            onInteract(e.target.value);
                         }}
                     />
                 </div>

@@ -6,15 +6,12 @@ import SearchFilterCriteria from "./SearchFilterCriteria";
 
 
 const SearchFilterDropdown = () => {
-    const { filters, setFilters } = useSearchFilters();
+    const { filters, filtersDispatch } = useSearchFilters();
 
     const setEntityFilter = (id: string) => {
         const entityType = id as EntityType;
         if (filters.entityType !== entityType)
-            setFilters({
-                ...filters,
-                entityType: entityType
-            })
+            filtersDispatch({ type: 'ENTITY_TYPE', selected: entityType });
     }
 
     return (
@@ -29,41 +26,19 @@ const SearchFilterDropdown = () => {
                         <div className="search-filter-content">
                             <SearchFilterCriteria
                                 name="Start Date"
-                                id="startDate"
-                                categoryName="reviewCriteria"
-                                selected={filters.selectedReviewCriteria === 'START_DATE'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedReviewCriteria: 'START_DATE'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedReviewCriteria: 'START_DATE',
-                                        startDate: value
-                                    })
-                                }}
+                                group="reviewCriteria"
+                                selected={filters.startDate.selected}
+                                selectionType="checkbox"
+                                inputType='date'
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_TOGGLE', filter: 'startDate', value: value})}
                             />
                             <SearchFilterCriteria
                                 name="End Date"
-                                id="endDate"
-                                categoryName="reviewCriteria"
-                                selected={filters.selectedReviewCriteria === 'END_DATE'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedReviewCriteria: 'END_DATE'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedReviewCriteria: 'END_DATE',
-                                        endDate: value
-                                    })
-                                }}
+                                group="reviewCriteria"
+                                selected={filters.endDate.selected}
+                                selectionType="checkbox"
+                                inputType='date'
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_TOGGLE', filter: 'endDate', value: value })}
                             />
                         </div>
                     </Tab>
@@ -71,41 +46,15 @@ const SearchFilterDropdown = () => {
                         <div className="search-filter-content">
                             <SearchFilterCriteria
                                 name="Name"
-                                id="userName"
-                                categoryName="userCriteria"
-                                selected={filters.selectedUserCriteria === 'NAME'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedUserCriteria: 'NAME'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedUserCriteria: 'NAME',
-                                        userName: value
-                                    })
-                                }}
+                                group="userCriteria"
+                                selected={filters.userName.selected}
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_SELECT', filter: 'userName', value: value })}
                             />
                             <SearchFilterCriteria
                                 name="Email"
-                                id="userEmail"
-                                categoryName="userCriteria"
-                                selected={filters.selectedUserCriteria === 'EMAIL'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedUserCriteria: 'EMAIL'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedUserCriteria: 'EMAIL',
-                                        userEmail: value
-                                    })
-                                }}
+                                group="userCriteria"
+                                selected={filters.userEmail.selected}
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_SELECT', filter: 'userEmail', value: value })}
                             />
                         </div>
                     </Tab>
@@ -113,60 +62,21 @@ const SearchFilterDropdown = () => {
                         <div className="search-filter-content">
                             <SearchFilterCriteria
                                 name="Name"
-                                id="foodName"
-                                categoryName="foodCriteria"
-                                selected={filters.selectedFoodCriteria === 'NAME'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'NAME'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'NAME',
-                                        foodName: value
-                                    })
-                                }}
+                                group="foodCriteria"
+                                selected={filters.foodName.selected}
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_SELECT', filter: 'foodName', value: value })}
                             />
                             <SearchFilterCriteria
                                 name="Origin"
-                                id="foodOrigin"
-                                categoryName="foodCriteria"
-                                selected={filters.selectedFoodCriteria === 'ORIGIN'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'ORIGIN'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'ORIGIN',
-                                        foodOrigin: value
-                                    })
-                                }}
+                                group="foodCriteria"
+                                selected={filters.foodOrigin.selected}
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_SELECT', filter: 'foodOrigin', value: value })}
                             />
                             <SearchFilterCriteria
                                 name="Average Rating"
-                                id="averageRating"
-                                categoryName="foodCriteria"
-                                selected={filters.selectedFoodCriteria === 'RATING'}
-                                onSelect={() => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'RATING'
-                                    })
-                                }}
-                                onEdit={(value: string) => {
-                                    setFilters({
-                                        ...filters,
-                                        selectedFoodCriteria: 'RATING',
-                                        averageRating: value
-                                    })
-                                }}
+                                group="foodCriteria"
+                                selected={filters.averageRating.selected}
+                                onInteract={(value?: string) => filtersDispatch({ type: 'FILTER_SELECT', filter: 'averageRating', value: value })}
                             />
                         </div>
                     </Tab>
