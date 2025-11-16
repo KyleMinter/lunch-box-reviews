@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
-import SearchFilters from "./searchFilters";
+import { useCallback, useMemo, useReducer } from "react";
+import SearchFilters, { FiltersAction, filtersReducer } from "./searchFilters";
 import { defaultFilters, FiltersContext, FiltersContextInterface, ResultsContext, ResultsContextInterface } from "./SearchContext";
 import { EntityType, FoodItem, Review, User } from "@lunch-box-reviews/shared-types";
 import { initialSearchState, searchReducer } from "./searchState";
@@ -10,7 +10,7 @@ interface SearchProviderProps {
 }
 
 const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
-    const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
+    const [filters, filtersDispatch] = useReducer<SearchFilters, [action: FiltersAction]>(filtersReducer, defaultFilters);
 
     const [searchState, searchDispatch] = useReducer(searchReducer, initialSearchState);
     
@@ -47,7 +47,7 @@ const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
 
     const filtersValue = useMemo<FiltersContextInterface>(() => ({
         filters,
-        setFilters,
+        filtersDispatch,
         search
     }), [filters, search]);
 
