@@ -8,7 +8,7 @@ import { ResultsContext, ResultsContextInterface } from "../utils/search/SearchC
  * const = {
  *      searchResults,
  *      isLoading,
- * } = useSearchFilters();
+ * } = useSearchResults();
  * ```
  * Used to access search results states.
  */
