@@ -24,13 +24,76 @@ const currentDateAsString = (): string => {
 
 export const defaultFilters: SearchFilters = {
     entityType: EntityType.Review,
-    startDate: { value: currentDateAsString(), selected: false },
-    endDate: { value: currentDateAsString(), selected: false },
-    userName: { value: '', selected: true, group: 'user' },
-    userEmail: { value: '', selected: false, group: 'user' },
-    foodName: { value: '', selected: true, group: 'food' },
-    foodOrigin: { value: '', selected: false, group: 'food' },
-    averageRating: { value: '', selected: false, group: 'food' }
+    startDate: {
+        name: 'Start Date',
+        key: 'startDate',
+        group: 'review',
+        selectionType: 'checkbox',
+        inputType: 'date',
+        value: currentDateAsString(),
+        selected: false,
+        errors: []
+    },
+    endDate: {
+        name: 'End Date',
+        key: 'endDate',
+        group: 'review',
+        selectionType: 'checkbox',
+        inputType: 'date',
+        value: currentDateAsString(),
+        selected: false,
+        errors: [],
+    },
+    userName: {
+        name: 'Name',
+        key: 'userName',
+        group: 'user',
+        selectionType: 'radio',
+        inputType: 'text',
+        value: '',
+        selected: true,
+        errors: []
+    },
+    userEmail: {
+        name: 'Email',
+        key: 'userEmail',
+        group: 'user',
+        selectionType: 'radio',
+        inputType: 'text',
+        value: '',
+        selected: false,
+        errors: []
+    },
+    foodName: {
+        name: 'Name',
+        key: 'foodName',
+        group: 'food',
+        selectionType: 'radio',
+        inputType: 'text',
+        value: '',
+        selected: true,
+        errors: []
+    },
+    foodOrigin: {
+        name: 'Origin',
+        key: 'foodOrigin',
+        group: 'food',
+        selectionType: 'radio',
+        inputType: 'text',
+        value: '',
+        selected: false,
+        errors: []
+    },
+    averageRating: {
+        name: 'Average Rating',
+        key: 'averageRating',
+        group: 'food',
+        selectionType: 'radio',
+        inputType: 'text',
+        value: '',
+        selected: false,
+        errors: []
+    }
 };
 
 const stub = (): never => {
