@@ -1,24 +1,24 @@
+import useSearchFilters from '../../hooks/useSearchFilters';
+import { SearchFilter } from '../../utils/search/searchFilters';
 import './searchBar.css';
 
 
 interface SearchFilterCriteriaProps {
-    name: string;
-    group: string;
-    selected: boolean;
-    selectionType?: 'radio' | 'checkbox';
-    inputType?: 'text' | 'date';
-    onInteract: (value?: string) => void;
+    filter: SearchFilter;
 }
 
-const SearchFilterCriteria = (props: SearchFilterCriteriaProps) => {
+const SearchFilterCriteria: React.FC<SearchFilterCriteriaProps> = ({ filter }) => {
     const {
         name,
-        group,
+        key,
+        selectionType,
+        inputType,
         selected,
-        selectionType = 'radio',
-        inputType = 'text',
-        onInteract,
-    } = props;
+        errors,
+        group
+    } = filter;
+
+    const { filtersDispatch } = useSearchFilters();
 
     return (
             <div className="search-filter-criteria">
@@ -26,16 +26,18 @@ const SearchFilterCriteria = (props: SearchFilterCriteriaProps) => {
                     type={selectionType}
                     name={group}
                     checked={selected}
-                    onChange={() => onInteract()}
+                    onChange={() => filtersDispatch({ type: 'FILTER_SELECT', filter: key })}
                 />
                 <div>
                     <label>{name}</label>
                     <input
                         type={inputType}
-                        onChange={(e) => {
-                            onInteract(e.target.value);
-                        }}
+                        className={errors.length > 0 ? 'error' : undefined}
+                        onChange={(e) => filtersDispatch({ type: 'FILTER_UPDATE', filter: key, value: e.target.value })}
                     />
+                    <div>
+
+                    </div>
                 </div>
             </div>
     )

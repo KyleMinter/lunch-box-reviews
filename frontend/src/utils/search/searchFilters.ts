@@ -1,10 +1,15 @@
 import { EntityType } from "@lunch-box-reviews/shared-types";
 
 
-interface SearchFilter {
+export interface SearchFilter {
+    readonly name: string;
+    readonly key: keyof SearchFilters;
+    readonly group: string;
+    readonly selectionType: 'radio' | 'checkbox';
+    readonly inputType: 'text' | 'date';
     value: string;
     selected: boolean;
-    group?: string;
+    errors: string[];
 }
 
 export interface SearchFilters {
@@ -20,15 +25,19 @@ export interface SearchFilters {
 
 function isSearchFilter(obj: any): obj is SearchFilter {
     return typeof obj === 'object' && obj !== null &&
+        'name' in obj && typeof obj.name === 'string' &&
+        'group' in obj && typeof obj.group === 'string' &&
+        'selectionType' in obj && (obj.selectionType === 'radio' || obj.selectionType === 'checkbox') &&
+        'inputType' in obj && (obj.inputType === 'text' || obj.inputType === 'date') &&
         'value' in obj && typeof obj.value === 'string' &&
-        'selected' in obj && typeof obj.selected === 'boolean';
+        'selected' in obj && typeof obj.selected === 'boolean' &&
+        'errors' in obj && Array.isArray(obj.errors);
 }
 
 export type FiltersAction =
     | { type: 'ENTITY_TYPE'; selected: EntityType }
-    | { type: 'FILTER_TOGGLE'; filter: keyof SearchFilters, value?: string }
-    | { type: 'FILTER_SELECT'; filter: keyof SearchFilters, value?: string }
-    | { type: 'FILTER_SET_VALUE'; filter: { name: keyof SearchFilters, value: string }}
+    | { type: 'FILTER_SELECT'; filter: keyof SearchFilters}
+    | { type: 'FILTER_UPDATE'; filter: keyof SearchFilters, value: string };
 
 export const filtersReducer = (state: SearchFilters, action: FiltersAction): SearchFilters => {
     switch (action.type) {
@@ -36,50 +45,50 @@ export const filtersReducer = (state: SearchFilters, action: FiltersAction): Sea
             state.entityType = action.selected;
             break;
         }
-        case 'FILTER_TOGGLE': {
-            const filter = state[action.filter];
-            if (isSearchFilter(filter)) {
-                const toggledFilter: SearchFilter = {
-                    value: action.value ?? filter.value,
-                    selected: !filter.selected,
-                    group: filter.group
+        case 'FILTER_SELECT': {
+            const selectedFilter = state[action.filter];
+            if (isSearchFilter(selectedFilter)) {
+                let filters = { ...state };
+
+                // If the filter is in a radio group, we will disable all of the filters in that group.
+                if (selectedFilter.selectionType === 'radio') {
+                    const filterKeys = Object.keys(state) as (keyof SearchFilters)[];
+                    filterKeys.forEach((filterKey) => {
+                        const filter = state[filterKey]
+                        if (isSearchFilter(filter) && filter.group === selectedFilter.group) {
+                            const disabledFilter: SearchFilter = {
+                                ...filter,
+                                selected: false
+                            };
+                            filters = {
+                                ...filters,
+                                [filterKey]: disabledFilter
+                            };
+                        }
+                    })
+                }
+                
+                const enabledFilter: SearchFilter = {
+                    ...selectedFilter,
+                    value: selectedFilter.value,
+                    selected: selectedFilter.selectionType === 'radio' ? true : !selectedFilter.selected
                 };
                 return {
-                    ...state,
-                    [action.filter]: toggledFilter
+                    ...filters,
+                    [action.filter]: enabledFilter
                 };
             }
             break;
         }
-        case 'FILTER_SELECT': {
-            const selectedFilter = state[action.filter];
-            // If the selected filter is in a group, we will disable all of the filters in that group.
-            if (isSearchFilter(selectedFilter) && selectedFilter.group) {
-                let filters = { ...state };
-                const filterKeys = Object.keys(state) as (keyof SearchFilters)[];
-                filterKeys.forEach((filterKey) => {
-                    const filter = state[filterKey]
-                    if (isSearchFilter(filter) && filter.group === selectedFilter.group) {
-                        const disabledFilter: SearchFilter = {
-                            value: filter.value,
-                            selected: false,
-                            group: filter.group
-                        };
-                        filters = {
-                            ...filters,
-                            [filterKey]: disabledFilter
-                        };
-                    }
-                })
-                
-                // Enable the selected filter.
+        case 'FILTER_UPDATE': {
+            const filter = state[action.filter];
+            if (isSearchFilter(filter)) {
                 const enabledFilter: SearchFilter = {
-                    value: action.value ?? selectedFilter.value,
-                    selected: true,
-                    group: selectedFilter.group
+                    ...filter,
+                    value: action.value
                 };
                 return {
-                    ...filters,
+                    ...state,
                     [action.filter]: enabledFilter
                 };
             }
