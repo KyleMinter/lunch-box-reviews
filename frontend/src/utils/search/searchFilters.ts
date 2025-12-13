@@ -1,4 +1,6 @@
 import { EntityType } from "@lunch-box-reviews/shared-types";
+import { sprintf } from "sprintf-js";
+import Validator, { dateSequenceValidator } from "../validators/validators";
 
 
 export interface SearchFilter {
@@ -9,7 +11,9 @@ export interface SearchFilter {
     readonly inputType: 'text' | 'date';
     value: string;
     selected: boolean;
+    touched: boolean;
     errors: string[];
+    readonly validators?: Validator[]
 }
 
 export interface SearchFilters {
@@ -32,6 +36,35 @@ function isSearchFilter(obj: any): obj is SearchFilter {
         'value' in obj && typeof obj.value === 'string' &&
         'selected' in obj && typeof obj.selected === 'boolean' &&
         'errors' in obj && Array.isArray(obj.errors);
+}
+
+function validateFilters(filters: SearchFilters) {
+    const filterKeys = Object.keys(filters) as (keyof SearchFilters)[];
+    filterKeys.forEach((filterKey) => {
+        const filter = filters[filterKey]
+        if (isSearchFilter(filter)) {
+            filter.errors = [];
+            if (filter.selected && filter.validators) {
+                filter.validators.forEach((validator) => {
+                    if (!validator.validate(filter.value)) {
+                        const errorMessage = sprintf(validator.errorMessage, filter.name);
+                        filter.errors = [...filter.errors, errorMessage];
+                    }
+                });
+            }
+        }
+    });
+
+    if (filters.startDate.selected && filters.endDate.selected &&
+        !dateSequenceValidator.validate(filters.startDate.value, filters.endDate.value)
+    ) {
+        const startErrorMessage = sprintf(dateSequenceValidator.startErrorMessage, filters.startDate.name);
+        filters.startDate.errors = [...filters.startDate.errors, startErrorMessage];
+        const endErrorMessage = sprintf(dateSequenceValidator.endErrorMessage, filters.endDate.name);
+        filters.endDate.errors = [...filters.endDate.errors, endErrorMessage];
+    }
+
+    return filters
 }
 
 export type FiltersAction =
@@ -71,11 +104,17 @@ export const filtersReducer = (state: SearchFilters, action: FiltersAction): Sea
                 const enabledFilter: SearchFilter = {
                     ...selectedFilter,
                     value: selectedFilter.value,
-                    selected: selectedFilter.selectionType === 'radio' ? true : !selectedFilter.selected
+                    selected: selectedFilter.selectionType === 'radio' ? true : !selectedFilter.selected,
+                    touched: true
                 };
-                return {
+                filters = {
                     ...filters,
                     [action.filter]: enabledFilter
+                };
+
+                filters = validateFilters(filters);
+                return {
+                    ...filters
                 };
             }
             break;
@@ -85,11 +124,19 @@ export const filtersReducer = (state: SearchFilters, action: FiltersAction): Sea
             if (isSearchFilter(filter)) {
                 const enabledFilter: SearchFilter = {
                     ...filter,
-                    value: action.value
+                    value: action.value,
+                    touched: true
                 };
-                return {
+                
+                let filters = {
                     ...state,
                     [action.filter]: enabledFilter
+                };
+
+                filters = validateFilters(filters);
+
+                return {
+                    ...filters
                 };
             }
             break;

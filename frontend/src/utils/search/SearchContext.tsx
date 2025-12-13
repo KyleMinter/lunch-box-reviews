@@ -1,6 +1,11 @@
 import { EntityType, FoodItem, Review, User } from "@lunch-box-reviews/shared-types";
 import { createContext } from "react";
 import SearchFilters, { FiltersAction } from "./searchFilters";
+import {
+    dateValidator,
+    emptyValueValidator,
+    emailValidtor
+} from "../validators/validators";
 
 
 export interface FiltersContextInterface {
@@ -32,7 +37,12 @@ export const defaultFilters: SearchFilters = {
         inputType: 'date',
         value: currentDateAsString(),
         selected: false,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            dateValidator,
+            emptyValueValidator
+        ]
     },
     endDate: {
         name: 'End Date',
@@ -42,7 +52,12 @@ export const defaultFilters: SearchFilters = {
         inputType: 'date',
         value: currentDateAsString(),
         selected: false,
+        touched: false,
         errors: [],
+        validators: [
+            dateValidator,
+            emptyValueValidator
+        ]
     },
     userName: {
         name: 'Name',
@@ -52,7 +67,11 @@ export const defaultFilters: SearchFilters = {
         inputType: 'text',
         value: '',
         selected: true,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            emptyValueValidator
+        ]
     },
     userEmail: {
         name: 'Email',
@@ -62,7 +81,12 @@ export const defaultFilters: SearchFilters = {
         inputType: 'text',
         value: '',
         selected: false,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            emptyValueValidator,
+            emailValidtor
+        ]
     },
     foodName: {
         name: 'Name',
@@ -72,7 +96,11 @@ export const defaultFilters: SearchFilters = {
         inputType: 'text',
         value: '',
         selected: true,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            emptyValueValidator
+        ]
     },
     foodOrigin: {
         name: 'Origin',
@@ -82,7 +110,11 @@ export const defaultFilters: SearchFilters = {
         inputType: 'text',
         value: '',
         selected: false,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            emptyValueValidator
+        ]
     },
     averageRating: {
         name: 'Average Rating',
@@ -92,7 +124,11 @@ export const defaultFilters: SearchFilters = {
         inputType: 'text',
         value: '',
         selected: false,
-        errors: []
+        touched: false,
+        errors: [],
+        validators: [
+            emptyValueValidator
+        ]
     }
 };
 
