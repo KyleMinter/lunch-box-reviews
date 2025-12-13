@@ -39,6 +39,12 @@
     flex-direction: row;
 }
 
-.search-filter-criteria {
-    display: flex
+.search-input-error {
+    border: 1px solid #F44336;
+    accent-color: #F44336;
+}
+
+.search-filter-errors {
+    color: #F44336;
+    font-size: .8em;
 }
