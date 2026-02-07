@@ -1,70 +1,101 @@
 import { User } from "@lunch-box-reviews/shared-types";
-import { useNavigate } from "react-router-dom";
-import './table.css';
+import { useState } from "react";
+import { 
+  Avatar,
+  CardHeader,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow
+} from "@mui/material";
 
 
 interface UsersTableProps {
-    users: User[]
+  users: User[]
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
-    return (
-        <table className="table">
-            <colgroup>
-                <col style={{ width: "8%" }} />
-                <col style={{ width: "46%"}} />
-                <col style={{ width: "46%"}} />
-            </colgroup>
-            <thead>
-                <tr>
-                    <th className="table-header-no-left-border" style={{ paddingLeft: 0 }} />
-                    <th className="table-header-no-left-border">
-                        Name
-                    </th>
-                    <th>Email</th>
-                </tr>
-            </thead>
-            <tbody>
-                {users.map((user, index) => {
-                    return (
-                        <UserEntry key={index} user={user} />
-                    )
-                })}
-            </tbody>
-        </table>
-    )
-}
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-interface UserEntryProps {
-    user: User
-}
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  }
 
-const UserEntry: React.FC<UserEntryProps> = ({ user }) => {
-    const navigate = useNavigate();
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
-    const onRowClick = () => {
-        navigate(`/home?row=${user.entityID}`);
-    };
-
-    const userPictureStyle = {
-        display: 'block',
-        width: '75%',
-        clipPath: 'circle()',
-        margin: '8px'
-    }
-
-    return (
-        <tr
-            className="table-row-hover"
-            onClick={onRowClick}
-        >
-            <td style={{ paddingLeft: 0 }}>
-                <img style={userPictureStyle} src="logo192.png" alt="" />
-            </td>
-            <td>{user.userName}</td>
-            <td>{user.userEmail}</td>
-        </tr>
-    )
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 440 }}>
+        <Table stickyHeader aria-label="user search results table">
+          <TableHead>
+            <TableRow>
+              <TableCell
+                key="userAvatarName"
+                align="left"
+                style={{ minWidth: 15, paddingLeft: 72 }}
+              >
+                Name
+              </TableCell>
+              <TableCell
+                key="userEmail"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Email
+              </TableCell>
+              <TableCell
+                key="accountCreated"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Account Created
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((user, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell key={`${index}-avatar-name`} align="center">
+                      <CardHeader
+                        avatar={<Avatar alt={`${user.userName}`} src="logo192.png" />}
+                        title={user.userName}
+                        sx={{ p: 0, textAlign: 'left' }}
+                      />
+                    </TableCell>
+                    <TableCell key={`${index}-email`} align="left">
+                      {user.userEmail}
+                    </TableCell>
+                    <TableCell key={`${index}-accountCreated`} align="left">
+                      {user.accountCreated}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={2}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
+  )
 }
 
 export default UsersTable;
