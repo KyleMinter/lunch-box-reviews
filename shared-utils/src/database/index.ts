@@ -75,7 +75,7 @@ export function getPaginationParameters(event: APIGatewayProxyEvent): Pagination
 
     const queryParams = event.queryStringParameters;
     if (queryParams && queryParams.limit) {
-        const supportedLimits = [10, 30, 50, 100];
+        const supportedLimits = [10, 25, 50];
         const limitParam = Number(queryParams.limit);
         if (supportedLimits.includes(limitParam))
             limit = limitParam;
