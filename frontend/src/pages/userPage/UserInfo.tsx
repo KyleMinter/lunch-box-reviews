@@ -1,78 +1,53 @@
-import { User, UserPermission } from "@lunch-box-reviews/shared-types";
+import { User } from "@lunch-box-reviews/shared-types";
 import './userInfo.css';
-import useAuth from "../../auth/useAuth";
+import { Box, Typography } from "@mui/material";
 
 
 interface UserInfoProps {
-    user: User
+  user: User
 }
 
 const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
-    const { user: loggedInUser } = useAuth();
-    const showAdminUserElements = loggedInUser && loggedInUser.userPermissions.includes(UserPermission.adminUserPermissions);
 
-    return (
-        <div className="user-info-container">
-            <img
-                src="logo192.png"
-                alt="Profile"
-            />
-            <div className="user-info-details-container">
-                <div className="user-info-details">
-                    <div>
-                        <h1>{user.userName}</h1>
-                        <p>{user.userEmail}</p>
-                    </div>
-                    {(showAdminUserElements || loggedInUser === user) ? <button>Edit</button> : null}
-                    
-                </div>
-
-                {showAdminUserElements  ?
-                <div className="user-permissions-container">
-                    {user.userPermissions.map((perm, index, array) => {
-                        const lastElement = (index === array.length - 1);
-                        return (<UserPermissionDisplay permission={perm} last={lastElement}/>);
-                    })}
-                </div> : null}
-            </div>
-        </div>
-    )
-}
-
-interface UserPermissionDisplayProps {
-    permission: UserPermission
-    last: boolean
-}
-
-const UserPermissionDisplay: React.FC<UserPermissionDisplayProps> = ({ permission, last }) => {
-    let permissionName = ''
-    switch (permission) {
-        case UserPermission.adminFoodItemPermissions:
-            permissionName = 'Admin Food Permissions';
-            break;
-        case UserPermission.adminReviewPermissions:
-            permissionName = 'Admin Review Permissions';
-            break;
-        case UserPermission.adminMenuInstancePermissions:
-            permissionName = 'Admin Menu Permissions';
-            break;
-        case UserPermission.adminUserPermissions:
-            permissionName = 'Admin User Permissions';
-            break;
-        case UserPermission.userReviewPermissions:
-            permissionName = 'User Review Permissions';
-            break;
-        default:
-            return null;
-    }
-
-    const commaSeparator = last ? '' : ', ';
-
-    return (
-        <div className="user-permission">
-            <span className='user-permission-bubble'>{permissionName}</span>{commaSeparator}
-        </div>
-    )
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        padding: 1,
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}
+    >
+      <Box sx={{ width: '192px' }}>
+        <img src="logo192.png" alt="Profile" />
+      </Box>
+      <Box
+        sx={{
+          flexGrow: 1,
+          paddingX: 5,
+          paddingY: 3,
+        }}
+      >
+        <Box sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+          marginBottom: 1,
+          paddingBottom: 1
+        }}>
+        <Typography variant="h3">
+          {user.userName}
+        </Typography>
+        <Typography variant="subtitle1">
+          {user.userEmail}
+        </Typography>
+        </Box>
+        <Typography variant="caption">
+          Account Created: 02/07/2026
+        </Typography>
+      </Box>
+    </Box>
+  )
 }
 
 
