@@ -1,150 +1,77 @@
 import { EntityType, FoodItem, Review, User } from "@lunch-box-reviews/shared-types";
 import { createContext } from "react";
 import SearchFilters, { FiltersAction } from "./searchFilters";
-import {
-    dateValidator,
-    emptyValueValidator,
-    emailValidtor
-} from "../validators/validators";
+import dayjs from "dayjs";
 
 
 export interface FiltersContextInterface {
-    filters: SearchFilters;
-    filtersDispatch: React.ActionDispatch<[action: FiltersAction]>;
-    search: () => Promise<void>;
+  filters: SearchFilters;
+  filtersDispatch: React.ActionDispatch<[action: FiltersAction]>;
+  search: () => Promise<void>;
 };
 
 export interface ResultsContextInterface {
-    searchResults: Review[] | User[] | FoodItem[] | undefined;
-    isLoading: boolean;
+  searchResults: Review[] | User[] | FoodItem[] | undefined;
+  isLoading: boolean;
 };
 
 const currentDateAsString = (): string => {
-    const date = new Date();
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth().toString().padStart(2, '0');
-    const day = date.getUTCDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const date = new Date();
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth().toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export const defaultFilters: SearchFilters = {
-    entityType: EntityType.Review,
-    startDate: {
-        name: 'Start Date',
-        key: 'startDate',
-        group: 'review',
-        selectionType: 'checkbox',
-        inputType: 'date',
-        value: currentDateAsString(),
-        selected: false,
-        touched: false,
-        errors: [],
-        validators: [
-            dateValidator,
-            emptyValueValidator
-        ]
-    },
-    endDate: {
-        name: 'End Date',
-        key: 'endDate',
-        group: 'review',
-        selectionType: 'checkbox',
-        inputType: 'date',
-        value: currentDateAsString(),
-        selected: false,
-        touched: false,
-        errors: [],
-        validators: [
-            dateValidator,
-            emptyValueValidator
-        ]
-    },
-    userName: {
-        name: 'Name',
-        key: 'userName',
-        group: 'user',
-        selectionType: 'radio',
-        inputType: 'text',
-        value: '',
-        selected: true,
-        touched: false,
-        errors: [],
-        validators: [
-            emptyValueValidator
-        ]
-    },
-    userEmail: {
-        name: 'Email',
-        key: 'userEmail',
-        group: 'user',
-        selectionType: 'radio',
-        inputType: 'text',
-        value: '',
-        selected: false,
-        touched: false,
-        errors: [],
-        validators: [
-            emptyValueValidator,
-            emailValidtor
-        ]
-    },
-    foodName: {
-        name: 'Name',
-        key: 'foodName',
-        group: 'food',
-        selectionType: 'radio',
-        inputType: 'text',
-        value: '',
-        selected: true,
-        touched: false,
-        errors: [],
-        validators: [
-            emptyValueValidator
-        ]
-    },
-    foodOrigin: {
-        name: 'Origin',
-        key: 'foodOrigin',
-        group: 'food',
-        selectionType: 'radio',
-        inputType: 'text',
-        value: '',
-        selected: false,
-        touched: false,
-        errors: [],
-        validators: [
-            emptyValueValidator
-        ]
-    },
-    averageRating: {
-        name: 'Average Rating',
-        key: 'averageRating',
-        group: 'food',
-        selectionType: 'radio',
-        inputType: 'text',
-        value: '',
-        selected: false,
-        touched: false,
-        errors: [],
-        validators: [
-            emptyValueValidator
-        ]
-    }
+  entityType: EntityType.Review,
+  searchInput: '',
+  errors: [],
+  startDate: {
+    selected: false,
+    value: dayjs(currentDateAsString()),
+    isCheckbox: true
+  },
+  endDate: {
+    selected: false,
+    value: dayjs(currentDateAsString()),
+    isCheckbox: true
+  },
+  userName: {
+    selected: true,
+    radioGroup: EntityType.User,
+    isCheckbox: false
+  },
+  userEmail: {
+    selected: false,
+    radioGroup: EntityType.User,
+    isCheckbox: false
+  },
+  foodName: {
+    selected: true,
+    radioGroup: EntityType.FoodItem,
+    isCheckbox: false
+  },
+  foodOrigin: {
+    selected: false,
+    radioGroup: EntityType.FoodItem,
+    isCheckbox: false
+  }
 };
 
 const stub = (): never => {
-    throw new Error('You forgot to wrap your component in <SearchProvider>.');
+  throw new Error('You forgot to wrap your component in <SearchProvider>.');
 };
 
 const initFilters: FiltersContextInterface = {
-    filters: defaultFilters,
-    filtersDispatch: stub,
-    search: stub
+  filters: defaultFilters,
+  filtersDispatch: stub,
+  search: stub
 };
 
 const initResults: ResultsContextInterface = {
-    searchResults: undefined,
-    isLoading: false
+  searchResults: undefined,
+  isLoading: false
 };
 
 export const FiltersContext = createContext(initFilters);
