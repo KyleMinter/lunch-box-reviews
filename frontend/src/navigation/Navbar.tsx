@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import './navbar.css'
 import NavbarMenu from './NavbarMenu';
 import Search from '../components/search/Search';
+import { AppBar, Box, Button, IconButton, Toolbar, Typography } from '@mui/material';
+import ReviewsIcon from '@mui/icons-material/Reviews';
 
 
 const Navbar = () => {
@@ -12,17 +13,35 @@ const Navbar = () => {
   }
 
   return (
-    <header className="navbar">
-      <div className="navbar-home">
-        <img
-          onClick={navigateToHome}
-          src="logo192.png" alt=""
-        />
-        <h2 onClick={navigateToHome}>Lunch Box Reviews</h2>
-      </div>
-      <Search />
-      <NavbarMenu />
-    </header>
+    <Box>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="navgiate-to-home"
+            onClick={navigateToHome}
+          >
+            <ReviewsIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Button
+              variant='text'
+              sx={{ textTransform: 'none' }}
+              aria-label="navgiate-to-home"
+              onClick={navigateToHome}
+            >
+              <Typography variant="h6" color="white">
+                Lunch Box Reviews
+              </Typography>
+            </Button>
+          </Box>
+          <Search />
+          <NavbarMenu />
+        </Toolbar>
+      </AppBar>
+    </Box>
   );
 }
 
