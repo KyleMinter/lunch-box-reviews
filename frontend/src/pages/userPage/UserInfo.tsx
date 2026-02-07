@@ -1,5 +1,4 @@
 import { User } from "@lunch-box-reviews/shared-types";
-import './userInfo.css';
 import { Box, Typography } from "@mui/material";
 
 
@@ -43,7 +42,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
         </Typography>
         </Box>
         <Typography variant="caption">
-          Account Created: 02/07/2026
+          Account Created: {user.accountCreated}
         </Typography>
       </Box>
     </Box>

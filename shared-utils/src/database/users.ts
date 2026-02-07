@@ -47,6 +47,7 @@ export async function constructUser(json: any) {
         entityType: EntityType.User,
         userName: json.userName,
         userEmail: json.userEmail,
+        accountCreated: '',
         userPermissions: userPermissions
     };
 

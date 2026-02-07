@@ -70,6 +70,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
                     entityType: EntityType.User,
                     userName: 'User Name',
                     userEmail: 'user.email@gmail.com',
+                    accountCreated: '02/07/2026',
                     userPermissions: [
                         UserPermission.adminUserPermissions,
                         UserPermission.adminFoodItemPermissions,

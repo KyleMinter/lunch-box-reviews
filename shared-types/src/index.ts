@@ -96,12 +96,14 @@ export class ReviewProps extends EntityProps {
  * ```js
  * userName         // the user name of the user.
  * userEmail        // the email of the user.
+ * accountCreate    // the date of account creation.
  * userPermissions  // an array containing the various permissions the user has.
  * ```
  */
 export interface User extends Entity {
     userName: string;
     userEmail: string;
+    accountCreated: string;
     userPermissions: UserPermission[]
 }
 
