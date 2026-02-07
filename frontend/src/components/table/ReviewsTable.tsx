@@ -50,25 +50,18 @@ const ReviewsTable: React.FC<ReviewsTableProps> = ({ reviews }) => {
                 Reviewer
               </TableCell>
               <TableCell
-                key="qualityRating"
+                key="Rating"
                 align="left"
                 style={{ minWidth: 15 }}
               >
-                Quality Rating
+                Rating
               </TableCell>
               <TableCell
-                key="quantityRating"
+                key="date"
                 align="left"
                 style={{ minWidth: 15 }}
               >
-                Quantity Rating
-              </TableCell>
-              <TableCell
-                key="overallRating"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Overall Rating
+                Date
               </TableCell>
             </TableRow>
           </TableHead>
@@ -79,19 +72,16 @@ const ReviewsTable: React.FC<ReviewsTableProps> = ({ reviews }) => {
                 return (
                   <TableRow key={index}>
                     <TableCell key={`${index}-food`} align="left">
-                      {review.foodID}
+                      {review.food.foodName}
                     </TableCell>
                     <TableCell key={`${index}-user`} align="left">
-                      {review.userID}
+                      {review.user.userName}
                     </TableCell>
-                    <TableCell key={`${index}-quality`} align="left">
-                      {review.quality}
+                    <TableCell key={`${index}-rating`} align="left">
+                      {review.rating} / 10
                     </TableCell>
-                    <TableCell key={`${index}-quantity`} align="left">
-                      {review.quantity}
-                    </TableCell>
-                    <TableCell key={`${index}-overall`} align="left">
-                      {review.rating}
+                    <TableCell key={`${index}-date`} align="left">
+                      {review.reviewDate}
                     </TableCell>
                   </TableRow>
                 );

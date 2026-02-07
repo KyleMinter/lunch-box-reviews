@@ -1,5 +1,5 @@
 function nameof<T>(name: keyof T) {
-    return name;
+  return name;
 }
 
 /**
@@ -13,10 +13,10 @@ function nameof<T>(name: keyof T) {
  * ```
  */
 export enum EntityType {
-    Review = 'review',
-    User = 'user',
-    FoodItem = 'foodItem',
-    Menu = 'menu'
+  Review = 'review',
+  User = 'user',
+  FoodItem = 'foodItem',
+  Menu = 'menu'
 }
 
 /**
@@ -24,8 +24,8 @@ export enum EntityType {
  * Contains the unique ID and the entity type of a given entity instance.
  */
 export interface Entity {
-    entityID: string,
-    entityType: EntityType | string
+  entityID: string,
+  entityType: EntityType | string
 }
 
 /**
@@ -33,17 +33,17 @@ export interface Entity {
  * Also contains a key property listing all of the interface's properties as string.
  */
 export class EntityProps {
-    static readonly entityID: string = nameof<Entity>('entityID');
-    static readonly entityType: string = nameof<Entity>('entityType');
+  static readonly entityID: string = nameof<Entity>('entityID');
+  static readonly entityType: string = nameof<Entity>('entityType');
 
-    static readonly keys: string = `
+  static readonly keys: string = `
         ${this.entityID},
         ${this.entityType}
     `;
 }
 
 /**
- * An interface representing a review entity stored in the Reviews Table.
+ * An interface representing a review prototype entity stored in the Reviews Table.
  * Contains the following fields:
  * ```js
  * foodID       // the ID of the food item that this review is for.
@@ -55,14 +55,60 @@ export class EntityProps {
  * reviewDate   // the date this review was last edited. Represented as an ISO-8601 string.
  * ```
  */
+export interface ReviewPrototype extends Entity {
+  foodID: string,
+  menuID: string,
+  userID: string,
+  quality: number,
+  quantity: number,
+  rating: number,
+  reviewDate: string
+}
+
+/**
+ * A class representing the properties of the ReviewPrototype interface.
+ * Also contains a key property listing all of the interface's properties as string.
+ */
+export class ReviewPrototypeProps extends EntityProps {
+  static readonly foodID: string = nameof<ReviewPrototype>('foodID');
+  static readonly menuID: string = nameof<ReviewPrototype>('menuID');
+  static readonly userID: string = nameof<ReviewPrototype>('userID');
+  static readonly quality: string = nameof<ReviewPrototype>('quality');
+  static readonly quanitity: string = nameof<ReviewPrototype>('quantity');
+  static readonly rating: string = nameof<ReviewPrototype>('rating');
+  static readonly reviewDate: string = nameof<ReviewPrototype>('reviewDate');
+
+  static readonly keys: string = `
+        ${EntityProps.keys},
+        ${this.foodID},
+        ${this.menuID},
+        ${this.userID},
+        ${this.quality},
+        ${this.quanitity},
+        ${this.rating},
+        ${this.reviewDate},
+    `;
+}
+
+/**
+ * An interface representing a review entity stored in the Reviews Table.
+ * Contains the following fields:
+ * ```js
+ * food         // the food item that this review is for.
+ * user         // the user who created the review.
+ * quality      // the quality rating of the review.
+ * quantity     // the quantity rating of the review.
+ * rating       // the overall rating of the review.
+ * reviewDate   // the date this review was last edited. Represented as an ISO-8601 string.
+ * ```
+ */
 export interface Review extends Entity {
-    foodID: string,
-    menuID: string,
-    userID: string,
-    quality: number,
-    quantity: number,
-    rating: number,
-    reviewDate: string
+  food: FoodItem,
+  user: User,
+  quality: number,
+  quantity: number,
+  rating: number,
+  reviewDate: string
 }
 
 /**
@@ -70,19 +116,17 @@ export interface Review extends Entity {
  * Also contains a key property listing all of the interface's properties as string.
  */
 export class ReviewProps extends EntityProps {
-    static readonly foodID: string = nameof<Review>('foodID');
-    static readonly menuID: string = nameof<Review>('menuID');
-    static readonly userID: string = nameof<Review>('userID');
-    static readonly quality: string = nameof<Review>('quality');
-    static readonly quanitity: string = nameof<Review>('quantity');
-    static readonly rating: string = nameof<Review>('rating');
-    static readonly reviewDate: string = nameof<Review>('reviewDate');
+  static readonly food: string = nameof<Review>('food');
+  static readonly user: string = nameof<Review>('user');
+  static readonly quality: string = nameof<Review>('quality');
+  static readonly quanitity: string = nameof<Review>('quantity');
+  static readonly rating: string = nameof<Review>('rating');
+  static readonly reviewDate: string = nameof<Review>('reviewDate');
 
-    static readonly keys: string = `
+  static readonly keys: string = `
         ${EntityProps.keys},
-        ${this.foodID},
-        ${this.menuID},
-        ${this.userID},
+        ${this.food},
+        ${this.user},
         ${this.quality},
         ${this.quanitity},
         ${this.rating},
@@ -101,10 +145,10 @@ export class ReviewProps extends EntityProps {
  * ```
  */
 export interface User extends Entity {
-    userName: string;
-    userEmail: string;
-    accountCreated: string;
-    userPermissions: UserPermission[]
+  userName: string;
+  userEmail: string;
+  accountCreated: string;
+  userPermissions: UserPermission[]
 }
 
 /**
@@ -112,11 +156,11 @@ export interface User extends Entity {
  * Also contains a key property listing all of the interface's properties as string.
  */
 export class UserProps extends EntityProps {
-    static readonly userName: string = nameof<User>('userName');
-    static readonly userEmail: string = nameof<User>('userEmail');
-    static readonly userPermissions: string = nameof<User>('userPermissions');
+  static readonly userName: string = nameof<User>('userName');
+  static readonly userEmail: string = nameof<User>('userEmail');
+  static readonly userPermissions: string = nameof<User>('userPermissions');
 
-    static readonly keys: string = `
+  static readonly keys: string = `
         ${EntityProps.keys},
         ${this.userName},
         ${this.userEmail},
@@ -136,11 +180,11 @@ export class UserProps extends EntityProps {
  * ```
  */
 export enum UserPermission {
-    userReviewPermissions,
-    adminReviewPermissions,
-    adminFoodItemPermissions,
-    adminMenuInstancePermissions,
-    adminUserPermissions
+  userReviewPermissions,
+  adminReviewPermissions,
+  adminFoodItemPermissions,
+  adminMenuInstancePermissions,
+  adminUserPermissions
 }
 
 /**
@@ -155,11 +199,11 @@ export enum UserPermission {
  * ```
  */
 export interface FoodItem extends Entity {
-    foodName: string,
-    foodOrigin: string,
-    foodAttributes: FoodAttributes,
-    totalRating: number,
-    numReviews: number
+  foodName: string,
+  foodOrigin: string,
+  foodAttributes: FoodAttributes,
+  totalRating: number,
+  numReviews: number
 }
 
 /**
@@ -167,8 +211,8 @@ export interface FoodItem extends Entity {
  * Contains a description and the nutritional information of the food item.
  */
 export interface FoodAttributes {
-    description?: string,
-    nutrition?: string
+  description?: string,
+  nutrition?: string
 }
 
 /**
@@ -176,13 +220,13 @@ export interface FoodAttributes {
  * Also contains a key property listing all of the interface's properties as string.
  */
 export class FoodItemProps extends EntityProps {
-    static readonly foodName: string = nameof<FoodItem>('foodName');
-    static readonly foodOrigin: string = nameof<FoodItem>('foodOrigin');
-    static readonly foodAttributes: string = nameof<FoodItem>('foodAttributes');
-    static readonly totalRating: string = nameof<FoodItem>('totalRating');
-    static readonly numReviews: string = nameof<FoodItem>('numReviews');
+  static readonly foodName: string = nameof<FoodItem>('foodName');
+  static readonly foodOrigin: string = nameof<FoodItem>('foodOrigin');
+  static readonly foodAttributes: string = nameof<FoodItem>('foodAttributes');
+  static readonly totalRating: string = nameof<FoodItem>('totalRating');
+  static readonly numReviews: string = nameof<FoodItem>('numReviews');
 
-    static readonly keys: string = `
+  static readonly keys: string = `
         ${EntityProps.keys},
         ${this.foodName},
         ${this.foodOrigin},
@@ -203,10 +247,10 @@ export class FoodItemProps extends EntityProps {
  * ```
  */
 export interface Menu extends Entity {
-    officeLocation: OfficeLocation,
-    officeCafe?: OfficeCafe,
-    menuOption: MenuOption,
-    menuDate: string
+  officeLocation: OfficeLocation,
+  officeCafe?: OfficeCafe,
+  menuOption: MenuOption,
+  menuDate: string
 }
 
 /**
@@ -214,8 +258,8 @@ export interface Menu extends Entity {
  * Can either one of the following: `MainOption` or `ChilledOption`.
  */
 export enum MenuOption {
-    MainOption,
-    ChilledOption
+  MainOption,
+  ChilledOption
 }
 
 /**
@@ -223,9 +267,9 @@ export enum MenuOption {
  * Can either one of the following: `OKC_HQ`, `Grapevine`, `NTH`.
  */
 export enum OfficeLocation {
-    OKC_HQ,
-    Grapevine,
-    NTH
+  OKC_HQ,
+  Grapevine,
+  NTH
 }
 
 /**
@@ -233,11 +277,11 @@ export enum OfficeLocation {
  * Can either one of the following: `CafeA`, `CafeB`, `CafeC`, `CafeD`, `CafeE`.
  */
 export enum OfficeCafe {
-    CafeA,
-    CafeB,
-    CafeC,
-    CafeD,
-    CafeE,
+  CafeA,
+  CafeB,
+  CafeC,
+  CafeD,
+  CafeE,
 }
 
 /**
@@ -245,12 +289,12 @@ export enum OfficeCafe {
  * Also contains a key property listing all of the interface's properties as string.
  */
 export class MenuProps extends EntityProps {
-    static readonly officeLocation: string = nameof<Menu>('officeLocation');
-    static readonly officeCafe: string = nameof<Menu>('officeCafe');
-    static readonly menuOption: string = nameof<Menu>('menuOption');
-    static readonly menuDate: string = nameof<Menu>('menuDate');
+  static readonly officeLocation: string = nameof<Menu>('officeLocation');
+  static readonly officeCafe: string = nameof<Menu>('officeCafe');
+  static readonly menuOption: string = nameof<Menu>('menuOption');
+  static readonly menuDate: string = nameof<Menu>('menuDate');
 
-    static readonly keys: string = `
+  static readonly keys: string = `
         ${EntityProps.keys},
         ${this.officeLocation},
         ${this.officeCafe},

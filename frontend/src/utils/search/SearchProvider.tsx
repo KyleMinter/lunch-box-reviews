@@ -20,14 +20,14 @@ const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
             {userName: 'name', userEmail: 'email', accountCreated: '02/07/2026', entityID: 'uid2', entityType: EntityType.User, userPermissions: []}
         ];
 
-        const reviews: Review[] = [
-            {entityID: 'rid1', foodID: 'food', menuID: '01/01/2025', userID: 'user', quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review},
-            {entityID: 'rid2', foodID: 'food', menuID: '01/01/2025', userID: 'user', quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review}
-        ];
-
         const foods: FoodItem[] = [
             {entityID: 'fid1', foodName: 'name', foodOrigin: 'origin', foodAttributes: {nutrition: 'nutrition', description: 'description'}, totalRating: 20, numReviews: 2, entityType: EntityType.FoodItem},
             {entityID: 'fid1', foodName: 'name', foodOrigin: 'origin', foodAttributes: {}, totalRating: 15, numReviews: 3, entityType: EntityType.FoodItem}
+        ];
+
+        const reviews: Review[] = [
+            {entityID: 'rid1', food: foods[0],  user: users[0], quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review},
+            {entityID: 'rid2', food: foods[1],  user: users[1], quality: 5.55, quantity: 3, rating: 8, reviewDate: '01/01/2025', entityType: EntityType.Review}
         ];
 
         searchDispatch({ type: 'SEARCH_START' });
