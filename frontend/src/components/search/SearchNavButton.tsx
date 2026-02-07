@@ -27,7 +27,8 @@ const SearchNavButton= (props : SearchNavButtonProps) => {
       aria-haspopup="true"
       aria-expanded={ariaExpanded}
       onClick={onClick}
-      variant='contained'
+      variant='outlined'
+      color="inherit"
       startIcon={!isMobile ? <SearchIcon /> : undefined}
       sx={{
         marginRight: theme.spacing(1),

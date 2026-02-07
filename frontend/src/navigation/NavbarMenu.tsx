@@ -44,11 +44,12 @@ function NavbarMenu() {
     <>
       <Button
         id="navbar-menu-button"
-        variant="contained"
+        variant="outlined"
         aria-controls={open ? 'navbar-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
+        color="inherit"
       >
         {open ? <MenuOpenIcon /> : <MenuIcon />}
       </Button>
