@@ -69,7 +69,7 @@ const SearchMenu = (props: SearchMenuProps) => {
     filtersDispatch({ type: 'FILTERS_ERRORS', errors: errors });
 
     if (errors.length === 0) {
-      // onClose();
+      onClose();
       await search();
       if (location.pathname !== '/search') {
         navigate('/search');
