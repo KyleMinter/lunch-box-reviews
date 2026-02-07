@@ -1,94 +1,115 @@
 import { Review } from "@lunch-box-reviews/shared-types";
-import { Link } from "react-router-dom";
-import './table.css';
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+} from "@mui/material";
+import { useState } from "react";
 
 
 interface ReviewsTableProps {
-    reviews: Review[]
+  reviews: Review[]
 }
 
 const ReviewsTable: React.FC<ReviewsTableProps> = ({ reviews }) => {
-    return (
-        <table className="table">
-            <colgroup>
-                <col style={{ width: "24%" }} />
-                <col style={{ width: "24%"}} />
-                <col style={{ width: "8%"}} />
-                <col style={{ width: "8.5%"}} />
-                <col style={{ width: "7.5%"}} />
-                <col style={{ width: "15%"}} />
-                <col style={{ width: "13%"}} />
-            </colgroup>
-            <thead>
-                <tr>
-                    <th rowSpan={2} className="table-header-no-left-border">
-                        Food Item
-                    </th>
-                    <th rowSpan={2}>
-                        Submitted By
-                    </th>
-                    <th colSpan={3} className="table-colspan-header">
-                        Review Ratings
-                    </th>
-                    <th colSpan={2} className="table-colspan-header">
-                        Menu
-                    </th>
-                </tr>
-                <tr className="table-subheaders">
-                    <th>Quality</th>
-                    <th>Quantity</th>
-                    <th>Overall</th>
-                    <th>Location</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {reviews.map((review, index) => {
-                    return (
-                        <ReviewEntry key={index} review={review} />
-                    )
-                })}
-            </tbody>
-        </table>
-    )
-}
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-interface ReviewEntryProps {
-    review: Review
-}
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  }
 
-const ReviewEntry: React.FC<ReviewEntryProps> = ({ review }) => {
-    return (
-        <tr>
-            <td>
-                <Link to={`/?food=${review.foodID}`}>
-                    {review.foodID}
-                </Link>
-            </td>
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
-            <td>
-                <Link to={`/?user=${review.userID}`}>
-                    {review.userID}
-                </Link>
-            </td>
-
-            <td>{review.quality}</td>
-            <td>{review.quantity}</td>
-            <td>{review.rating}</td>
-            
-            <td>
-                <Link to={`/?menu=${review.menuID}`}>
-                    {review.menuID}
-                </Link>
-            </td>
-            
-            <td>
-                <Link to={`/?menu=${review.menuID}`}>
-                    {review.menuID}
-                </Link>
-            </td>
-        </tr>
-    )
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 440 }}>
+        <Table stickyHeader aria-label="user search results table">
+          <TableHead>
+            <TableRow>
+              <TableCell
+                key="foodItem"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Item
+              </TableCell>
+              <TableCell
+                key="user"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Reviewer
+              </TableCell>
+              <TableCell
+                key="qualityRating"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Quality Rating
+              </TableCell>
+              <TableCell
+                key="quantityRating"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Quantity Rating
+              </TableCell>
+              <TableCell
+                key="overallRating"
+                align="left"
+                style={{ minWidth: 15 }}
+              >
+                Overall Rating
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {reviews
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((review, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell key={`${index}-food`} align="left">
+                      {review.foodID}
+                    </TableCell>
+                    <TableCell key={`${index}-user`} align="left">
+                      {review.userID}
+                    </TableCell>
+                    <TableCell key={`${index}-quality`} align="left">
+                      {review.quality}
+                    </TableCell>
+                    <TableCell key={`${index}-quantity`} align="left">
+                      {review.quantity}
+                    </TableCell>
+                    <TableCell key={`${index}-overall`} align="left">
+                      {review.rating}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50]}
+        component="div"
+        count={2}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
+  )
 }
 
 export default ReviewsTable;
