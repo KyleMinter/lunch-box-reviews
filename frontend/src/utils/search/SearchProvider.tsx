@@ -16,8 +16,8 @@ const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
     
     const search = useCallback(async () => {
         const users: User[] = [
-            {userName: 'name', userEmail: 'email', entityID: 'uid1', entityType: EntityType.User, userPermissions: []},
-            {userName: 'name', userEmail: 'email', entityID: 'uid2', entityType: EntityType.User, userPermissions: []}
+            {userName: 'name', userEmail: 'email', accountCreated: '02/07/2026', entityID: 'uid1', entityType: EntityType.User, userPermissions: []},
+            {userName: 'name', userEmail: 'email', accountCreated: '02/07/2026', entityID: 'uid2', entityType: EntityType.User, userPermissions: []}
         ];
 
         const reviews: Review[] = [
