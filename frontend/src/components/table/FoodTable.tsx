@@ -11,25 +11,61 @@ import {
   TableRow,
   Typography
 } from "@mui/material";
-import { Fragment, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Fragment, useEffect, useState } from "react";
+import LoadingSpinner from "../LoadingSpinner";
+import NoResultsFound from "./NoResultsFound";
+import { useFoodItems } from "../../hooks/useFetch";
 
 
-interface FoodTableProps {
-  foodItems: FoodItem[]
-}
+const FoodTable = () => {
+  const queryClient = useQueryClient();
 
-const FoodTable: React.FC<FoodTableProps> = ({ foodItems }) => {
-  const [page, setPage] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading
+  } = useFoodItems(rowsPerPage);
+
+  const page = data?.pages[pageIndex];
+  const items = page?.items ?? [];
+
+  useEffect(() => {
+      setPageIndex(0);
+      queryClient.removeQueries({ queryKey: ['foods'] });
+    }, [rowsPerPage, queryClient]);
+
+  const handleChangePage = async (_event: unknown, newPageIndex: number) => {
+    // Only allow forward navigation by 1.
+    if (newPageIndex > pageIndex) {
+      if (newPageIndex === (data?.pages.length ?? 1) - 1) {
+        if (hasNextPage) {
+          await fetchNextPage();
+        }
+      }
+      setPageIndex(newPageIndex);
+    }
+
+    // Backwards navigation is always safe.
+    if (newPageIndex < pageIndex) {
+      setPageIndex(newPageIndex);
+    }
   }
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+    setRowsPerPage(Number(event.target.value));
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const foodItems: FoodItem[] = [];
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -61,43 +97,48 @@ const FoodTable: React.FC<FoodTableProps> = ({ foodItems }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {foodItems
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((food, index) => {
-                return (
-                  <Fragment key={index}>
+            {items.map((food) => {
+              return (
+                <Fragment key={food.entityId}>
+                  <TableRow>
+                    <TableCell key={`${food.entityId}-name`} align="left">
+                      {food.foodName}
+                    </TableCell>
+                    <TableCell key={`${food.entityId}-origin`} align="left">
+                      {food.foodOrigin}
+                    </TableCell>
+                    <TableCell key={`${food.entityId}-averageRating`} align="left">
+                      {food.totalRating / food.numReviews}
+                    </TableCell>
+                  </TableRow>
+                  {(food.foodAttributes.description || food.foodAttributes.nutrition) && (
                     <TableRow>
-                      <TableCell key={`${index}-name`} align="left">
-                        {food.foodName}
-                      </TableCell>
-                      <TableCell key={`${index}-origin`} align="left">
-                        {food.foodOrigin}
-                      </TableCell>
-                      <TableCell key={`${index}-averageRating`} align="left">
-                        {food.totalRating / food.numReviews}
+                      <TableCell key={`${food.entityId}-attributes`} align="left" colSpan={3}>
+                        <Box sx={{ pl: 2 }}>
+                          {food.foodAttributes.description && (
+                            <Typography key={`${food.entityId}-description`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                              {food.foodAttributes.description}
+                            </Typography>
+                          )}
+                          {food.foodAttributes.nutrition && (
+                            <Typography key={`${food.entityId}-nutrition`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                              {food.foodAttributes.nutrition}
+                            </Typography>
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
-                    {(food.foodAttributes.description || food.foodAttributes.nutrition) && (
-                      <TableRow>
-                        <TableCell key={`${index}-attributes`} align="left" colSpan={3}>
-                          <Box sx={{ pl: 2 }}>
-                            {food.foodAttributes.description && (
-                              <Typography key={`${index}-description`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                                {food.foodAttributes.description}
-                              </Typography>
-                            )}
-                            {food.foodAttributes.nutrition && (
-                              <Typography key={`${index}-nutrition`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                                {food.foodAttributes.nutrition}
-                              </Typography>
-                            )}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </Fragment>
-                );
-              })}
+                  )}
+                </Fragment>
+              );
+            })}
+            {items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  <NoResultsFound />
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -106,10 +147,18 @@ const FoodTable: React.FC<FoodTableProps> = ({ foodItems }) => {
         component="div"
         count={2}
         rowsPerPage={rowsPerPage}
-        page={page}
+        page={pageIndex}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        slotProps={{
+          actions: {
+            nextButton: {
+              disabled: !hasNextPage && pageIndex === (data?.pages.length ?? 1) - 1
+            }
+          }
+        }}
       />
+      {isFetchingNextPage && <LoadingSpinner />}
     </Paper>
   )
 }
