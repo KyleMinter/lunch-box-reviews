@@ -1,4 +1,4 @@
-import { styled, alpha, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import useSearchFilters from '../../hooks/useSearchFilters';
@@ -47,7 +47,6 @@ const SearchBar = (props: SearchBarProps) => {
     disabled = false
   } = props;
   
-  const theme = useTheme();
   const { filters, filtersDispatch } = useSearchFilters();
 
   return (
