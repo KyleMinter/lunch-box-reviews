@@ -1,7 +1,6 @@
 import { EntityType } from "@lunch-box-reviews/shared-types";
 import dayjs, { Dayjs } from "dayjs";
 import { defaultFilters } from "./SearchContext";
-import validateFilters from "../validators/filterValidation";
 
 
 export interface SearchFilter {
@@ -34,7 +33,7 @@ function isSearchFilter(obj: any): obj is SearchFilter {
 }
 
 function isDateValue(value: any): boolean {
-  return (typeof value === null || dayjs.isDayjs(value));
+  return (value === null || dayjs.isDayjs(value));
 }
 
 export type FiltersAction =
