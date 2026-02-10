@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, AUTH_ENABLED } from '../constants';
+import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, AUTH_ENABLED } from '../../constants';
 
 interface Auth0ProviderWithNavigateProps {
   children: React.ReactNode;
