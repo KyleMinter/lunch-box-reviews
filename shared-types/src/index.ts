@@ -103,7 +103,6 @@ export const foodItemProps = props(foodItemSchema);
  * userName         // the user name of the user.
  * userEmail        // the email of the user.
  * created          // the date of account creation.
- * userPermissions  // an array containing the various permissions the user has.
  * ```
  */
 export type User = z.infer<typeof userSchema>;
@@ -133,8 +132,8 @@ export const reviewBaseSchema = entitySchema.extend({
  * An interface representing a review prototype entity stored in the Reviews Table.
  * Contains the following fields:
  * ```js
- * foodID       // the ID of the food item that this review is for.
- * userID       // the ID of the user who created the review.
+ * foodId       // the ID of the food item that this review is for.
+ * userId       // the ID of the user who created the review.
  * quality      // the quality rating of the review.
  * quantity     // the quantity rating of the review.
  * rating       // the overall rating of the review.
