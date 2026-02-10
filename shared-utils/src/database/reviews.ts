@@ -7,6 +7,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import {
   DateFilter,
+  decodeCursor,
+  encodeCursor,
   getDynamoDbClient,
   getFoodItem,
   IDeleteCommandOutput,
@@ -14,7 +16,7 @@ import {
   IPutCommandOutput,
   IQueryCommandOutput,
   IUpdateCommandOutput,
-  PaginationParameters,
+  reviewPrototypeToDtoSchema,
   REVIEWS_TABLE,
   updateFoodItem
 } from '.';
@@ -23,19 +25,21 @@ import { BadRequestError } from '../errors';
 import {
   EntityType,
   FoodItem,
+  PaginatedResponse,
+  PaginationParameters,
   Review,
-  ReviewProps,
   ReviewPrototype,
-  ReviewPrototypeProps
+  reviewPrototypeProps,
+  reviewPrototypeSchema
 } from '@lunch-box-reviews/shared-types';
 
 
 /*
-    ======================================================================================================
+  ======================================================================================================
 
-    /reviews Database Queries
+  /reviews Database Queries
 
-    ======================================================================================================
+  ======================================================================================================
 */
 
 /**
@@ -49,15 +53,11 @@ function roundTo(num: number, places: number): number {
   return Math.round(num * factor) / factor;
 }
 
-function convertAndValidateRatingNumbers(qualityStr: string, quantityStr: string) {
-  // Convert the ratings to numbers
-  let quality: number = Number(qualityStr);
-  let quantity: number = Number(quantityStr);
-
+function validateRatingNumbers(quality: number, quantity: number) {
   // Valiate quality and quantity ratings.
-  if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
-    quality < 1 || quantity < 1 || quantity > 5)
+  if (quality > 10 || quality < 1 || quantity < 1 || quantity > 5) {
     throw new BadRequestError('Invalid review ratings provided');
+  }
 
   // Round quality rating to two decimal places and truncate the quantity rating.
   quality = roundTo(quality as number, 2);
@@ -86,27 +86,44 @@ function calculateOverallRating(quality: number, quantity: number): number {
  * Constructs a new review with a given a JSON string.
  * @param jsonStr the JSON object to construct the review from
  * @param oldReview an already existing review used to supply values to the newly constructed review.
- * If this value is provided the existing entityID, userID, and foodID will used. If no review is given, values will instead be sourced from the provided json.
+ * If this value is provided the existing entityId, userId, and foodId will used. If no review is given, values will instead be sourced from the provided json.
  * @returns the newly constructed review
  */
-export async function constructReview(json: any, oldReview?: ReviewPrototype) {
-  const { quality, quantity } = convertAndValidateRatingNumbers(json.quality, json.quantity);
+export async function constructReview(json: any, oldReview?: ReviewPrototype): Promise<ReviewPrototype> {
+  const partialReviewSchema = reviewPrototypeSchema.transform((data) => {
+    const currDate: string = new Date().toISOString();
+    const { quality, quantity } = validateRatingNumbers(data.quality, data.quantity);
+    const rating = calculateOverallRating(quality, quantity);
 
-  const reviewDate: string = new Date().toISOString();
+    return {
+      ...data,
+      entityType: EntityType.Review,
+      quality: quality,
+      quantity: quantity,
+      rating: rating,
+      reviewDate: currDate
+    };
+  });
 
-  // Construct the review.
-  const review: ReviewPrototype = {
-    entityID: oldReview ? oldReview.entityID : uuidv4(),
-    entityType: EntityType.Review,
-    userID: oldReview ? oldReview.userID : json.userID,
-    menuID: oldReview ? oldReview.menuID : json.menuID,
-    foodID: oldReview ? oldReview.foodID : json.foodID,
-    quality: quality,
-    quantity: quantity,
-    rating: calculateOverallRating(json.quality, json.quantity),
-    reviewDate: reviewDate,
+  let constructedReviewSchema;
+  if (!oldReview) {
+    // Construct a new review.
+    constructedReviewSchema = partialReviewSchema.transform((data) => {
+      return { ...data, entityId: uuidv4() };
+    });
+  } else {
+    // Construct a review from an existing one.
+    constructedReviewSchema = partialReviewSchema.transform((data) => {
+      return {
+        ...data,
+        entityId: oldReview.entityId,
+        userId: oldReview.userId,
+        foodId: oldReview.foodId
+      };
+    });
   }
 
+  const review = constructedReviewSchema.parse(json);
   return review;
 }
 
@@ -139,7 +156,10 @@ export async function createReview(review: ReviewPrototype, foodItem: FoodItem) 
  * @param pagination the pagination parameters used to query the database
  * @returns a list of reviews and the last evaluated key
  */
-export async function getAllReviews(dateFilter: DateFilter, pagination?: PaginationParameters) {
+export async function getAllReviews(
+  dateFilter: DateFilter,
+  pagination?: PaginationParameters
+): Promise<PaginatedResponse<Review>> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
@@ -148,8 +168,8 @@ export async function getAllReviews(dateFilter: DateFilter, pagination?: Paginat
   const endDate = dateFilter.endDate;
 
   if (startDate && endDate) {
-    indexName = `GSI-${ReviewPrototypeProps.entityType}-${ReviewPrototypeProps.reviewDate}`;
-    keyConditionExpression = `${ReviewPrototypeProps.entityType} = :pkValue AND ${ReviewPrototypeProps.reviewDate} BETWEEN :startDate AND :endDate`;
+    indexName = `GSI-${reviewPrototypeProps.entityType}-${reviewPrototypeProps.reviewDate}`;
+    keyConditionExpression = `${reviewPrototypeProps.entityType} = :pkValue AND ${reviewPrototypeProps.reviewDate} BETWEEN :startDate AND :endDate`;
     expressionAttributeValues = {
       ':pkValue': EntityType.Review,
       ':startDate': startDate,
@@ -157,16 +177,16 @@ export async function getAllReviews(dateFilter: DateFilter, pagination?: Paginat
     };
   }
   else if (startDate) {
-    indexName = `GSI-${ReviewPrototypeProps.entityType}-${ReviewPrototypeProps.reviewDate}`;
-    keyConditionExpression = `${ReviewPrototypeProps.entityType} = :pkValue AND ${ReviewPrototypeProps.reviewDate} >= :startDate`;
+    indexName = `GSI-${reviewPrototypeProps.entityType}-${reviewPrototypeProps.reviewDate}`;
+    keyConditionExpression = `${reviewPrototypeProps.entityType} = :pkValue AND ${reviewPrototypeProps.reviewDate} >= :startDate`;
     expressionAttributeValues = {
       ':pkValue': EntityType.Review,
       ':startDate': startDate
     };
   }
   else if (endDate) {
-    indexName = `GSI-${ReviewPrototypeProps.entityType}-${ReviewPrototypeProps.reviewDate}`;
-    keyConditionExpression = `${ReviewPrototypeProps.entityType} = :pkValue AND ${ReviewPrototypeProps.reviewDate} <= :endDate`;
+    indexName = `GSI-${reviewPrototypeProps.entityType}-${reviewPrototypeProps.reviewDate}`;
+    keyConditionExpression = `${reviewPrototypeProps.entityType} = :pkValue AND ${reviewPrototypeProps.reviewDate} <= :endDate`;
     expressionAttributeValues = {
       ':pkValue': EntityType.Review,
       ':endDate': endDate
@@ -174,8 +194,8 @@ export async function getAllReviews(dateFilter: DateFilter, pagination?: Paginat
   }
   // Query the database for all reviews.
   else {
-    indexName = `GSI-${ReviewPrototypeProps.entityType}`;
-    keyConditionExpression = `${ReviewPrototypeProps.entityType} = :pkValue`;
+    indexName = `GSI-${reviewPrototypeProps.entityType}`;
+    keyConditionExpression = `${reviewPrototypeProps.entityType} = :pkValue`;
     expressionAttributeValues = {
       ':pkValue': EntityType.Review
     };
@@ -188,38 +208,57 @@ export async function getAllReviews(dateFilter: DateFilter, pagination?: Paginat
       IndexName: indexName,
       KeyConditionExpression: keyConditionExpression,
       ExpressionAttributeValues: expressionAttributeValues,
-      ProjectionExpression: ReviewPrototypeProps.keys,
-      ExclusiveStartKey: pagination?.offset,
+      ProjectionExpression: reviewPrototypeProps.keys,
+      ExclusiveStartKey: decodeCursor(pagination?.cursor),
       Limit: pagination?.limit,
     })
   ) as IQueryCommandOutput<ReviewPrototype>;
 
-  // TODO: we need to grab users and food items associated with each review
+  return await convertReviewPrototypesToDto({
+    items: results.Items ?? [],
+    nextCursor: encodeCursor(results.LastEvaluatedKey)
+  });
+}
+
+/**
+ * Converts all ReviewPrototype instances in a given PaginatedResponse to Review.
+ * @param response a PaginatedResponse containing ReviewPrototype objects
+ * @returns a PaginatedResponse containing Review objects
+ */
+export async function convertReviewPrototypesToDto(
+  response: PaginatedResponse<ReviewPrototype>
+): Promise<PaginatedResponse<Review>> {
+  let items: Review[] = [];
+  if (response.items) {
+    const promises = await response.items.map(async (review) => {
+      return reviewPrototypeToDtoSchema.parse(review);
+    });
+
+    items = await Promise.all(promises);
+  }
 
   return {
-    Items: results.Items ? results.Items : [],
-    LastEvaluatedKey: results.LastEvaluatedKey
+    items: items,
+    nextCursor: response.nextCursor
   };
 }
 
 /**
  * Retrieves a review from the database.
- * @param reviewID the id of the review to retrieve
+ * @param reviewId the id of the review to retrieve
  * @returns the review retrieved
  */
-export async function getReview(reviewID: string) {
+export async function getReview(reviewId: string) {
   const dynamo = getDynamoDbClient();
   const results = await dynamo.send(
     new GetCommand({
       TableName: REVIEWS_TABLE,
       Key: {
-        entityID: reviewID
+        entityId: reviewId
       },
-      ProjectionExpression: ReviewPrototypeProps.keys,
+      ProjectionExpression: reviewPrototypeProps.keys,
     })
   ) as IGetCommandOutput<ReviewPrototype>;
-
-  // TODO: we need to grab user and food item associate with the review
 
   return results.Item;
 }
@@ -232,7 +271,7 @@ export async function getReview(reviewID: string) {
  */
 export async function updateReview(review: ReviewPrototype, oldReview: ReviewPrototype) {
   // Update the total rating for the corresponding food item.
-  const foodItem: FoodItem = (await getFoodItem(review.foodID))!;
+  const foodItem: FoodItem = (await getFoodItem(review.foodId))!;
   foodItem.totalRating -= oldReview.rating;
   foodItem.totalRating += review.rating;
   await updateFoodItem(foodItem);
@@ -242,14 +281,14 @@ export async function updateReview(review: ReviewPrototype, oldReview: ReviewPro
     new UpdateCommand({
       TableName: REVIEWS_TABLE,
       Key: {
-        entityID: review.entityID
+        entityId: review.entityId
       },
       UpdateExpression: `SET
-                ${ReviewPrototypeProps.quality} = :newQuality,
-                ${ReviewPrototypeProps.quanitity} = :newQuantity,
-                ${ReviewPrototypeProps.rating} = :newRating,
-                ${ReviewPrototypeProps.reviewDate} = :newDate`,
-      ConditionExpression: `attribute_exists(${ReviewPrototypeProps.entityID})`,
+        ${reviewPrototypeProps.quality} = :newQuality,
+        ${reviewPrototypeProps.quantity} = :newQuantity,
+        ${reviewPrototypeProps.rating} = :newRating,
+        ${reviewPrototypeProps.reviewDate} = :newDate`,
+      ConditionExpression: `attribute_exists(${reviewPrototypeProps.entityId})`,
       ExpressionAttributeValues: {
         ':newQuality': review.quality,
         ':newQuantity': review.quantity,
@@ -273,7 +312,7 @@ export async function updateReview(review: ReviewPrototype, oldReview: ReviewPro
 export async function deleteReview(review: ReviewPrototype, updateFoodItemRating: boolean = true) {
   // Update the total rating for the corresponding food item.
   if (updateFoodItemRating) {
-    const foodItem = (await getFoodItem(review.foodID))!;
+    const foodItem = (await getFoodItem(review.foodId))!;
     foodItem.totalRating -= review.rating;
     foodItem.numReviews--;
     await updateFoodItem(foodItem);
@@ -284,7 +323,7 @@ export async function deleteReview(review: ReviewPrototype, updateFoodItemRating
     new DeleteCommand({
       TableName: REVIEWS_TABLE,
       Key: {
-        entityID: review.entityID
+        entityId: review.entityId
       }
     })
   ) as IDeleteCommandOutput<ReviewPrototype>;
