@@ -42,7 +42,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
         </Typography>
         </Box>
         <Typography variant="caption">
-          Account Created: {user.accountCreated}
+          Account Created: {user.created}
         </Typography>
       </Box>
     </Box>

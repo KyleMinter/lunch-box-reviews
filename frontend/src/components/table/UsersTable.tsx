@@ -76,8 +76,8 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
                     <TableCell key={`${index}-email`} align="left">
                       {user.userEmail}
                     </TableCell>
-                    <TableCell key={`${index}-accountCreated`} align="left">
-                      {user.accountCreated}
+                    <TableCell key={`${index}-created`} align="left">
+                      {user.created}
                     </TableCell>
                   </TableRow>
                 );
