@@ -24,12 +24,13 @@ import { BadRequestError } from '../errors';
 import { 
   EntityType,
   FoodItem,
+  FoodItemPaginatedResponse,
   foodItemProps,
   foodItemSchema,
-  PaginatedResponse,
   PaginationParameters,
-  Review,
+  ReviewPaginatedResponse,
   ReviewPrototype,
+  ReviewPrototypePaginatedResponse,
   reviewPrototypeProps
 } from '@lunch-box-reviews/shared-types';
 
@@ -108,7 +109,7 @@ export async function createFoodItem(foodItem: FoodItem) {
 export async function getAllFoodItems(
   pagination?: PaginationParameters,
   criteriaFilter?: CriteriaFilter
-): Promise<PaginatedResponse<FoodItem>> {
+): Promise<FoodItemPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
@@ -185,7 +186,7 @@ export async function getFoodItem(foodId: string) {
 export async function getReviewPrototypesFromFoodItem(
   foodId: string,
   pagination?: PaginationParameters
-): Promise<PaginatedResponse<ReviewPrototype>> {
+): Promise<ReviewPrototypePaginatedResponse> {
   const dynamo = getDynamoDbClient();
   const results = await dynamo.send(
     new QueryCommand({
@@ -217,7 +218,7 @@ export async function getReviewPrototypesFromFoodItem(
 export async function getReviewsFromFoodItem(
   foodId: string,
   pagination?: PaginationParameters
-): Promise<PaginatedResponse<Review>> {
+): Promise<ReviewPaginatedResponse> {
   return await convertReviewPrototypesToDto(
     await getReviewPrototypesFromFoodItem(foodId, pagination)
   );

@@ -25,10 +25,11 @@ import { BadRequestError } from '../errors';
 import {
   EntityType,
   FoodItem,
-  PaginatedResponse,
   PaginationParameters,
   Review,
+  ReviewPaginatedResponse,
   ReviewPrototype,
+  ReviewPrototypePaginatedResponse,
   reviewPrototypeProps,
   reviewPrototypeSchema
 } from '@lunch-box-reviews/shared-types';
@@ -159,7 +160,7 @@ export async function createReview(review: ReviewPrototype, foodItem: FoodItem) 
 export async function getAllReviews(
   dateFilter: DateFilter,
   pagination?: PaginationParameters
-): Promise<PaginatedResponse<Review>> {
+): Promise<ReviewPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
@@ -226,8 +227,8 @@ export async function getAllReviews(
  * @returns a PaginatedResponse containing Review objects
  */
 export async function convertReviewPrototypesToDto(
-  response: PaginatedResponse<ReviewPrototype>
-): Promise<PaginatedResponse<Review>> {
+  response: ReviewPrototypePaginatedResponse
+): Promise<ReviewPaginatedResponse> {
   let items: Review[] = [];
   if (response.items) {
     const promises = await response.items.map(async (review) => {

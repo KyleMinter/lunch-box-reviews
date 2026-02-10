@@ -21,12 +21,13 @@ import {
 } from '.';
 import {
   EntityType,
-  PaginatedResponse,
   PaginationParameters,
-  Review,
+  ReviewPaginatedResponse,
   ReviewPrototype,
+  ReviewPrototypePaginatedResponse,
   reviewPrototypeProps,
   User,
+  UserPaginatedResponse,
   userProps,
   userSchema
 } from '@lunch-box-reviews/shared-types';
@@ -105,7 +106,7 @@ export async function createUser(user: User) {
 export async function getAllUsers(
   pagination?: PaginationParameters,
   criteriaFilter?: CriteriaFilter
-): Promise<PaginatedResponse<User>> {
+): Promise<UserPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
@@ -182,7 +183,7 @@ export async function getUser(userId: string): Promise<User | undefined> {
 export async function getReviewPrototypesFromUser(
   userId: string,
   pagination?: PaginationParameters
-): Promise<PaginatedResponse<ReviewPrototype>> {
+): Promise<ReviewPrototypePaginatedResponse> {
   const dynamo = getDynamoDbClient();
   const results = await dynamo.send(
     new QueryCommand({
@@ -214,7 +215,7 @@ export async function getReviewPrototypesFromUser(
 export async function getReviewsFromUser(
   userId: string,
   pagination?: PaginationParameters
-): Promise<PaginatedResponse<Review>> {
+): Promise<ReviewPaginatedResponse> {
   return await convertReviewPrototypesToDto(
     await getReviewPrototypesFromUser(userId, pagination)
   );
