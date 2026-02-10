@@ -19,7 +19,7 @@ const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
     filters,
     filtersDispatch,
     search
-  }), [filters, search]);
+  }), [searchFilters, filters, search]);
 
   return (
     <FiltersContext.Provider value={filtersValue}>

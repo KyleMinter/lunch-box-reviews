@@ -1,4 +1,4 @@
-import { EntityType, FoodItem, Review, User } from '@lunch-box-reviews/shared-types';
+import { EntityType } from '@lunch-box-reviews/shared-types';
 import UsersTable from '../../components/table/UsersTable';
 import ReviewsTable from '../../components/table/ReviewsTable';
 import FoodTable from '../../components/table/FoodTable';

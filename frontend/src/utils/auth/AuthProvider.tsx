@@ -124,7 +124,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
   const isAuthorized = useCallback((): boolean => {
     if (!AUTH_ENABLED) return true;
     else return user !== undefined;
-  }, [user, AUTH_ENABLED]);
+  }, [user]);
 
   const contextValue = useMemo<AuthContextInterface>(() => {
     return {
