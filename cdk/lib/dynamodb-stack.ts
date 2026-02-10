@@ -18,7 +18,7 @@ export class DynamoDBStack extends cdk.Stack {
             billingMode: BillingMode.PAY_PER_REQUEST,
             removalPolicy: RemovalPolicy.DESTROY,
             partitionKey: {
-                name: 'entityID',
+                name: 'entityId',
                 type: AttributeType.STRING
             }
         });
@@ -33,38 +33,25 @@ export class DynamoDBStack extends cdk.Stack {
         };
 
         const GSI_EntityType_FoodID: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-entityType-foodID',
+            indexName: 'GSI-entityType-foodId',
             partitionKey: {
                 name: 'entityType',
                 type: AttributeType.STRING,
             },
             sortKey: {
-                name: 'foodID',
+                name: 'foodId',
                 type: AttributeType.STRING,
             }
         };
 
         const GSI_EntityType_UserID: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-entityType-userID',
+            indexName: 'GSI-entityType-userId',
             partitionKey: {
                 name: 'entityType',
                 type: AttributeType.STRING,
             },
             sortKey: {
-                name: 'userID',
-                type: AttributeType.STRING,
-            }
-        };
-
-        // ISO 8601 string for date representation
-        const GSI_EntityType_MenuDate: GlobalSecondaryIndexProps = {
-            indexName: 'GSI-entityType-menuDate',
-            partitionKey: {
-                name: 'entityType',
-                type: AttributeType.STRING,
-            },
-            sortKey: {
-                name: 'menuDate',
+                name: 'userId',
                 type: AttributeType.STRING,
             }
         };
@@ -129,7 +116,6 @@ export class DynamoDBStack extends cdk.Stack {
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodID);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_UserID);
-        TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_MenuDate);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_ReviewDate);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodName);
         TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodOrigin);
