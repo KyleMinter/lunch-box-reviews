@@ -2,7 +2,6 @@ import './App.css';
 import { Route, Routes, useSearchParams } from 'react-router-dom';
 import HomePage from './pages/homePage/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-import LoadingPage from './pages/LoadingPage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
 import ProfilePage from './pages/ProfilePage';
@@ -16,6 +15,8 @@ import useAuth from './hooks/useAuth';
 import AuthGuard from './utils/auth/AuthGuard';
 import Auth0ProviderWithNavigate from './utils/auth/Auth0ProviderWithNavigate';
 import AuthProvider from './utils/auth/AuthProvider';
+import LoadingSpinner from './components/LoadingSpinner';
+import { Box } from '@mui/material';
 
 
 const App = () => {
@@ -75,7 +76,9 @@ const PageRoutes = () => {
 
   if (isLoadingAuth) {
     return (
-      <LoadingPage />
+      <Box sx={{ mt: 5 }}>
+        <LoadingSpinner />
+      </Box>
     )
   }
 

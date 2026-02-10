@@ -1,8 +1,9 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react"
 import { ComponentType } from "react";
-import LoadingPage from "../../pages/LoadingPage";
 import UnauthorizedPage from "../../pages/UnauthorizedPage";
 import useAuth from "../../hooks/useAuth";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import { Box } from "@mui/material";
 
 
 interface AuthGuardProps {
@@ -18,7 +19,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
 
   const Page = withAuthenticationRequired(Component, {
     onRedirecting: () => (
-      <LoadingPage />
+      <Box sx={{ mt: 5 }}>
+        <LoadingSpinner />
+      </Box>
     )
   });
 
@@ -27,7 +30,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
   if (!isAuthenticated)
     return <Page />;
   else if (!user)
-    return <LoadingPage />;
+    return (
+      <Box sx={{ mt: 5 }}>
+        <LoadingSpinner />
+      </Box>
+    );
   // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
   else if (!isAuthorized())
     return <UnauthorizedPage />;
