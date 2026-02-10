@@ -54,6 +54,19 @@ export class NoBodyProvidedError extends BadRequestError {
 }
 
 /**
+ * An error that is generated when receiving an API request with which the client is not authorized to perform.
+ * Has an status code of 401 and contains an error message.
+ */
+export class UnauthorizedError extends RequestError {
+  constructor(message: string = 'User is not authorized for this action') {
+    super(message, 401);
+    this.name = 'UnauthorizedError';
+
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+  }
+}
+
+/**
  * An error that is generated when a target resource does not exist.
  * Has a status code of 404 and contains an error message.
  */
@@ -67,14 +80,14 @@ export class NotFoundError extends RequestError {
 }
 
 /**
- * An error that is generated when receiving an API request with which the client is not authorized to perform.
- * Has an status code of 401 and contains an error message.
+ * An error that is generated when receiving an API request with an unsupported method type.
+ * Has a status code of 405 and contains an error message.
  */
-export class UnauthorizedError extends RequestError {
-  constructor(message: string = 'User is not authorized for this action') {
-    super(message, 401);
-    this.name = 'UnauthorizedError';
+export class MethodNotAllowedError extends RequestError {
+  constructor(message: string = 'Request method not allowed on this resource') {
+    super(message, 405);
+    this.name = 'MethodNotAllowedError';
 
-    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+    Object.setPrototypeOf(this, MethodNotAllowedError.prototype);
   }
 }
