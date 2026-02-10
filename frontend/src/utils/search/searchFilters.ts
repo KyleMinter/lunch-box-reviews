@@ -57,7 +57,7 @@ export const filtersReducer = (state: SearchFilters, action: FiltersAction): Sea
       const selectedFilter = state[action.filter];
       if (isSearchFilter(selectedFilter)) {
         let filters = { ...state };
-        
+
         // If the filter is in a radio group, we will disable all of the filters in that group.
         if (selectedFilter.radioGroup) {
           const filterKeys = Object.keys(state) as (keyof SearchFilters)[];
