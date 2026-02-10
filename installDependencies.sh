@@ -8,7 +8,7 @@ printf "\nBuilding shared-utils package...\n"
 (cd ./shared-utils && npm install && npm run build)
       
 printf "\nInstalling Lambda dependencies...\n"
-for dir in ./cdk/lambda/*/*/; do
+for dir in ./cdk/lambda/*/; do
 if [ -d "$dir" ]; then
     printf "\nInstalling dependencies for $dir \n"
     (cd "$dir" && npm install)
