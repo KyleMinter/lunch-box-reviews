@@ -1,11 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwksClient, SigningKey } from 'jwks-rsa';
-import { GetCommand, GetCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { getDynamoDbClient, REVIEWS_TABLE } from '../database';
 import { UnauthorizedError } from '../errors';
-import { UserPermission } from '@lunch-box-reviews/shared-types';
 
 
 /**
@@ -14,12 +11,12 @@ import { UserPermission } from '@lunch-box-reviews/shared-types';
  * @returns the authorization headers
  */
 export function getAuthorizationHeaders(requestMethods: string) {
-    return {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': `${requestMethods}`,
-    };
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': `${requestMethods}`,
+  };
 }
 
 /**
@@ -29,28 +26,28 @@ export function getAuthorizationHeaders(requestMethods: string) {
  * @returns the decoded JWT if verification is successful, undefined if it is not
  */
 export async function validateJwtToken(event: APIGatewayProxyEvent): Promise<JwtPayload> {
-    const auth: string | undefined = event.headers.Authorization || event.headers.authorization;
-    if (auth === undefined)
-        throw new Error('Authorization header is undefined');
-    const token = auth.replace('Bearer ', '');
+  const auth: string | undefined = event.headers.Authorization || event.headers.authorization;
+  if (auth === undefined)
+    throw new Error('Authorization header is undefined');
+  const token = auth.replace('Bearer ', '');
 
-    // Configure Jwks client so we can obtain the key.
-    const jwks = new JwksClient({
-        jwksUri: 'https://dev-0jf5q4cnqlq566kt.us.auth0.com/.well-known/jwks.json'
-    });
+  // Configure Jwks client so we can obtain the key.
+  const jwks = new JwksClient({
+    jwksUri: 'https://dev-0jf5q4cnqlq566kt.us.auth0.com/.well-known/jwks.json'
+  });
 
-    // Obtain the public key so we can validate the token.
-    const jwtHeader = JSON.parse(atob(token.split('.')[0]));
-    const kid = jwtHeader.kid;
-    const signingKey = await jwks.getSigningKey(kid) as SigningKey;
-    const publicKey = signingKey.getPublicKey();
-    
-    // Verify the token.
-    const decodedJwt: JwtPayload = jwt.verify(token, publicKey) as JwtPayload;
-    if (!decodedJwt || !decodedJwt.sub)
-        throw new UnauthorizedError('User is not authorized');
+  // Obtain the public key so we can validate the token.
+  const jwtHeader = JSON.parse(atob(token.split('.')[0]));
+  const kid = jwtHeader.kid;
+  const signingKey = await jwks.getSigningKey(kid) as SigningKey;
+  const publicKey = signingKey.getPublicKey();
 
-    return decodedJwt;
+  // Verify the token.
+  const decodedJwt: JwtPayload = jwt.verify(token, publicKey) as JwtPayload;
+  if (!decodedJwt || !decodedJwt.sub)
+    throw new UnauthorizedError('User is not authorized');
+
+  return decodedJwt;
 }
 
 /**
@@ -59,24 +56,24 @@ export async function validateJwtToken(event: APIGatewayProxyEvent): Promise<Jwt
  * @param userID the ID of the user
  * @param permissions a list of UserPermissions to ensure the user has
  */
-export async function validateUserPermissions(userID: string, permissions: UserPermission[]) {
-    const dynamo = getDynamoDbClient();
+// export async function validateUserPermissions(userID: string, permissions: UserPermission[]) {
+//   const dynamo = getDynamoDbClient();
 
-    const userPermissions: UserPermission[] | undefined = await dynamo.send(
-        new GetCommand({
-            TableName: REVIEWS_TABLE,
-            Key: {
-                entityID: userID
-            },
-            ProjectionExpression: 'userPermissions',
-        })
-    ).then((result: GetCommandOutput) => result.Item?.userPermissions);
+//   const userPermissions: UserPermission[] | undefined = await dynamo.send(
+//     new GetCommand({
+//       TableName: REVIEWS_TABLE,
+//       Key: {
+//         entityID: userID
+//       },
+//       ProjectionExpression: 'userPermissions',
+//     })
+//   ).then((result: GetCommandOutput) => result.Item?.userPermissions);
 
-    if (!userPermissions)
-        throw new UnauthorizedError('User does not exist');
+//   if (!userPermissions)
+//     throw new UnauthorizedError('User does not exist');
 
-    permissions.forEach(permission => {
-        if (!userPermissions.includes(permission))
-            throw new UnauthorizedError('User is not authorized for this action');
-    });
-}
+//   permissions.forEach(permission => {
+//     if (!userPermissions.includes(permission))
+//       throw new UnauthorizedError('User is not authorized for this action');
+//   });
+// }
