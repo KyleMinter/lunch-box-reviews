@@ -1,9 +1,9 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react"
 import { ComponentType } from "react";
-import UnauthorizedPage from "../../pages/UnauthorizedPage";
 import useAuth from "../../hooks/useAuth";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { Box } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 
 interface AuthGuardProps {
@@ -12,6 +12,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
   const { isEnabled, user, isAuthenticated, isAuthorized } = useAuth();
+  const navigate = useNavigate();
 
   // If authentication is disabled we will simply permit navigation to the provided component.
   if (!isEnabled)
@@ -37,7 +38,23 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
     );
   // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
   else if (!isAuthorized())
-    return <UnauthorizedPage />;
+    return (
+      <Box sx={{ mt: 5 }}>
+        <Typography variant="h6">
+          You are not authorized to view this page
+        </Typography>
+        <Typography variant="subtitle1">
+          Click the button below to navigate back to the home page
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => navigate('/')}
+        >
+          Home
+        </Button>
+      </Box>
+    );
   else
     return <Page />;
 }
