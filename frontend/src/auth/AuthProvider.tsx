@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { EntityType, User, userSchema } from "@lunch-box-reviews/shared-types";
 import axios, { AxiosResponse } from "axios";
 import AuthContext, { AuthContextInterface } from "./AuthContext";
+import { AUTH0_AUDIENCE, AUTH_ENABLED } from "../constants";
 
 
 // Returns auth values based on whether or not authenticaion is enabled/disabled
@@ -35,16 +36,12 @@ const getAuth = (authEnabled: boolean) => {
 
 interface AuthProviderOptions {
   children: React.ReactNode;
-  authEnabled: boolean;
-  audience?: string;
   context?: Context<AuthContextInterface>;
 }
 
 const AuthProvider = (opts: AuthProviderOptions) => {
   const {
     children,
-    authEnabled,
-    audience,
     context = AuthContext
   } = opts;
 
@@ -56,7 +53,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
     getAccessTokenSilently,
     loginWithRedirect,
     logout: auth0Logout
-  } = getAuth(authEnabled)
+  } = getAuth(AUTH_ENABLED)
 
   const [user, setUser] = useState<User | undefined>(undefined);
 
@@ -64,7 +61,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
   useEffect(() => {
     (async () => {
       // If authentication is disabled we will provide a fake user to test with.
-      if (!authEnabled) {
+      if (!AUTH_ENABLED) {
         const fakeUser: User = {
           entityId: '',
           entityType: EntityType.User,
@@ -74,7 +71,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
         };
         setUser(fakeUser);
       }
-      else if (authEnabled && isAuthenticated) {
+      else if (AUTH_ENABLED && isAuthenticated) {
         const token = await getAccessTokenSilently();
 
         const headers = {
@@ -87,7 +84,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
           userEmail: `${auth0User!.email}`
         }
 
-        const url = `${audience}users`;
+        const url = `${AUTH0_AUDIENCE}users`;
 
         try {
           /*  TODO: it may be worth investigating using auth0's user for everything and then just grabbing user perms from this API call.
@@ -125,9 +122,9 @@ const AuthProvider = (opts: AuthProviderOptions) => {
   }, [auth0Logout]);
 
   const isAuthorized = useCallback((): boolean => {
-    if (!authEnabled) return true;
+    if (!AUTH_ENABLED) return true;
     else return user !== undefined;
-  }, [user, authEnabled]);
+  }, [user, AUTH_ENABLED]);
 
   const contextValue = useMemo<AuthContextInterface>(() => {
     return {
