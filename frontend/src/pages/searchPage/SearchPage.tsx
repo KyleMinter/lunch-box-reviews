@@ -18,22 +18,6 @@ const SearchPage = () => {
       case EntityType.FoodItem:
         return <FoodTable />;
     }
-
-    return (
-      <Box sx={{
-        pt: 2,
-        textAlign: 'center',
-        borderTop: 1,
-        borderColor: 'divider'
-      }}>
-        <Typography variant="h6">
-          No results found
-        </Typography>
-        <Typography variant="subtitle1">
-          Adjust your selected filters for more results
-        </Typography>
-      </Box>
-    );
   };
 
   return (
