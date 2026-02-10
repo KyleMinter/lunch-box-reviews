@@ -13,7 +13,6 @@ import useAuth from './auth/useAuth';
 import SearchPage from './pages/searchPage/SearchPage';
 import './pages/pages.css';
 import SearchProvider from './utils/search/SearchProvider';
-import useSearchResults from './hooks/useSearchResults';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 
@@ -67,9 +66,8 @@ const App = () => {
 
 const PageRoutes = () => {
   const { isLoading: isLoadingAuth } = useAuth()
-  const { isLoading: isLoadingSearch } = useSearchResults();
 
-  if (isLoadingAuth || isLoadingSearch) {
+  if (isLoadingAuth) {
     return (
       <LoadingPage />
     )
