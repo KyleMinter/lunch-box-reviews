@@ -5,15 +5,17 @@ import NotFoundPage from './pages/NotFoundPage';
 import LoadingPage from './pages/LoadingPage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
-import AuthGuard from './auth/AuthGuard';
 import ProfilePage from './pages/ProfilePage';
 import VerifyEmailModal from './components/modal/VerifyEmailModal';
 import AuthErrorModal from './components/modal/AuthErrorModal';
-import useAuth from './auth/useAuth';
 import SearchPage from './pages/searchPage/SearchPage';
 import './pages/pages.css';
 import SearchProvider from './utils/search/SearchProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import useAuth from './hooks/useAuth';
+import AuthGuard from './utils/auth/AuthGuard';
+import Auth0ProviderWithNavigate from './utils/auth/Auth0ProviderWithNavigate';
+import AuthProvider from './utils/auth/AuthProvider';
 
 
 const App = () => {
@@ -44,12 +46,16 @@ const App = () => {
 
   return (
     <>
-      <QueryClientProvider client={queryClient}>
-        <SearchProvider>
-          <Navbar />
-          <PageRoutes />
-        </SearchProvider>
-      </QueryClientProvider>
+      <Auth0ProviderWithNavigate>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <SearchProvider>
+              <Navbar />
+              <PageRoutes />
+            </SearchProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </Auth0ProviderWithNavigate>
       <VerifyEmailModal
         closeOnLossOfFocus={true}
         isOpen={isVerifyEmailModalOpen}

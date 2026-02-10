@@ -1,8 +1,8 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react"
 import { ComponentType } from "react";
-import LoadingPage from "../pages/LoadingPage";
-import UnauthorizedPage from "../pages/UnauthorizedPage";
-import useAuth from "./useAuth";
+import LoadingPage from "../../pages/LoadingPage";
+import UnauthorizedPage from "../../pages/UnauthorizedPage";
+import useAuth from "../../hooks/useAuth";
 
 
 interface AuthGuardProps {

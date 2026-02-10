@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { EntityType, User, userSchema } from "@lunch-box-reviews/shared-types";
 import axios, { AxiosResponse } from "axios";
 import AuthContext, { AuthContextInterface } from "./AuthContext";
-import { AUTH0_AUDIENCE, AUTH_ENABLED } from "../constants";
+import { AUTH0_AUDIENCE, AUTH_ENABLED } from "../../constants";
 
 
 // Returns auth values based on whether or not authenticaion is enabled/disabled
