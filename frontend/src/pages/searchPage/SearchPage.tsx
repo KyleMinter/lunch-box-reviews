@@ -3,11 +3,11 @@ import UsersTable from '../../components/table/UsersTable';
 import ReviewsTable from '../../components/table/ReviewsTable';
 import FoodTable from '../../components/table/FoodTable';
 import { Box, Typography } from '@mui/material';
-import useSearchFilters from '../../hooks/useSearchFilters';
+import useSearchState from '../../hooks/useSearchState';
 
 
 const SearchPage = () => {
-  const { searchFilters } = useSearchFilters();
+  const { searchFilters } = useSearchState();
 
   const Table = () => {
     switch (searchFilters.entityType) {

@@ -15,7 +15,7 @@ import { FiltersContext, FiltersContextInterface } from "../utils/search/SearchC
  * Used to access search filters state and methods.
  */
 const useSearchFilters = (context = FiltersContext): FiltersContextInterface => {
-    return useContext(context) as FiltersContextInterface
+  return useContext(context) as FiltersContextInterface
 }
 
 export default useSearchFilters;

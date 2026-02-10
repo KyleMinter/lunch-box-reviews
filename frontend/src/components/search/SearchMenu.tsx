@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import useSearchFilters from "../../hooks/useSearchFilters";
 import { EntityType } from "@lunch-box-reviews/shared-types";
 import SearchBar from "./SearchBar";
@@ -7,8 +6,6 @@ import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLa
 import DatePickerInput from "../inputs/DatePickerInput";
 import SendIcon from '@mui/icons-material/Send';
 import ClearIcon from '@mui/icons-material/Clear';
-import validateFilters from "../../utils/validators/filterValidation";
-
 
 
 interface TabPanelProps {
@@ -60,20 +57,11 @@ const SearchMenu = (props: SearchMenuProps) => {
     onClose
   } = props;
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const { filters, filtersDispatch, search } = useSearchFilters();
 
   const onSearchButtonClick = async () => {
-    const errors = validateFilters(filters);
-    filtersDispatch({ type: 'FILTERS_ERRORS', errors: errors });
-
-    if (errors.length === 0) {
+    if (search()) {
       onClose();
-      await search();
-      if (location.pathname !== '/search') {
-        navigate('/search');
-      }
     }
   }
 

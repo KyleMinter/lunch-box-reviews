@@ -5,11 +5,14 @@ import dayjs from "dayjs";
 
 
 export interface FiltersContextInterface {
-  searchFilters: SearchFilters;
   filters: SearchFilters;
   filtersDispatch: React.ActionDispatch<[action: FiltersAction]>;
-  search: () => void;
-};
+  search: () => boolean;
+}
+
+export interface SearchStateContextInterface {
+  searchFilters: SearchFilters;
+}
 
 const currentDateAsString = (): string => {
   const date = new Date();
@@ -17,7 +20,7 @@ const currentDateAsString = (): string => {
   const month = date.getUTCMonth().toString().padStart(2, '0');
   const day = date.getUTCDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
+};
 
 export const defaultFilters: SearchFilters = {
   entityType: EntityType.Review,
@@ -60,10 +63,14 @@ const stub = (): never => {
 };
 
 const initFilters: FiltersContextInterface = {
-  searchFilters: defaultFilters,
   filters: defaultFilters,
   filtersDispatch: stub,
   search: stub
 };
 
+const initSearchState: SearchStateContextInterface = {
+  searchFilters: defaultFilters
+}
+
 export const FiltersContext = createContext(initFilters);
+export const SearchStateContext = createContext(initSearchState);
