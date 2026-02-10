@@ -1,4 +1,3 @@
-import { FoodItem } from "@lunch-box-reviews/shared-types";
 import {
   Box,
   Paper,
@@ -64,8 +63,6 @@ const FoodTable = () => {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
-  const foodItems: FoodItem[] = [];
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
