@@ -174,14 +174,24 @@ export const reviewDtoSchema = reviewBaseSchema.extend({
   ======================================================================================================
 */
 
-/**
- * Interface representing a generic paginated response containing items of type T.
- * Contains a nextCursor property that is an encoded key string or undefined.
- */
-export type PaginatedResponse<T> = {
-  items: T[];
-  nextCursor: string | null
-}
+export const paginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) => {
+  return z.object({
+    items: z.array(itemSchema),
+    nextCursor: z.string().nullable().optional()
+  });
+};
+
+export type ReviewPrototypePaginatedResponse = z.infer<typeof reviewPrototypePaginatedResponseSchema>;
+export const reviewPrototypePaginatedResponseSchema = paginatedResponseSchema(reviewPrototypeSchema);
+
+export type ReviewPaginatedResponse = z.infer<typeof reviewPaginatedResponseSchema>;
+export const reviewPaginatedResponseSchema = paginatedResponseSchema(reviewDtoSchema);
+
+export type UserPaginatedResponse = z.infer<typeof userPaginatedResponseSchema>;
+export const userPaginatedResponseSchema = paginatedResponseSchema(userSchema);
+
+export type FoodItemPaginatedResponse = z.infer<typeof foodItemPaginatedResponseSchema>;
+export const foodItemPaginatedResponseSchema = paginatedResponseSchema(foodItemSchema);
 
 /**
  * Interface representing pagination query parameters.
