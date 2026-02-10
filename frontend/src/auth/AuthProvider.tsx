@@ -1,6 +1,6 @@
 import { Context, useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { EntityType, User } from "@lunch-box-reviews/shared-types";
+import { EntityType, User, userSchema } from "@lunch-box-reviews/shared-types";
 import axios, { AxiosResponse } from "axios";
 import AuthContext, { AuthContextInterface } from "./AuthContext";
 
@@ -96,7 +96,8 @@ const AuthProvider = (opts: AuthProviderOptions) => {
           */
 
           const response: AxiosResponse<User> = await axios.post(url, body, { headers: headers });
-          setUser(response.data);
+          const user = userSchema.parse(response.data);
+          setUser(user);
         }
         catch (err) {
           logoutWithError();
