@@ -42,7 +42,7 @@ jobs:
       
       - name: Build Local Lambda Projects
         run: |
-          for dir in ./lambda/*/*/; do
+          for dir in ./lambda/*/; do
             if [ -d "$dir" ]; then
                 echo "Building Lambda in $dir"
                 (cd "$dir" && npm install && npm run build)
