@@ -1,7 +1,6 @@
 import './App.css';
-import { Route, Routes, useSearchParams } from 'react-router-dom';
+import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 import HomePage from './pages/homePage/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
 import ProfilePage from './pages/ProfilePage';
@@ -16,7 +15,7 @@ import AuthGuard from './utils/auth/AuthGuard';
 import Auth0ProviderWithNavigate from './utils/auth/Auth0ProviderWithNavigate';
 import AuthProvider from './utils/auth/AuthProvider';
 import LoadingSpinner from './components/LoadingSpinner';
-import { Box } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 
 const App = () => {
@@ -72,7 +71,8 @@ const App = () => {
 }
 
 const PageRoutes = () => {
-  const { isLoading: isLoadingAuth } = useAuth()
+  const { isLoading: isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
 
   if (isLoadingAuth) {
     return (
@@ -90,7 +90,28 @@ const PageRoutes = () => {
         path="/profile"
         element={<AuthGuard Component={ProfilePage} />}
       />
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={(
+        <Box sx={{
+          pt: 2,
+          textAlign: 'center',
+          borderTop: 1,
+          borderColor: 'divider'
+        }}>
+          <Typography variant="h6">
+            Page not found
+          </Typography>
+          <Typography variant="subtitle1">
+            Click the button below to navigate back to the home page
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 2 }}
+            onClick={() => navigate('/')}
+          >
+            Home
+          </Button>
+        </Box>
+      )} />
     </Routes>
   );
 }
