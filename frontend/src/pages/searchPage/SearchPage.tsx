@@ -2,21 +2,21 @@ import { EntityType, FoodItem, Review, User } from '@lunch-box-reviews/shared-ty
 import UsersTable from '../../components/table/UsersTable';
 import ReviewsTable from '../../components/table/ReviewsTable';
 import FoodTable from '../../components/table/FoodTable';
-import useSearchResults from '../../hooks/useSearchResults';
 import { Box, Typography } from '@mui/material';
+import useSearchFilters from '../../hooks/useSearchFilters';
 
 
 const SearchPage = () => {
-  const { searchResults } = useSearchResults();
+  const { searchFilters } = useSearchFilters();
 
   const Table = () => {
-    switch (searchResults && searchResults[0].entityType) {
+    switch (searchFilters.entityType) {
       case EntityType.Review:
-        return <ReviewsTable reviews={searchResults as Review[]} />;
+        return <ReviewsTable />;
       case EntityType.User:
-        return <UsersTable users={searchResults as User[]} />;
+        return <UsersTable />;
       case EntityType.FoodItem:
-        return <FoodTable foodItems={searchResults as FoodItem[]} />;
+        return <FoodTable />;
     }
 
     return (

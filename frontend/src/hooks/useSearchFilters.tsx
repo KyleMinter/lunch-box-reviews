@@ -5,11 +5,12 @@ import { FiltersContext, FiltersContextInterface } from "../utils/search/SearchC
 
 /**
  * ```js
- * const = {
- *      filters,
- *      setFilters,
- *      search,
- * } = useSearchFilters();
+ *  const = {
+ *    searchFilters,
+ *    filters,
+ *    filtersDispatch,
+ *    search,
+ *  } = useSearchFilters();
  * ```
  * Used to access search filters state and methods.
  */

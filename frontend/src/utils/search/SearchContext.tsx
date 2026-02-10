@@ -5,14 +5,10 @@ import dayjs from "dayjs";
 
 
 export interface FiltersContextInterface {
+  searchFilters: SearchFilters;
   filters: SearchFilters;
   filtersDispatch: React.ActionDispatch<[action: FiltersAction]>;
-  search: () => Promise<void>;
-};
-
-export interface ResultsContextInterface {
-  searchResults: Review[] | User[] | FoodItem[] | undefined;
-  isLoading: boolean;
+  search: () => void;
 };
 
 const currentDateAsString = (): string => {
@@ -64,15 +60,10 @@ const stub = (): never => {
 };
 
 const initFilters: FiltersContextInterface = {
+  searchFilters: defaultFilters,
   filters: defaultFilters,
   filtersDispatch: stub,
   search: stub
 };
 
-const initResults: ResultsContextInterface = {
-  searchResults: undefined,
-  isLoading: false
-};
-
 export const FiltersContext = createContext(initFilters);
-export const ResultsContext = createContext(initResults);
