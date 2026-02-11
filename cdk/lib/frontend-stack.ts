@@ -13,7 +13,7 @@ export class FrontendStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const websiteBucket = new s3.Bucket(this, 'paycom-lunch-reviews-frontent', {
+        const websiteBucket = new s3.Bucket(this, 'lunch-box-reviews-frontend', {
             autoDeleteObjects: true,
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
             removalPolicy: RemovalPolicy.DESTROY
