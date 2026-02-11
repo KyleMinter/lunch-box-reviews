@@ -1,6 +1,6 @@
-export * from './foodItems';
-export * from './reviews';
-export * from './users';
+export * from './foodItems.js';
+export * from './reviews.js';
+export * from './users.js';
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -13,11 +13,11 @@ import {
   DeleteCommandOutput
 } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { BadRequestError } from '../errors';
+import { BadRequestError } from '../errors/index.js';
 import { PaginationParameters, reviewDtoSchema, reviewPrototypeSchema } from '@lunch-box-reviews/shared-types';
 import { z } from "zod";
-import { getUser } from './users';
-import { getFoodItem } from './foodItems';
+import { getUser } from './users.js';
+import { getFoodItem } from './foodItems.js';
 
 
 /*

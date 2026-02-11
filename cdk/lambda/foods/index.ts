@@ -5,9 +5,9 @@ import {
   PaginationParameters,
   RequestError,
   getAuthorizationHeaders,
+  NotFoundError,
   getFoodItem,
   getAllFoodItems,
-  MethodNotAllowedError,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -17,7 +17,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = event.httpMethod;
+  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
   const foodId = event.pathParameters?.id;
   // const jwt = await validateJwtToken(event);
 
@@ -120,7 +120,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         */
         if (foodId) {
           // Getting one food item by id.
-          body = await getFoodItem(foodId);
+          const foodItem = await getFoodItem(foodId);
+          if (!foodItem) {
+            throw new NotFoundError();
+          }
+          body = foodItem;
         } else {
           // Getting a list of food items.
           const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
@@ -131,22 +135,26 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
         break;
       }
-      default:
-        throw new MethodNotAllowedError();
     }
   }
   catch (err) {
     if (err instanceof RequestError) {
       statusCode = err.statusCode;
-      body = err.message;
+      body = {error: err.message};
     }
     else {
       statusCode = 500;
-      body = err;
+      body = {error: err instanceof Error ? err.message : String(err)};
     }
   }
   finally {
-    body = JSON.stringify(body);
+    if (typeof body === 'string') {
+      // Already a string, keep as is
+    } else if (body === undefined || body === null) {
+      body = JSON.stringify({});
+    } else {
+      body = JSON.stringify(body);
+    }
   }
   return {
     statusCode,

@@ -1,4 +1,5 @@
 {
+    "type": "module",
     "name": "@lunch-box-reviews/shared-types",
     "version": "1.0.0",
     "description": "",

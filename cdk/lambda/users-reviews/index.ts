@@ -2,7 +2,6 @@ import {
   getAuthorizationHeaders,
   getPaginationParameters,
   getReviewsFromUser,
-  MethodNotAllowedError,
   NoIdProvidedError,
   PaginationParameters,
   RequestError
@@ -15,7 +14,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,GET');
 
-  const method = event.httpMethod;
+  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
   const userId = event.pathParameters?.id;
 
   try {
@@ -35,22 +34,26 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
         break;
       }
-      default:
-        throw new MethodNotAllowedError();
     }
   }
   catch (err) {
     if (err instanceof RequestError) {
       statusCode = err.statusCode;
-      body = err.message;
+      body = {error: err.message};
     }
     else {
       statusCode = 500;
-      body = err;
+      body = {error: err instanceof Error ? err.message : String(err)};
     }
   }
   finally {
-    body = JSON.stringify(body);
+    if (typeof body === 'string') {
+      // Already a string, keep as is
+    } else if (body === undefined || body === null) {
+      body = JSON.stringify({});
+    } else {
+      body = JSON.stringify(body);
+    }
   }
   return {
     statusCode,

@@ -58,10 +58,12 @@ export class ApiStack extends cdk.Stack {
           }));
 
           // Add the function as a route to the API.
-          httpApi.addRoutes({
-            path: route.PATH,
-            methods: route.METHODS,
-            integration: new HttpLambdaIntegration('reviews-integration', lambdaFunction)
+          route.PATHS.forEach((routePath: string) => {
+            httpApi.addRoutes({
+              path: routePath,
+              methods: route.METHODS,
+              integration: new HttpLambdaIntegration('reviews-integration', lambdaFunction)
+            });
           });
         });
       });
@@ -70,19 +72,6 @@ export class ApiStack extends cdk.Stack {
       // I never thought I'd get this far... - Plankton
       console.log(err);
     }
-
-    // httpApi.addRoutes({
-    //   path: '/reviews',
-    //   methods: [HttpMethod.POST],
-    //   integration: new HttpLambdaIntegration('reviews-integration', new lambda.Function(this, 'createReviewFunction', {
-    //     runtime: this.RUNTIME,
-    //     handler: 'index.handler',
-    //     code: lambda.Code.fromAsset(path.join(__dirname, '/../lambda/reviews/createReview')),
-    //     environment: {
-    //       REGION: this.REGION
-    //     }
-    //   }))
-    // });
 
     new cdk.CfnOutput(this, 'ApiEndpoint', {
       value: httpApi.apiEndpoint,

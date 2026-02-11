@@ -19,9 +19,9 @@ import {
   reviewPrototypeToDtoSchema,
   REVIEWS_TABLE,
   updateFoodItem
-} from '.';
+} from './index.js';
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestError } from '../errors';
+import { BadRequestError } from '../errors/index.js';
 import {
   EntityType,
   FoodItem,

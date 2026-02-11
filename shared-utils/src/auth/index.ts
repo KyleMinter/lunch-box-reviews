@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwksClient, SigningKey } from 'jwks-rsa';
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { UnauthorizedError } from '../errors';
+import { UnauthorizedError } from '../errors/index.js';
 
 
 /**

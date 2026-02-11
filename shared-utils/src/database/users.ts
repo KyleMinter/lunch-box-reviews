@@ -18,7 +18,7 @@ import {
   IQueryCommandOutput,
   IUpdateCommandOutput,
   REVIEWS_TABLE
-} from '.';
+} from './index.js';
 import {
   EntityType,
   PaginationParameters,

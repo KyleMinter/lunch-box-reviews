@@ -5,6 +5,7 @@ import {
   getAuthorizationHeaders,
   validateJwtToken,
   NoBodyProvidedError,
+  NotFoundError,
   constructUser,
   User,
   getUser,
@@ -13,7 +14,6 @@ import {
   CriteriaFilter,
   getCriteriaFilterParameters,
   getAllUsers,
-  MethodNotAllowedError,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -23,9 +23,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = event.httpMethod;
+  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
   const userId = event.pathParameters?.id;
-  const jwt = await validateJwtToken(event);
 
   try {
     switch (method) {
@@ -35,12 +34,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
           POST /users
           ==========================================================================================
         */
-        const jwt = await validateJwtToken(event);
 
         if (!event.body || event.body.length === 0)
           throw new NoBodyProvidedError();
 
         const json = JSON.parse(event.body);
+        const jwt = await validateJwtToken(event);
         json.entityId = jwt.sub;
         const user: User = await constructUser(json);
 
@@ -141,7 +140,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         */
         if (userId) {
           // Getting one user by id.
-          body = await getUser(userId);
+          const user = await getUser(userId);
+          if (!user) {
+            throw new NotFoundError();
+          }
+          body = user;
         } else {
           // Getting a list of reviews.
           const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
@@ -152,22 +155,26 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
         break;
       }
-      default:
-        throw new MethodNotAllowedError();
     }
   }
   catch (err) {
     if (err instanceof RequestError) {
       statusCode = err.statusCode;
-      body = err.message;
+      body = {error: err.message};
     }
     else {
       statusCode = 500;
-      body = err;
+      body = {error: err instanceof Error ? err.message : String(err)};
     }
   }
   finally {
-    body = JSON.stringify(body);
+    if (typeof body === 'string') {
+      // Already a string, keep as is
+    } else if (body === undefined || body === null) {
+      body = JSON.stringify({});
+    } else {
+      body = JSON.stringify(body);
+    }
   }
   return {
     statusCode,

@@ -36,6 +36,7 @@ jobs:
           (cd ../shared-types && npm install && npm run build)
       
       - name: Build Shared Utils package
+        working-directory: ./shared-utils
         run: |
           echo "Building shared-utils package..."
           (cd ../shared-utils && npm install && npm run build)

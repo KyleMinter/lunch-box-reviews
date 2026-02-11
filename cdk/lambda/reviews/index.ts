@@ -19,7 +19,6 @@ import {
   NoBodyProvidedError,
   NotFoundError,
   NoIdProvidedError,
-  MethodNotAllowedError,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -29,9 +28,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = event.httpMethod;
+  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
   const reviewId = event.pathParameters?.id;
-  const jwt = await validateJwtToken(event);
+
+  console.log(`event.httpMethod: ${event.httpMethod}\nevent.requestContext.httpMethod: ${event.requestContext.httpMethod}\nmethod: ${method}`);
 
   try {
     switch (method) {
@@ -46,6 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         }
 
         const json = JSON.parse(event.body);
+        const jwt = await validateJwtToken(event);
         json.userId = jwt.sub;
         const review: ReviewPrototype = await constructReview(json);
 
@@ -75,6 +76,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
           throw new NotFoundError();
         }
 
+        const jwt = await validateJwtToken(event);
         if (!jwt.sub || reviewInDatabase.userId !== jwt.sub) {
           throw new UnauthorizedError();
         }
@@ -99,6 +101,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
           throw new NotFoundError()
         }
 
+        const jwt = await validateJwtToken(event);
         if (!jwt.sub || reviewInDatabase.userId !== jwt.sub) {
           throw new UnauthorizedError();
         }
@@ -114,9 +117,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         */
         if (reviewId) {
           // Getting one review by id.
-          body = reviewPrototypeToDtoSchema.parse(
-            await getReview(reviewId)
-          );
+          const review = await getReview(reviewId);
+          if (!review) {
+            throw new NotFoundError();
+          }
+          body = reviewPrototypeToDtoSchema.parse(review);
         } else {
           // Getting a list of reviews.
           const filter: DateFilter = getDateFilterParameters(event);
@@ -127,23 +132,30 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         
         break;
       }
-      default:
-        throw new MethodNotAllowedError();
     }
   }
   catch (err) {
     if (err instanceof RequestError) {
       statusCode = err.statusCode;
-      body = err.message;
+      body = {error: err.message};
     }
     else {
       statusCode = 500;
-      body = err;
+      body = {error: err instanceof Error ? err.message : String(err)};
     }
   }
   finally {
-    body = JSON.stringify(body);
+    console.log('Before finally - body:', body);
+    if (typeof body === 'string') {
+      // Already a string, keep as is
+    } else if (body === undefined || body === null) {
+      body = JSON.stringify({});
+    } else {
+      body = JSON.stringify(body);
+    }
+    console.log('After finally - body:', body);
   }
+  console.log('Response:', { statusCode, body });
   return {
     statusCode,
     headers,

@@ -5,7 +5,7 @@ import { API_URL } from "../constants";
 
 async function fetchReviews({ cursor, limit }: PaginationParameters) {
   const response = await axios.get<ReviewPaginatedResponse>(
-    `${API_URL}/reviews?limit=${limit}&cursor=${cursor ?? ''}`
+    `${API_URL}reviews?limit=${limit}&cursor=${cursor ?? ''}`
   );
 
   return reviewPaginatedResponseSchema.parse(response.data);
@@ -23,7 +23,7 @@ export function useReviews(pageSize: number) {
 
 async function fetchUsers({ cursor, limit }: PaginationParameters) {
   const response = await axios.get<UserPaginatedResponse>(
-    `${API_URL}/users?limit=${limit}&cursor=${cursor ?? ''}`
+    `${API_URL}users?limit=${limit}&cursor=${cursor ?? ''}`
   );
 
   return userPaginatedResponseSchema.parse(response.data);
@@ -41,7 +41,7 @@ export function useUsers(pageSize: number) {
 
 async function fetchFoodItems({ cursor, limit }: PaginationParameters) {
   const response = await axios.get<FoodItemPaginatedResponse>(
-    `${API_URL}/foods?limit=${limit}&cursor=${cursor ?? ''}`
+    `${API_URL}foods?limit=${limit}&cursor=${cursor ?? ''}`
   );
 
   return foodItemPaginatedResponseSchema.parse(response.data);
