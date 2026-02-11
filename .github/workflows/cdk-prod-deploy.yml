@@ -78,9 +78,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: 'us-east-1'
 
-#      - name: Bootstrap CDK
-#        run: |
-#          cdk bootstrap aws://$(aws sts get-caller-identity --query 'Account' --output text)/us-east-1
+      - name: Bootstrap CDK
+        run: |
+          cdk bootstrap aws://$(aws sts get-caller-identity --query 'Account' --output text)/us-east-1
       
       - name: Synth stack
         run: cdk synth
