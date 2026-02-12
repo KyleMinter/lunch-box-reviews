@@ -14,27 +14,22 @@ import {
   CriteriaFilter,
   getCriteriaFilterParameters,
   getAllUsers,
+  NoIdProvidedError,
 } from '@lunch-box-reviews/shared-utils';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   let body;
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
+  const routeKey = event.requestContext.http.method;
   const userId = event.pathParameters?.id;
 
   try {
-    switch (method) {
-      case 'POST': {
-        /*
-          ==========================================================================================
-          POST /users
-          ==========================================================================================
-        */
-
+    switch (routeKey) {
+      case 'POST /users/{id}': {
         if (!event.body || event.body.length === 0)
           throw new NoBodyProvidedError();
 
@@ -132,47 +127,42 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       //   body = await deleteUser(userID);
       //   break;
       // }
-      case 'GET': {
-        /*
-          ==========================================================================================
-          GET /users/{id}
-          ==========================================================================================
-        */
-        if (userId) {
-          // Getting one user by id.
-          const user = await getUser(userId);
-          if (!user) {
-            throw new NotFoundError();
-          }
-          body = user;
-        } else {
-          // Getting a list of reviews.
-          const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
-          const pagination: PaginationParameters = getPaginationParameters(event);
-
-          body = await getAllUsers(pagination, filter);
+      case 'GET /users/{id}': {
+        if (!userId) {
+          throw new NoIdProvidedError()
         }
 
+        const user = await getUser(userId);
+        if (!user) {
+          throw new NotFoundError();
+        }
+        body = user;
+        break;
+      }
+      case 'GET /users': {
+        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
+
+        body = await getAllUsers(pagination, filter);
         break;
       }
     }
   }
   catch (err) {
-    if (err instanceof RequestError) {
-      statusCode = err.statusCode;
-      body = {error: err.message};
+    if (err instanceof Error) {
+      body = err.message;
+      if (err instanceof RequestError) {
+        statusCode = err.statusCode;
+      } else {
+        statusCode = 500;
+      }
+    } else {
+      body = err;
     }
-    else {
-      statusCode = 500;
-      body = {error: err instanceof Error ? err.message : String(err)};
-    }
+    body = { error: body };
   }
   finally {
-    if (typeof body === 'string') {
-      // Already a string, keep as is
-    } else if (body === undefined || body === null) {
-      body = JSON.stringify({});
-    } else {
+    if (body) {
       body = JSON.stringify(body);
     }
   }

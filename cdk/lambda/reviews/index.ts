@@ -20,27 +20,20 @@ import {
   NotFoundError,
   NoIdProvidedError,
 } from '@lunch-box-reviews/shared-utils';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   let body;
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
+  const routeKey = event.requestContext.routeKey;
   const reviewId = event.pathParameters?.id;
 
-  console.log(`event.httpMethod: ${event.httpMethod}\nevent.requestContext.httpMethod: ${event.requestContext.httpMethod}\nmethod: ${method}`);
-
   try {
-    switch (method) {
-      case 'POST': {
-        /*
-          ==========================================================================================
-          POST /reviews
-          ==========================================================================================
-        */
+    switch (routeKey) {
+      case 'POST /reviews/{id}': {
         if (!event.body || event.body.length === 0) {
           throw new NoBodyProvidedError();
         }
@@ -57,12 +50,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         body = await createReview(review, foodItem);
         break;
       }
-      case 'PUT': {
-        /*
-          ==========================================================================================
-          PUT /reviews/{id}
-          ==========================================================================================
-        */
+      case 'PUT /reviews/{id}': {
         if (!reviewId) {
           throw new NoIdProvidedError();
         }
@@ -86,12 +74,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         body = await updateReview(review, reviewInDatabase);
         break;
       }
-      case 'DELETE': {
-        /*
-          ==========================================================================================
-          DELETE /reviews/{id}
-          ==========================================================================================
-        */
+      case 'DELETE /reviews/{id}': {
         if (!reviewId) {
           throw new NoIdProvidedError();
         }
@@ -109,53 +92,45 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         body = await deleteReview(reviewInDatabase);
         break;
       }
-      case 'GET': {
-        /*
-          ==========================================================================================
-          GET /reviews/{id}
-          ==========================================================================================
-        */
-        if (reviewId) {
-          // Getting one review by id.
-          const review = await getReview(reviewId);
-          if (!review) {
-            throw new NotFoundError();
-          }
-          body = reviewPrototypeToDtoSchema.parse(review);
-        } else {
-          // Getting a list of reviews.
-          const filter: DateFilter = getDateFilterParameters(event);
-          const pagination: PaginationParameters = getPaginationParameters(event);
-          
-          body = await getAllReviews(filter, pagination);
+      case 'GET /reviews/{id}': {
+        if (!reviewId) {
+          throw new NoIdProvidedError();
         }
+
+        const review = await getReview(reviewId);
+        if (!review) {
+          throw new NotFoundError();
+        }
+        body = reviewPrototypeToDtoSchema.parse(review);
+        break;
+      }
+      case 'GET /reviews': {
+        const filter: DateFilter = getDateFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
         
+        body = await getAllReviews(filter, pagination);
         break;
       }
     }
   }
   catch (err) {
-    if (err instanceof RequestError) {
-      statusCode = err.statusCode;
-      body = {error: err.message};
+    if (err instanceof Error) {
+      body = err.message;
+      if (err instanceof RequestError) {
+        statusCode = err.statusCode;
+      } else {
+        statusCode = 500;
+      }
+    } else {
+      body = err;
     }
-    else {
-      statusCode = 500;
-      body = {error: err instanceof Error ? err.message : String(err)};
-    }
+    body = { error: body };
   }
   finally {
-    console.log('Before finally - body:', body);
-    if (typeof body === 'string') {
-      // Already a string, keep as is
-    } else if (body === undefined || body === null) {
-      body = JSON.stringify({});
-    } else {
+    if (body) {
       body = JSON.stringify(body);
     }
-    console.log('After finally - body:', body);
   }
-  console.log('Response:', { statusCode, body });
   return {
     statusCode,
     headers,

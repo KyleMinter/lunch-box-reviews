@@ -8,16 +8,17 @@ import {
   NotFoundError,
   getFoodItem,
   getAllFoodItems,
+  NoIdProvidedError,
 } from '@lunch-box-reviews/shared-utils';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   let body;
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
+  const method = event.requestContext.http.method;
   const foodId = event.pathParameters?.id;
   // const jwt = await validateJwtToken(event);
 
@@ -112,47 +113,42 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       //   body = await deleteFoodItem(foodID);
       //   break;
       // }
-      case 'GET': {
-        /*
-          ==========================================================================================
-          GET /foods/{id}
-          ==========================================================================================
-        */
-        if (foodId) {
-          // Getting one food item by id.
-          const foodItem = await getFoodItem(foodId);
-          if (!foodItem) {
-            throw new NotFoundError();
-          }
-          body = foodItem;
-        } else {
-          // Getting a list of food items.
-          const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
-          const pagination: PaginationParameters = getPaginationParameters(event);
-
-          body = await getAllFoodItems(pagination, filter);
+      case 'GET /foods/{id}': {
+        if (!foodId) {
+          throw new NoIdProvidedError();
         }
 
+        const foodItem = await getFoodItem(foodId);
+        if (!foodItem) {
+          throw new NotFoundError();
+        }
+        body = foodItem;
+        break;
+      }
+      case 'GET /foods': {
+        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
+
+        body = await getAllFoodItems(pagination, filter);
         break;
       }
     }
   }
   catch (err) {
-    if (err instanceof RequestError) {
-      statusCode = err.statusCode;
-      body = {error: err.message};
+    if (err instanceof Error) {
+      body = err.message;
+      if (err instanceof RequestError) {
+        statusCode = err.statusCode;
+      } else {
+        statusCode = 500;
+      }
+    } else {
+      body = err;
     }
-    else {
-      statusCode = 500;
-      body = {error: err instanceof Error ? err.message : String(err)};
-    }
+    body = { error: body };
   }
   finally {
-    if (typeof body === 'string') {
-      // Already a string, keep as is
-    } else if (body === undefined || body === null) {
-      body = JSON.stringify({});
-    } else {
+    if (body) {
       body = JSON.stringify(body);
     }
   }

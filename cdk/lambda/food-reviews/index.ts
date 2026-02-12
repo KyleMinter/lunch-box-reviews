@@ -6,25 +6,20 @@ import {
   PaginationParameters,
   RequestError
 } from '@lunch-box-reviews/shared-utils';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   let body;
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,GET');
 
-  const method = (event as any).httpMethod ?? (event as any).requestContext?.http?.method;
+  const routeKey = event.requestContext.http.method;
   const foodId = event.pathParameters?.id;
 
   try {
-    switch (method) {
-      case 'GET': {
-        /*
-          ==========================================================================================
-          GET /foods/{id}/reviews
-          ==========================================================================================
-        */
+    switch (routeKey) {
+      case 'GET /reviews/{id}': {
         if (!foodId) {
           throw new NoIdProvidedError();
         }
@@ -37,21 +32,20 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     }
   }
   catch (err) {
-    if (err instanceof RequestError) {
-      statusCode = err.statusCode;
-      body = {error: err.message};
+    if (err instanceof Error) {
+      body = err.message;
+      if (err instanceof RequestError) {
+        statusCode = err.statusCode;
+      } else {
+        statusCode = 500;
+      }
+    } else {
+      body = err;
     }
-    else {
-      statusCode = 500;
-      body = {error: err instanceof Error ? err.message : String(err)};
-    }
+    body = { error: body };
   }
   finally {
-    if (typeof body === 'string') {
-      // Already a string, keep as is
-    } else if (body === undefined || body === null) {
-      body = JSON.stringify({});
-    } else {
+    if (body) {
       body = JSON.stringify(body);
     }
   }
