@@ -127,9 +127,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     body = { error: body };
   }
   finally {
+    console.log(`before stringify: ${body}`);
     if (body) {
       body = JSON.stringify(body);
     }
+    console.log(`after stringify: ${body}`);
   }
   return {
     statusCode,

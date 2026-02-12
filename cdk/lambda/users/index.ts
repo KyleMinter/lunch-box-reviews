@@ -15,6 +15,7 @@ import {
   getCriteriaFilterParameters,
   getAllUsers,
   NoIdProvidedError,
+  getReviewsFromUser,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -29,7 +30,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   try {
     switch (routeKey) {
-      case 'POST /users/{id}': {
+      case 'POST /users': {
         if (!event.body || event.body.length === 0)
           throw new NoBodyProvidedError();
 
@@ -41,6 +42,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         // Check if the user is already in the database.
         const userInDatabase = await getUser(user.entityId)
         if (userInDatabase) {
+          console.log(JSON.stringify(userInDatabase));
           // If needed, update the user in the database.
           if (user.userName !== userInDatabase.userName || user.userEmail !== userInDatabase.userEmail) {
             await updateUser(user);
@@ -56,77 +58,13 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         }
         break;
       }
-      // case 'PUT': {
-      //   /*
-      //     ==========================================================================================
-      //     PUT /users/{id}
-      //     ==========================================================================================
-      //   */
-      //   // Get the request's query parameters.
-      //   const queryParams = event.queryStringParameters;
-      //   if (queryParams)
-      //     throw new Error('Query parameters are not supported for this endpoint');
+      case 'GET /users': {
+        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const pagination: PaginationParameters = getPaginationParameters(event);
 
-      //   // Get the userID from the request's path parameter.
-      //   const userID = event.pathParameters?.id;
-      //   if (!userID)
-      //     throw new Error('UserID is undefined');
-
-      //   // Ensure that a body was sent with the request.
-      //   if (!event.body)
-      //     throw new BadRequestError('No user provided in request body');
-
-      //   // Ensure that a user with the provided ID exists.
-      //   const userInDatabase = await getUser(userID);
-      //   if (!userInDatabase) {
-      //     throw new BadRequestError('User with provided ID does not exist');
-      //   }
-
-      //   // Validate user permissions.
-      //   const jwt = await validateJwtToken(event);
-      //   await validateUserPermissions(jwt.sub!, [
-      //     UserPermission.adminUserPermissions
-      //   ]);
-
-      //   // Update the user.
-      //   const json = JSON.parse(event.body);
-      //   json.entityID = userInDatabase.entityID;
-      //   const user: User = await constructUser(json);
-      //   body = await updateUser(user);
-      //   break;
-      // }
-      // case 'DELETE': {
-      //   /*
-      //     ==========================================================================================
-      //     DELETE /users/{id}
-      //     ==========================================================================================
-      //   */
-      //   // Get the request's query parameters.
-      //   const queryParams = event.queryStringParameters;
-      //   if (queryParams)
-      //     throw new Error('Query parameters are not supported for this endpoint');
-
-      //   // Get the userID from the request's path parameter.
-      //   const userID = event.pathParameters?.id;
-      //   if (!userID)
-      //     throw new Error('UserID is undefined');
-
-      //   // Ensure that a user with the provided ID exists.
-      //   const userInDatabase = await getUser(userID);
-      //   if (!userInDatabase) {
-      //     throw new BadRequestError('Review with provided ID does not exist');
-      //   }
-
-      //   // Validate user permissions.
-      //   const jwt = await validateJwtToken(event);
-      //   await validateUserPermissions(jwt.sub!, [
-      //     UserPermission.adminUserPermissions
-      //   ]);
-
-      //   // Delete the user.
-      //   body = await deleteUser(userID);
-      //   break;
-      // }
+        body = await getAllUsers(pagination, filter);
+        break;
+      }
       case 'GET /users/{id}': {
         if (!userId) {
           throw new NoIdProvidedError()
@@ -139,11 +77,14 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         body = user;
         break;
       }
-      case 'GET /users': {
-        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
-        const pagination: PaginationParameters = getPaginationParameters(event);
+      case 'GET /users/{id}/reviews': {
+        if (!userId) {
+          throw new NoIdProvidedError();
+        }
 
-        body = await getAllUsers(pagination, filter);
+        const pagination: PaginationParameters = getPaginationParameters(event);
+        body = await getReviewsFromUser(userId, pagination);
+
         break;
       }
     }
@@ -162,9 +103,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     body = { error: body };
   }
   finally {
+    console.log(`before stringify: ${body}`);
     if (body) {
       body = JSON.stringify(body);
     }
+    console.log(`after stringify: ${body}`);
   }
   return {
     statusCode,

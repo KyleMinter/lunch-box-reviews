@@ -202,6 +202,9 @@ export async function getAllReviews(
     };
   }
 
+  console.log(`entityType: ${reviewPrototypeProps.entityType}`);
+  console.log(JSON.stringify(reviewPrototypeProps));
+
   const dynamo = getDynamoDbClient();
   const results = await dynamo.send(
     new QueryCommand({
