@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwksClient, SigningKey } from 'jwks-rsa';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { UnauthorizedError } from '../errors/index.js';
 
 
@@ -25,7 +25,7 @@ export function getAuthorizationHeaders(requestMethods: string) {
  * @param token the JWT token
  * @returns the decoded JWT if verification is successful, undefined if it is not
  */
-export async function validateJwtToken(event: APIGatewayProxyEvent): Promise<JwtPayload> {
+export async function validateJwtToken(event: APIGatewayProxyEventV2): Promise<JwtPayload> {
   const auth: string | undefined = event.headers.Authorization || event.headers.authorization;
   if (auth === undefined)
     throw new Error('Authorization header is undefined');

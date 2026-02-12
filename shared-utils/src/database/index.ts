@@ -12,7 +12,7 @@ import {
   UpdateCommandOutput,
   DeleteCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { BadRequestError } from '../errors/index.js';
 import { PaginationParameters, reviewDtoSchema, reviewPrototypeSchema } from '@lunch-box-reviews/shared-types';
 import { z } from "zod";
@@ -63,7 +63,7 @@ export function getDynamoDbClient(): DynamoDBDocumentClient {
  * @param event the request event
  * @returns the pagination (limit & offset) query parameters
  */
-export function getPaginationParameters(event: APIGatewayProxyEvent): PaginationParameters {
+export function getPaginationParameters(event: APIGatewayProxyEventV2): PaginationParameters {
   let limit: number = 10;
   let cursor: string | undefined = undefined;
 
@@ -90,7 +90,7 @@ export function getPaginationParameters(event: APIGatewayProxyEvent): Pagination
  * @param event the request event
  * @returns the criteria filter query parameters
  */
-export function getCriteriaFilterParameters(event: APIGatewayProxyEvent): CriteriaFilter | undefined {
+export function getCriteriaFilterParameters(event: APIGatewayProxyEventV2): CriteriaFilter | undefined {
   const queryParams = event.queryStringParameters;
   const filter: string | undefined = queryParams ? queryParams.filter : undefined;
   const criteria: string | undefined = queryParams ? queryParams.criteria : undefined;
@@ -114,7 +114,7 @@ export function getCriteriaFilterParameters(event: APIGatewayProxyEvent): Criter
  * @param event the request event
  * @returns the date filter parameters
  */
-export function getDateFilterParameters(event: APIGatewayProxyEvent): DateFilter {
+export function getDateFilterParameters(event: APIGatewayProxyEventV2): DateFilter {
   const queryParams = event.queryStringParameters;
   const startDate: string | undefined = queryParams ? queryParams.startDate : undefined;
   const endDate: string | undefined = queryParams ? queryParams.endDate : undefined;
