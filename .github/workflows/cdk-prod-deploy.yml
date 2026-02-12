@@ -38,8 +38,13 @@ jobs:
       - name: Build Shared Utils package
         working-directory: ./shared-utils
         run: |
+          touch .env
+          echo "AUTH0_DOMAIN=$DOMAIN" >> .env
           echo "Building shared-utils package..."
-          (cd ../shared-utils && npm install && npm run build)
+          npm install
+          npm run build
+        env:
+          DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
       
       - name: Build Local Lambda Projects
         run: |

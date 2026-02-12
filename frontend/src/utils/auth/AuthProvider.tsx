@@ -118,7 +118,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
 
   const logoutWithError = useCallback(async () => {
     setUser(undefined);
-    await auth0Logout({ logoutParams: { returnTo: '/?authError' } });
+    await auth0Logout({ logoutParams: { returnTo: `${window.location.origin}/?authError` } });
   }, [auth0Logout]);
 
   const isAuthorized = useCallback((): boolean => {
