@@ -3,9 +3,10 @@ import { z } from "zod";
 
 const props = <T extends z.ZodObject<any>>(schema: T) => {
   const keys = Object.keys(schema.shape) as Array<keyof z.infer<T>>;
-  const map = Object.keys(schema.shape).reduce((acc, key) => {
+  const map = keys.reduce((acc, key) => {
+    acc[key] = key;
     return acc;
-  }, [] as { [K in keyof z.infer<T>]: K});
+  }, {} as { [K in keyof z.infer<T>]: K});
 
   return {
     ...map,
