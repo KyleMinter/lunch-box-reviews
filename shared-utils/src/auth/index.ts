@@ -51,31 +51,3 @@ export async function validateJwtToken(event: APIGatewayProxyEventV2): Promise<J
 
   return decodedJwt;
 }
-
-/**
- * Verifies that a user with a given userID has the provided permissions.
- * Throws an UnauthorizedError if the user does not exist or does not have one or more of the provided permissions.
- * @param userID the ID of the user
- * @param permissions a list of UserPermissions to ensure the user has
- */
-// export async function validateUserPermissions(userID: string, permissions: UserPermission[]) {
-//   const dynamo = getDynamoDbClient();
-
-//   const userPermissions: UserPermission[] | undefined = await dynamo.send(
-//     new GetCommand({
-//       TableName: REVIEWS_TABLE,
-//       Key: {
-//         entityID: userID
-//       },
-//       ProjectionExpression: 'userPermissions',
-//     })
-//   ).then((result: GetCommandOutput) => result.Item?.userPermissions);
-
-//   if (!userPermissions)
-//     throw new UnauthorizedError('User does not exist');
-
-//   permissions.forEach(permission => {
-//     if (!userPermissions.includes(permission))
-//       throw new UnauthorizedError('User is not authorized for this action');
-//   });
-// }
