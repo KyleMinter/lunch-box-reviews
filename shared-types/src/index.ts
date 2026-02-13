@@ -81,6 +81,7 @@ export const foodAttributesSchema = z.object({
  */
 export type FoodItem = z.infer<typeof foodItemSchema>;
 export const foodItemSchema = entitySchema.extend({
+  entityType: entitySchema.shape.entityType.default(EntityType.FoodItem),
   foodName: z.string(),
   foodOrigin: z.string(),
   foodAttributes: foodAttributesSchema,
@@ -108,6 +109,7 @@ export const foodItemProps = props(foodItemSchema);
  */
 export type User = z.infer<typeof userSchema>;
 export const userSchema = entitySchema.extend({
+  entityType: entitySchema.shape.entityType.default(EntityType.User),
   userName: z.string(),
   userEmail: z.string(),
   created: z.string().datetime()
@@ -123,6 +125,7 @@ export const userProps = props(userSchema);
 */
 
 export const reviewBaseSchema = entitySchema.extend({
+  entityType: entitySchema.shape.entityType.default(EntityType.Review),
   quality: z.number(),
   quantity: z.number(),
   rating: z.number(),

@@ -42,7 +42,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         // Check if the user is already in the database.
         const userInDatabase = await getUser(user.entityId)
         if (userInDatabase) {
-          console.log(JSON.stringify(userInDatabase));
           // If needed, update the user in the database.
           if (user.userName !== userInDatabase.userName || user.userEmail !== userInDatabase.userEmail) {
             await updateUser(user);
@@ -103,11 +102,9 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     body = { error: body };
   }
   finally {
-    console.log(`before stringify: ${body}`);
     if (body) {
       body = JSON.stringify(body);
     }
-    console.log(`after stringify: ${body}`);
   }
   return {
     statusCode,

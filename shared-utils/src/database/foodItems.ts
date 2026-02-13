@@ -51,35 +51,14 @@ import {
  * @returns the newly constructed food item
  */
 export async function constructFoodItem(json: any, oldFoodItem?: FoodItem) {
-  const partialFoodItemSchema = foodItemSchema.transform((data) => {
-    return {
-      ...data,
-      entityType: EntityType.Review
-    }
-  });
+  const preFilledJson = {
+    ...json,
+    entityId: oldFoodItem?.entityId ?? uuidv4(),
+    totalRating: oldFoodItem?.totalRating ?? 0,
+    numReviews: oldFoodItem?.numReviews ?? 0
+  };
 
-  let constructedFoodItemSchema;
-  if (!oldFoodItem) {
-    constructedFoodItemSchema = partialFoodItemSchema.transform((data) => {
-      return {
-        ...data,
-        entityId: uuidv4(),
-        totalRating: 0,
-        numReviews: 0
-      };
-    });
-  } else {
-    constructedFoodItemSchema = partialFoodItemSchema.transform((data) => {
-      return {
-        ...data,
-        entityId: oldFoodItem.entityId,
-        totalRating: oldFoodItem.totalRating,
-        numReviews: oldFoodItem.numReviews
-      };
-    });
-  }
-
-  const foodItem = constructedFoodItemSchema.parse(json);
+  const foodItem = foodItemSchema.parse(preFilledJson);
   return foodItem;
 }
 

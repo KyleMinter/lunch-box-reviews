@@ -49,33 +49,15 @@ import {
  * @returns the newly constructed user
  */
 export async function constructUser(json: any, oldUser?: User) {
-  const partialUserSchema = userSchema.transform((data) => {
-    return {
-      ...data,
-      entityType: EntityType.User
-    };
-  });
+  const currDate: string = new Date().toISOString();
 
-  let constructedUserSchema;
-  if (!oldUser) {
-    constructedUserSchema = partialUserSchema.transform((data) => {
-      const currDate: string = new Date().toISOString();
-      return {
-        ...data,
-        created: currDate
-      };
-    });
-  } else {
-    constructedUserSchema = partialUserSchema.transform((data) => {
-      return {
-        ...data,
-        entityId: oldUser.entityId,
-        created: oldUser.created
-      }
-    }) 
+  const preFilledJson = {
+    ...json,
+    entityId: oldUser?.entityId ?? json.entityId,
+    created: oldUser?.created ?? currDate
   }
 
-  const user = constructedUserSchema.parse(json);
+  const user = userSchema.parse(preFilledJson);
   return user;
 }
 

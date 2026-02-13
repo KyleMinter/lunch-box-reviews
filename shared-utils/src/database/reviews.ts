@@ -54,9 +54,14 @@ function roundTo(num: number, places: number): number {
   return Math.round(num * factor) / factor;
 }
 
-function validateRatingNumbers(quality: number, quantity: number) {
+function getAndValidateRatings(json: any) {
+  // Convert the ratings to numbers
+  let quality: number = Number(json.quality);
+  let quantity: number = Number(json.quantity);
+
   // Valiate quality and quantity ratings.
-  if (quality > 10 || quality < 1 || quantity < 1 || quantity > 5) {
+  if (isNaN(quality) || isNaN(quantity) || quality > 10 ||
+    quality < 1 || quantity < 1 || quantity > 5) {
     throw new BadRequestError('Invalid review ratings provided');
   }
 
@@ -64,23 +69,14 @@ function validateRatingNumbers(quality: number, quantity: number) {
   quality = roundTo(quality as number, 2);
   quantity = Math.trunc(quantity as number);
 
-  return {
-    quality,
-    quantity
-  };
-}
-
-/**
- * Calculates the overall rating given a quality and quantity rating
- * @param quality the quality rating
- * @param quantity the quantity rating
- * @returns the overall rating
- */
-function calculateOverallRating(quality: number, quantity: number): number {
-  // Compute the overall rating and round it to two decimal places.
   let rating = quality * Math.sqrt(quantity / 5);
   rating = roundTo(rating, 2);
-  return rating;
+
+  return {
+    quality,
+    quantity,
+    rating
+  };
 }
 
 /**
@@ -91,40 +87,21 @@ function calculateOverallRating(quality: number, quantity: number): number {
  * @returns the newly constructed review
  */
 export async function constructReview(json: any, oldReview?: ReviewPrototype): Promise<ReviewPrototype> {
-  const partialReviewSchema = reviewPrototypeSchema.transform((data) => {
-    const currDate: string = new Date().toISOString();
-    const { quality, quantity } = validateRatingNumbers(data.quality, data.quantity);
-    const rating = calculateOverallRating(quality, quantity);
+  const { quality, quantity, rating } = getAndValidateRatings(json);
+  const currDate: string = new Date().toISOString();
 
-    return {
-      ...data,
-      entityType: EntityType.Review,
-      quality: quality,
-      quantity: quantity,
-      rating: rating,
-      reviewDate: currDate
-    };
-  });
+  const preFilledJson = {
+    ...json,
+    entityId: oldReview?.entityId ?? uuidv4(),
+    userId: oldReview?.userId ?? json.userId,
+    foodId: oldReview?.foodId ?? json.foodId,
+    quality: quality,
+    quantity: quantity,
+    rating: rating,
+    reviewDate: currDate
+  };
 
-  let constructedReviewSchema;
-  if (!oldReview) {
-    // Construct a new review.
-    constructedReviewSchema = partialReviewSchema.transform((data) => {
-      return { ...data, entityId: uuidv4() };
-    });
-  } else {
-    // Construct a review from an existing one.
-    constructedReviewSchema = partialReviewSchema.transform((data) => {
-      return {
-        ...data,
-        entityId: oldReview.entityId,
-        userId: oldReview.userId,
-        foodId: oldReview.foodId
-      };
-    });
-  }
-
-  const review = constructedReviewSchema.parse(json);
+  const review = reviewPrototypeSchema.parse(preFilledJson);
   return review;
 }
 

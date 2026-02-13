@@ -21,7 +21,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   const routeKey = event.requestContext.http.method;
   const foodId = event.pathParameters?.id;
-  // const jwt = await validateJwtToken(event);
 
   try {
     switch (routeKey) {
