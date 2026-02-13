@@ -33,7 +33,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   try {
     switch (routeKey) {
-      case 'POST /reviews/{id}': {
+      case 'POST': {
         if (!event.body || event.body.length === 0) {
           throw new NoBodyProvidedError();
         }
