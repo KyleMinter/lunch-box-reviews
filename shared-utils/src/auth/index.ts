@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwksClient, SigningKey } from 'jwks-rsa';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
