@@ -8,17 +8,13 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useReviews } from "../../hooks/useFetch";
-import { useQueryClient } from "@tanstack/react-query";
 import LoadingSpinner from "../LoadingSpinner";
 import NoResultsFound from "./NoResultsFound";
 
 
 const ReviewsTable = () => {
-  const queryClient = useQueryClient();
-
-  const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const {
@@ -29,34 +25,13 @@ const ReviewsTable = () => {
     isLoading
   } = useReviews(rowsPerPage);
 
-  const page = data?.pages[pageIndex];
-  const items = page?.items ?? [];
+  const items = data?.pages.flatMap(page => page.items) ?? [];
 
-  useEffect(() => {
-    setPageIndex(0);
-    queryClient.removeQueries({ queryKey: ['reviews'] });
-  }, [rowsPerPage, queryClient]);
-
-  const handleChangePage = async (_event: unknown, newPageIndex: number) => {
-    // Only allow forward navigation by 1.
-    if (newPageIndex > pageIndex) {
-      if (newPageIndex === (data?.pages.length ?? 1) - 1) {
-        if (hasNextPage) {
-          await fetchNextPage();
-        }
-      }
-      setPageIndex(newPageIndex);
-    }
-
-    // Backwards navigation is always safe.
-    if (newPageIndex < pageIndex) {
-      setPageIndex(newPageIndex);
+  const handleNext = async () => {
+    if (hasNextPage) {
+      await fetchNextPage();
     }
   }
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(Number(event.target.value));
-  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -68,52 +43,20 @@ const ReviewsTable = () => {
         <Table stickyHeader aria-label="user search results table">
           <TableHead>
             <TableRow>
-              <TableCell
-                key="foodItem"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Item
-              </TableCell>
-              <TableCell
-                key="user"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Reviewer
-              </TableCell>
-              <TableCell
-                key="rating"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Rating
-              </TableCell>
-              <TableCell
-                key="date"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Date
-              </TableCell>
+              <TableCell>Item</TableCell>
+              <TableCell>Reviewer</TableCell>
+              <TableCell>Rating</TableCell>
+              <TableCell>Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {items.map((review) => {
               return (
                 <TableRow key={review.entityId}>
-                  <TableCell key={`${review.entityId}-food`} align="left">
-                    {review.food.foodName}
-                  </TableCell>
-                  <TableCell key={`${review.entityId}-user`} align="left">
-                    {review.user.userName}
-                  </TableCell>
-                  <TableCell key={`${review.entityId}-rating`} align="left">
-                    {review.rating} / 10
-                  </TableCell>
-                  <TableCell key={`${review.entityId}-date`} align="left">
-                    {review.reviewDate}
-                  </TableCell>
+                  <TableCell>{review.food.foodName}</TableCell>
+                  <TableCell>{review.user.userName}</TableCell>
+                  <TableCell>{review.rating} / 10</TableCell>
+                  <TableCell>{review.reviewDate}</TableCell>
                 </TableRow>
               );
             })}
@@ -130,15 +73,18 @@ const ReviewsTable = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 50]}
         component="div"
-        count={2}
+        count={-1}
         rowsPerPage={rowsPerPage}
-        page={pageIndex}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        page={0}
+        onPageChange={handleNext}
+        onRowsPerPageChange={(event) => {
+          setRowsPerPage(Number(event.target.value));
+        }}
+        labelDisplayedRows={({ from, to}) => `Items: ${from}-${to}`}
         slotProps={{
           actions: {
             nextButton: {
-              disabled: !hasNextPage && pageIndex === (data?.pages.length ?? 1) - 1
+              disabled: !hasNextPage
             }
           }
         }}

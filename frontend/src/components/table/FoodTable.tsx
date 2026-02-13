@@ -10,17 +10,13 @@ import {
   TableRow,
   Typography
 } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment,  useState } from "react";
 import LoadingSpinner from "../LoadingSpinner";
 import NoResultsFound from "./NoResultsFound";
 import { useFoodItems } from "../../hooks/useFetch";
 
 
 const FoodTable = () => {
-  const queryClient = useQueryClient();
-
-  const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const {
@@ -31,34 +27,13 @@ const FoodTable = () => {
     isLoading
   } = useFoodItems(rowsPerPage);
 
-  const page = data?.pages[pageIndex];
-  const items = page?.items ?? [];
+  const items = data?.pages.flatMap(page => page.items) ?? [];
 
-  useEffect(() => {
-      setPageIndex(0);
-      queryClient.removeQueries({ queryKey: ['foods'] });
-    }, [rowsPerPage, queryClient]);
-
-  const handleChangePage = async (_event: unknown, newPageIndex: number) => {
-    // Only allow forward navigation by 1.
-    if (newPageIndex > pageIndex) {
-      if (newPageIndex === (data?.pages.length ?? 1) - 1) {
-        if (hasNextPage) {
-          await fetchNextPage();
-        }
-      }
-      setPageIndex(newPageIndex);
-    }
-
-    // Backwards navigation is always safe.
-    if (newPageIndex < pageIndex) {
-      setPageIndex(newPageIndex);
+  const handleNext = async () => {
+    if (hasNextPage) {
+      await fetchNextPage();
     }
   }
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(Number(event.target.value));
-  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -70,27 +45,9 @@ const FoodTable = () => {
         <Table stickyHeader aria-label="user search results table">
           <TableHead>
             <TableRow>
-              <TableCell
-                key="foodName"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Name
-              </TableCell>
-              <TableCell
-                key="foodOrigin"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Location
-              </TableCell>
-              <TableCell
-                key="averageRating"
-                align="left"
-                style={{ minWidth: 15 }}
-              >
-                Average Rating
-              </TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Average Rating</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -98,30 +55,19 @@ const FoodTable = () => {
               return (
                 <Fragment key={food.entityId}>
                   <TableRow>
-                    <TableCell key={`${food.entityId}-name`} align="left">
-                      {food.foodName}
-                    </TableCell>
-                    <TableCell key={`${food.entityId}-origin`} align="left">
-                      {food.foodOrigin}
-                    </TableCell>
-                    <TableCell key={`${food.entityId}-averageRating`} align="left">
-                      {food.totalRating / food.numReviews}
-                    </TableCell>
+                    <TableCell>{food.foodName}</TableCell>
+                    <TableCell>{food.foodOrigin}</TableCell>
+                    <TableCell>{food.totalRating / food.numReviews}</TableCell>
                   </TableRow>
                   {(food.foodAttributes.description || food.foodAttributes.nutrition) && (
                     <TableRow>
-                      <TableCell key={`${food.entityId}-attributes`} align="left" colSpan={3}>
+                      <TableCell colSpan={3}>
                         <Box sx={{ pl: 2 }}>
-                          {food.foodAttributes.description && (
-                            <Typography key={`${food.entityId}-description`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                              {food.foodAttributes.description}
-                            </Typography>
-                          )}
-                          {food.foodAttributes.nutrition && (
-                            <Typography key={`${food.entityId}-nutrition`} variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                              {food.foodAttributes.nutrition}
-                            </Typography>
-                          )}
+                          <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                            {food.foodAttributes.description && (food.foodAttributes.description)}
+                            {food.foodAttributes.description && food.foodAttributes.nutrition && (<br />)}
+                            {food.foodAttributes.nutrition && (food.foodAttributes.nutrition)}
+                          </Typography>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -142,15 +88,18 @@ const FoodTable = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 50]}
         component="div"
-        count={2}
+        count={-1}
         rowsPerPage={rowsPerPage}
-        page={pageIndex}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        page={0}
+        onPageChange={handleNext}
+        onRowsPerPageChange={(event) => {
+          setRowsPerPage(Number(event.target.value));
+        }}
+        labelDisplayedRows={({ from, to}) => `Items: ${from}-${to}`}
         slotProps={{
           actions: {
             nextButton: {
-              disabled: !hasNextPage && pageIndex === (data?.pages.length ?? 1) - 1
+              disabled: !hasNextPage
             }
           }
         }}
