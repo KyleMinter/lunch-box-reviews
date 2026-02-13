@@ -8,13 +8,18 @@ import {
     BillingMode
 } from 'aws-cdk-lib/aws-dynamodb';
 
+
+interface DynamoDBStackProps extends cdk.StackProps {
+  tableName: string;
+}
+
 export class DynamoDBStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: DynamoDBStackProps) {
         super(scope, id, props);
 
         // Define Review-Entities table
         const TABLE_ReviewEntities = new Table(this, 'Review-Entities', {
-            tableName: 'Review-Entities-Table',
+            tableName: props.tableName,
             billingMode: BillingMode.PAY_PER_REQUEST,
             removalPolicy: RemovalPolicy.DESTROY,
             partitionKey: {

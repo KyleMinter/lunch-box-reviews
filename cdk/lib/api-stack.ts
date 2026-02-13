@@ -7,11 +7,17 @@ import { HttpApi, CorsHttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
 import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import * as fs from 'fs';
 
+
+interface ApiStackProps extends cdk.StackProps {
+  auth0_domain: string;
+  region: string;
+  tableName: string;
+}
+
 export class ApiStack extends cdk.Stack {
   private readonly RUNTIME = lambda.Runtime.NODEJS_20_X;
-  private readonly REGION = 'us-east-1';
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
     const httpApi = new HttpApi(this, 'Reviews-API', {
@@ -46,7 +52,9 @@ export class ApiStack extends cdk.Stack {
               followSymlinks: cdk.SymlinkFollowMode.ALWAYS
             }),
             environment: {
-              REGION: this.REGION
+              AUTH0_DOMAIN: props.auth0_domain,
+              REGION: props.region,
+              TABLE_NAME: props.tableName
             }
           });
 

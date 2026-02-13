@@ -28,7 +28,7 @@ import { getFoodItem } from './foodItems.js';
   ======================================================================================================
 */
 
-export const REVIEWS_TABLE = 'Review-Entities-Table';
+export const REVIEWS_TABLE = process.env.TABLE_NAME!;
 
 /**
  * Interface representing criteria filter query parameters.

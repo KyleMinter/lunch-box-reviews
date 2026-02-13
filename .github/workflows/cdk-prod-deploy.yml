@@ -36,15 +36,9 @@ jobs:
           (cd ../shared-types && npm install && npm run build)
       
       - name: Build Shared Utils package
-        working-directory: ./shared-utils
         run: |
-          touch .env
-          echo "AUTH0_DOMAIN=$DOMAIN" >> .env
           echo "Building shared-utils package..."
-          npm install
-          npm run build
-        env:
-          DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          (cd ../shared-utils && npm install && npm run build)
       
       - name: Build Local Lambda Projects
         run: |
@@ -76,6 +70,20 @@ jobs:
         run: |
           mkdir -p ./assets
           cp -r ../frontend/build/* ./assets
+
+      - name: Create .env for CDK
+        working-directory: ./cdk
+        run: |
+          touch .env
+          echo "DOMAIN is set? $([[ -n "$DOMAIN" ]] && echo yes || echo no)"
+          echo "TABLE_NAME is set? $([[ -n "$TABLE_NAME" ]] && echo yes || echo no)"
+          echo "AUTH0_DOMAIN=$DOMAIN" >> .env
+          echo "AWS_REGION=$AWS_REGION" >> .env
+          echo "TABLE_NAME=$TABLE_NAME" >> .env
+        env:
+          DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          TABLE_NAME: ${{ secrets.TABLE_NAME }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@master

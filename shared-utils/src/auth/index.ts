@@ -32,10 +32,11 @@ export async function validateJwtToken(event: APIGatewayProxyEventV2): Promise<J
   const token = auth.replace('Bearer ', '');
 
   // Configure Jwks client so we can obtain the key.
-  const domain = process.env.AUTH0_DOMAIN;
+  const domain = process.env.AUTH0_DOMAIN!
+  console.log(`domain: ${domain}`);
   const jwks = new JwksClient({
     // TODO: get this from and env file instead.
-    jwksUri: `${domain}/.well-known/jwks.json`
+    jwksUri: `https://${domain}/.well-known/jwks.json`
   });
 
   // Obtain the public key so we can validate the token.

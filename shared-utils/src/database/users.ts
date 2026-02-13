@@ -75,8 +75,6 @@ export async function constructUser(json: any, oldUser?: User) {
     }) 
   }
 
-  console.log(`schema: ${JSON.stringify(constructedUserSchema)}`);
-
   const user = constructedUserSchema.parse(json);
   return user;
 }
@@ -87,7 +85,6 @@ export async function constructUser(json: any, oldUser?: User) {
  * @returns the newly created user
  */
 export async function createUser(user: User) {
-  console.log(`new user: ${user}`);
   // Add the new user to the database.
   const dynamo = getDynamoDbClient();
   await dynamo.send(
