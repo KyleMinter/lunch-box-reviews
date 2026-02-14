@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import useAuth from "../hooks/useAuth";
-import UserPage from "./userPage/UserPage";
+import useAuth from "../../hooks/useAuth";
+import UserPage from "./UserPage";
 import { Box } from "@mui/material";
 
 const ProfilePage = () => {

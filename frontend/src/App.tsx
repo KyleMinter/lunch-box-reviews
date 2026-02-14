@@ -3,11 +3,10 @@ import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 import HomePage from './pages/homePage/HomePage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/userPage/ProfilePage';
 import VerifyEmailModal from './components/modal/VerifyEmailModal';
 import AuthErrorModal from './components/modal/AuthErrorModal';
 import SearchPage from './pages/searchPage/SearchPage';
-import './pages/pages.css';
 import SearchProvider from './utils/search/SearchProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import useAuth from './hooks/useAuth';
@@ -16,6 +15,7 @@ import Auth0ProviderWithNavigate from './utils/auth/Auth0ProviderWithNavigate';
 import AuthProvider from './utils/auth/AuthProvider';
 import LoadingSpinner from './components/LoadingSpinner';
 import { Box, Button, Typography } from '@mui/material';
+import UserPage from './pages/userPage/UserPage';
 
 
 const App = () => {
@@ -90,6 +90,8 @@ const PageRoutes = () => {
         path="/profile"
         element={<AuthGuard Component={ProfilePage} />}
       />
+      <Route path="/user/:userId" element={<UserPage />} />
+      <Route path="/food/:foodId" element={<UserPage />} />
       <Route path="*" element={(
         <Box sx={{
           pt: 2,

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { 
   reviewPaginatedResponseSchema,
   PaginationParameters,
@@ -7,7 +7,9 @@ import {
   UserPaginatedResponse,
   userPaginatedResponseSchema,
   FoodItemPaginatedResponse,
-  foodItemPaginatedResponseSchema
+  foodItemPaginatedResponseSchema,
+  User,
+  userSchema
 } from "@lunch-box-reviews/shared-types";
 import { API_URL } from "../constants";
 
@@ -29,6 +31,27 @@ export function useReviews(pageSize: number) {
   });
 }
 
+async function fetchReviewsFromUser(userId: string, { cursor, limit }: PaginationParameters) {
+  const url = `${API_URL}users/${userId}/reviews?limit=${limit}&cursor=${cursor ?? ''}`;
+  const response = await axios.get<ReviewPaginatedResponse>(url);
+  return reviewPaginatedResponseSchema.parse(response.data);
+}
+
+export function useReviewsFromUser(userId: string | undefined, pageSize: number) {
+  return useInfiniteQuery({
+    queryKey: ['reviews', 'user', userId, pageSize],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      fetchReviewsFromUser(userId!, {
+        cursor: pageParam,
+        limit: pageSize,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: !!userId, // ✅ only fetch if userId exists
+    refetchOnWindowFocus: false,
+  });
+}
+
 async function fetchUsers({ cursor, limit }: PaginationParameters) {
   const url = `${API_URL}users?limit=${limit}&cursor=${cursor ?? ''}`
   const response = await axios.get<UserPaginatedResponse>(url);
@@ -44,6 +67,20 @@ export function useUsers(pageSize: number) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false
   });
+}
+
+async function fetchUserById(userId: string) {
+  const url = `${API_URL}users/${userId}`
+  const response = await axios.get<User>(url);
+  return userSchema.parse(response.data);
+}
+
+export function useUser(userId?: string) {
+  return useQuery<User, Error>({
+    queryKey: ['user', userId],
+    queryFn: () => fetchUserById(userId!),
+    enabled: !!userId // only run query if userId exists
+  })
 }
 
 async function fetchFoodItems({ cursor, limit }: PaginationParameters) {
