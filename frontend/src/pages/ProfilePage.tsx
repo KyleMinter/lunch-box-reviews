@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import UserPage from "./userPage/UserPage";
+import { Box } from "@mui/material";
 
 const ProfilePage = () => {
     const { isEnabled, user, getAccessTokenSilently } = useAuth();
@@ -16,7 +17,11 @@ const ProfilePage = () => {
     return (
         <>
             <UserPage user={user!}/>
-            <p>{token}</p>
+            <Box sx={{
+              overflow: 'hidden'
+            }}>
+              {token}
+            </Box>
         </>
     );
 }

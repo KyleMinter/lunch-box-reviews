@@ -1,53 +1,70 @@
-import { User } from "@lunch-box-reviews/shared-types";
-import { Box, Typography } from "@mui/material";
-
+import { User } from '@lunch-box-reviews/shared-types';
+import {
+  Box,
+  Divider,
+  Paper,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 
 interface UserInfoProps {
-  user: User
+  user: User;
 }
 
 const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        padding: 1,
-        borderBottom: 1,
-        borderColor: 'divider'
-      }}
-    >
-      <Box sx={{ width: '192px' }}>
-        <img src="logo192.png" alt="Profile" />
-      </Box>
-      <Box
-        sx={{
-          flexGrow: 1,
-          paddingX: 5,
-          paddingY: 3,
-        }}
+    <Paper sx={{ p: 2 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={2}
+        alignItems={{ xs: 'center', md: 'stretch' }}
       >
-        <Box sx={{
-          borderBottom: 1,
-          borderColor: 'divider',
-          marginBottom: 1,
-          paddingBottom: 1
-        }}>
-        <Typography variant="h3">
-          {user.userName}
-        </Typography>
-        <Typography variant="subtitle1">
-          {user.userEmail}
-        </Typography>
+        <Box
+          sx={{
+            width: { xs: '100%', md: 192 },
+            display: 'flex',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Box
+            component="img"
+            src="logo192.png"
+            alt="Profile"
+            sx={{ maxWidth: '100%', height: 'auto' }}
+          />
         </Box>
-        <Typography variant="caption">
-          Account Created: {user.created}
-        </Typography>
-      </Box>
-    </Box>
-  )
-}
+        <Divider
+          orientation={isMdUp ? 'vertical' : 'horizontal'}
+          flexItem
+          sx={{
+            mx: isMdUp ? 2 : 0,
+            my: isMdUp ? 0 : 1,
+          }}
+        />
+        <Stack
+          spacing={1}
+          justifyContent="center"
+          divider={<Divider />}
+          sx={{ flex: 1, width: '100%' }}
+        >
+          <Box>
+            <Typography variant="h3">{user.userName}</Typography>
+            <Typography variant="subtitle1">{user.userEmail}</Typography>
+          </Box>
 
+          <Typography variant="caption">
+            Account Created: {user.created}
+          </Typography>
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+};
 
 export default UserInfo;
