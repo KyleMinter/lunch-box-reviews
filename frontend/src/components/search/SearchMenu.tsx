@@ -84,6 +84,10 @@ const SearchMenu = (props: SearchMenuProps) => {
     }
   };
 
+  const isSearchBarDisabled = value === 0
+    || (value === 1 && filters.userNone.selected)
+    || (value === 2 && filters.foodNone.selected);
+
   return (
     <Popover
       id={id}
@@ -113,7 +117,7 @@ const SearchMenu = (props: SearchMenuProps) => {
           borderBottom: 1,
           borderColor: 'divider'
         }}>
-          <SearchBar disabled={value === 0} />
+          <SearchBar disabled={isSearchBarDisabled} />
         </Box>
         <TabPanel value={value} index={0}>
           <FormGroup>
@@ -177,6 +181,16 @@ const SearchMenu = (props: SearchMenuProps) => {
               }
               label="Email"
             />
+            <FormControlLabel
+              value="userNone"
+              control={
+                <Radio
+                  checked={filters.userNone.selected}
+                  onChange={() => filtersDispatch({ type: 'FILTER_SELECT', filter: 'userNone' })}
+                />
+              }
+              label="None"
+            />
           </RadioGroup>
         </TabPanel>
         <TabPanel value={value} index={2}>
@@ -207,6 +221,16 @@ const SearchMenu = (props: SearchMenuProps) => {
                 />
               }
               label="Location"
+            />
+            <FormControlLabel 
+              value="foodNone"
+              control={
+                <Radio
+                  checked={filters.foodNone.selected}
+                  onChange={() => filtersDispatch({ type: 'FILTER_SELECT', filter: 'foodNone' })}
+                />
+              }
+              label="None"
             />
           </RadioGroup>
         </TabPanel>

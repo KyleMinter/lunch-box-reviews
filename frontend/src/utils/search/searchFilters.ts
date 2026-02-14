@@ -18,8 +18,10 @@ export interface SearchFilters {
   endDate: SearchFilter;
   userName: SearchFilter;
   userEmail: SearchFilter;
+  userNone: SearchFilter;
   foodName: SearchFilter;
   foodOrigin: SearchFilter;
+  foodNone: SearchFilter;
 }
 
 function isSearchFilter(obj: any): obj is SearchFilter {

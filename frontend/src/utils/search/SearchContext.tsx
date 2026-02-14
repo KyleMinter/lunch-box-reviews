@@ -46,6 +46,11 @@ export const defaultFilters: SearchFilters = {
     radioGroup: EntityType.User,
     isCheckbox: false
   },
+  userNone: {
+    selected: false,
+    radioGroup: EntityType.User,
+    isCheckbox: false
+  },
   foodName: {
     selected: true,
     radioGroup: EntityType.FoodItem,
@@ -55,7 +60,12 @@ export const defaultFilters: SearchFilters = {
     selected: false,
     radioGroup: EntityType.FoodItem,
     isCheckbox: false
-  }
+  },
+  foodNone: {
+    selected: false,
+    radioGroup: EntityType.FoodItem,
+    isCheckbox: false
+  },
 };
 
 const stub = (): never => {
