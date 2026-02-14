@@ -24,7 +24,8 @@ export function useReviews(pageSize: number) {
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       fetchReviews({ cursor: pageParam, limit: pageSize }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    refetchOnWindowFocus: false
   });
 }
 
@@ -40,7 +41,8 @@ export function useUsers(pageSize: number) {
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       fetchUsers({ cursor: pageParam, limit: pageSize }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    refetchOnWindowFocus: false
   });
 }
 
@@ -56,6 +58,7 @@ export function useFoodItems(pageSize: number) {
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       fetchFoodItems({ cursor: pageParam, limit: pageSize }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    refetchOnWindowFocus: false
   });
 }
