@@ -11,15 +11,18 @@ interface ReviewsTableProps {
     hasNextPage?: boolean;
     isFetchingNextPage: boolean;
     isLoading: boolean;
-  }
+  };
+  noResultsComponent?: React.ReactNode;
 }
 
 const ReviewsTable: React.FC<ReviewsTableProps> = ({
-  useData = useReviews
+  useData = useReviews,
+  noResultsComponent
 }) => {
   return (
     <InfiniteTable
       useData={useData}
+      noResultsComponent={noResultsComponent}
       getRowId={(review: Review) => review.entityId}
       columns={[
         { id: "item", label: "Item" },
