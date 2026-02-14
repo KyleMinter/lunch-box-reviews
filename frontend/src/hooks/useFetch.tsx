@@ -49,7 +49,7 @@ export function useReviewsFromUser(userId: string | undefined, pageSize: number)
         limit: pageSize,
       }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: !!userId, // ✅ only fetch if userId exists
+    enabled: !!userId,
     refetchOnWindowFocus: false,
   });
 }
@@ -70,7 +70,7 @@ export function useReviewsFromFood(foodId: string | undefined, pageSize: number)
         limit: pageSize,
       }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: !!foodId, // ✅ only fetch if foodId exists
+    enabled: !!foodId,
     refetchOnWindowFocus: false,
   });
 }
@@ -102,7 +102,7 @@ export function useUser(userId?: string) {
   return useQuery<User, Error>({
     queryKey: ['user', userId],
     queryFn: () => fetchUserById(userId!),
-    enabled: !!userId // only run query if userId exists
+    enabled: !!userId
   })
 }
 
@@ -133,6 +133,6 @@ export function useFood(foodId?: string) {
   return useQuery<FoodItem, Error>({
     queryKey: ['food', foodId],
     queryFn: () => fetchFoodById(foodId!),
-    enabled: !!foodId // only run query if foodId exists
+    enabled: !!foodId
   })
 }
