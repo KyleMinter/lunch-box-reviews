@@ -1,6 +1,4 @@
 import {
-  getCriteriaFilterParameters,
-  CriteriaFilter,
   getPaginationParameters,
   PaginationParameters,
   RequestError,
@@ -10,6 +8,8 @@ import {
   getAllFoodItems,
   NoIdProvidedError,
   getReviewsFromFoodItem,
+  getFilters,
+  Filter,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -25,7 +25,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   try {
     switch (routeKey) {
       case 'GET /foods': {
-        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const filter: Filter | undefined = getFilters(event);
         const pagination: PaginationParameters = getPaginationParameters(event);
 
         body = await getAllFoodItems(pagination, filter);

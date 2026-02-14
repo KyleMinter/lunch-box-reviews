@@ -196,12 +196,61 @@ export const userPaginatedResponseSchema = paginatedResponseSchema(userSchema);
 export type FoodItemPaginatedResponse = z.infer<typeof foodItemPaginatedResponseSchema>;
 export const foodItemPaginatedResponseSchema = paginatedResponseSchema(foodItemSchema);
 
+/*
+  ======================================================================================================
+
+  Pagination/Filter Parameter types
+
+  ======================================================================================================
+*/
+
 /**
  * Interface representing pagination query parameters.
  * Contains a limit and cursor parameter.
  */
 export type PaginationParameters = z.infer<typeof paginationParametersSchema>;
 export const paginationParametersSchema = z.object({
-  limit: z.number(),
+  limit: z.coerce.number(),
   cursor: z.string().optional()
+});
+
+export const supportedUserAttributes = ['userName', 'userEmail'] as const;
+export type SupportedUserAttributes = (typeof supportedUserAttributes)[number];
+
+export const supportedFoodAttributes = ['foodName', 'foodOrigin'] as const;
+export type supportedFoodAttributes = (typeof supportedFoodAttributes)[number];
+
+export const supportedAttributes = [...supportedUserAttributes, ...supportedFoodAttributes] as const;
+export type SupportedAttributes = (typeof supportedAttributes)[number];
+
+export type Filter = z.infer<typeof filterSchema>;
+export const filterSchema = z.object({
+  filterAttribute: z.enum(supportedAttributes),
+  filterString: z.string().min(1)
+});
+
+export type UserFilter = z.infer<typeof userFilterSchema>;
+export const userFilterSchema = filterSchema.extend({
+  filterAttribute: z.enum(supportedUserAttributes)
+});
+
+export type FoodFilter = z.infer<typeof foodFilterSchema>;
+export const foodFilterSchema = filterSchema.extend({
+  filterAttribute: z.enum(supportedFoodAttributes)
+});
+
+export type DateFilter = z.infer<typeof dateFilterSchema>;
+export const dateFilterSchema = z.object({
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional()
+})
+.refine((data) => {
+  if (data.startDate && data.endDate) {
+    return new Date(data.startDate) <= new Date(data.endDate);
+  }
+  return true;
+},
+{
+  message: 'startDate must be before or equal to endDate',
+  path: ['startDate']
 });

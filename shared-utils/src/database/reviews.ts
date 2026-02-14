@@ -6,7 +6,6 @@ import {
   DeleteCommand
 } from '@aws-sdk/lib-dynamodb';
 import {
-  DateFilter,
   decodeCursor,
   encodeCursor,
   getDynamoDbClient,
@@ -31,7 +30,8 @@ import {
   ReviewPrototype,
   ReviewPrototypePaginatedResponse,
   reviewPrototypeProps,
-  reviewPrototypeSchema
+  reviewPrototypeSchema,
+  DateFilter
 } from '@lunch-box-reviews/shared-types';
 
 
@@ -136,7 +136,7 @@ export async function createReview(review: ReviewPrototype, foodItem: FoodItem) 
  */
 export async function getAllReviews(
   dateFilter: DateFilter,
-  pagination?: PaginationParameters
+  pagination?: PaginationParameters,
 ): Promise<ReviewPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;

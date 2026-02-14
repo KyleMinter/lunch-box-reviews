@@ -7,7 +7,6 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import {
   convertReviewPrototypesToDto,
-  CriteriaFilter,
   decodeCursor,
   deleteReview,
   encodeCursor,
@@ -20,6 +19,7 @@ import {
   REVIEWS_TABLE
 } from './index.js';
 import {
+  Filter,
   EntityType,
   PaginationParameters,
   ReviewPaginatedResponse,
@@ -27,10 +27,12 @@ import {
   ReviewPrototypePaginatedResponse,
   reviewPrototypeProps,
   User,
+  userFilterSchema,
   UserPaginatedResponse,
   userProps,
   userSchema
 } from '@lunch-box-reviews/shared-types';
+import { BadRequestError } from '../errors/index.js';
 
 
 /*
@@ -86,26 +88,27 @@ export async function createUser(user: User) {
  * @returns a list of users and the last evaluated key
  */
 export async function getAllUsers(
-  pagination?: PaginationParameters,
-  criteriaFilter?: CriteriaFilter
+  pagination: PaginationParameters,
+  filter?: Filter
 ): Promise<UserPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
 
-  // Query the database for users using a criteria and filter.
-  if (criteriaFilter) {
-    const filter = criteriaFilter.filter;
-    const criteria = criteriaFilter.criteria;
+  // Query the database for users using filter.
+  if (filter) {
+    const parsed = userFilterSchema.safeParse(filter);
+    if (!parsed.success) {
+      throw new BadRequestError('Invalid user filter provided');
+    }
+    const attribute = filter.filterAttribute;
+    const filterString = filter.filterString;
 
-    if (criteria !== userProps.userName && criteria !== userProps.userEmail)
-      throw new Error('Unsupported criteria');
-
-    indexName = `GSI-${userProps.entityId}-${criteria}`;
-    keyConditionExpression = `${userProps.entityType} = :pkValue AND begins_with(${criteria}, :skValue)`;
+    indexName = `GSI-${userProps.entityId}-${attribute}`;
+    keyConditionExpression = `${userProps.entityType} = :pkValue AND begins_with(${attribute}, :skValue)`;
     expressionAttributeValues = {
       ':pkValue': EntityType.User,
-      ':skValue': filter
+      ':skValue': filterString
     };
   }
   // Query the database for all users.
@@ -125,8 +128,8 @@ export async function getAllUsers(
       KeyConditionExpression: keyConditionExpression,
       ExpressionAttributeValues: expressionAttributeValues,
       ProjectionExpression: userProps.keys,
-      ExclusiveStartKey: decodeCursor(pagination?.cursor),
-      Limit: pagination?.limit,
+      ExclusiveStartKey: decodeCursor(pagination.cursor),
+      Limit: pagination.limit,
     })
   ) as IQueryCommandOutput<User>;
 

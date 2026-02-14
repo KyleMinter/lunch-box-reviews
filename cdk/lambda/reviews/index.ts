@@ -1,5 +1,4 @@
 import {
-  getDateFilterParameters,
   DateFilter,
   getPaginationParameters,
   PaginationParameters,
@@ -19,6 +18,7 @@ import {
   NoBodyProvidedError,
   NotFoundError,
   NoIdProvidedError,
+  getDateFilters,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -105,7 +105,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         break;
       }
       case 'GET /reviews': {
-        const filter: DateFilter = getDateFilterParameters(event);
+        const filter: DateFilter = getDateFilters(event);
         const pagination: PaginationParameters = getPaginationParameters(event);
         
         body = await getAllReviews(filter, pagination);

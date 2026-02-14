@@ -14,7 +14,18 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { BadRequestError } from '../errors/index.js';
-import { PaginationParameters, reviewDtoSchema, reviewPrototypeSchema } from '@lunch-box-reviews/shared-types';
+import {
+  dateFilterSchema,
+  DateFilter,
+  Filter,
+  filterSchema,
+  PaginationParameters,
+  paginationParametersSchema,
+  reviewDtoSchema,
+  reviewPrototypeSchema,
+  supportedAttributes,
+  SupportedAttributes
+} from '@lunch-box-reviews/shared-types';
 import { z } from "zod";
 import { getUser } from './users.js';
 import { getFoodItem } from './foodItems.js';
@@ -29,24 +40,6 @@ import { getFoodItem } from './foodItems.js';
 */
 
 export const REVIEWS_TABLE = process.env.TABLE_NAME!;
-
-/**
- * Interface representing criteria filter query parameters.
- * Contains a filter and criteria.
- */
-export interface CriteriaFilter {
-  filter: string,
-  criteria: string,
-}
-
-/**
- * Interface representing date filter query parameters.
- * Contains a start date and end date.
- */
-export interface DateFilter {
-  startDate: string | undefined,
-  endDate: string | undefined
-}
 
 /**
  * Gets the Dynamo DB client to use for querying.
@@ -64,67 +57,84 @@ export function getDynamoDbClient(): DynamoDBDocumentClient {
  * @returns the pagination (limit & offset) query parameters
  */
 export function getPaginationParameters(event: APIGatewayProxyEventV2): PaginationParameters {
-  let limit: number = 10;
-  let cursor: string | undefined = undefined;
-
   const queryParams = event.queryStringParameters;
-  if (queryParams && queryParams.limit) {
-    const supportedLimits = [10, 25, 50];
-    const limitParam = Number(queryParams.limit);
-    if (supportedLimits.includes(limitParam))
-      limit = limitParam;
-    else
-      throw new BadRequestError('Unsupported limit parameter');
 
-    cursor = queryParams ? queryParams.cursor : undefined;
+  const parsed = paginationParametersSchema.safeParse({
+    limit: queryParams?.limit ?? 10,
+    cursor: queryParams?.cursor
+  });
+
+  if (!parsed.success) {
+    throw new BadRequestError('Invalid pagination parameters');
   }
 
-  return {
-    limit,
-    cursor
+  const supportedLimits = [10, 25, 50];
+  if (!supportedLimits.includes(parsed.data.limit)) {
+    throw new BadRequestError('Unsupported limit parameter');
   }
+
+  return parsed.data;
 }
 
 /**
- * Gets the criteria filter query parameters for a given request.
+ * Gets the filters for a given request.
  * @param event the request event
- * @returns the criteria filter query parameters
+ * @returns the filter query parameters
  */
-export function getCriteriaFilterParameters(event: APIGatewayProxyEventV2): CriteriaFilter | undefined {
+export function getFilters(event: APIGatewayProxyEventV2): Filter | undefined {
   const queryParams = event.queryStringParameters;
-  const filter: string | undefined = queryParams ? queryParams.filter : undefined;
-  const criteria: string | undefined = queryParams ? queryParams.criteria : undefined;
 
-  if ((!filter && criteria) || (filter && !criteria))
-    throw new Error('An unsupported combination of query parameters was supplied');
-
-  if (filter && criteria) {
-    const criteriaFilter: CriteriaFilter = {
-      filter: filter,
-      criteria: criteria
-    };
-    return criteriaFilter;
-  }
-  else
+  if (!queryParams) {
     return undefined;
+  }
+
+  const entries = Object.entries(queryParams).filter(([key]) =>
+    supportedAttributes.includes(key as SupportedAttributes)
+  );
+
+  if (entries.length === 0) {
+    return undefined;
+  }
+
+  if (entries.length === 1) {
+    throw new BadRequestError('Only one filter parameter is allowed at a time');
+  }
+
+  const [filterAttribute, filterString] = entries[0] as [SupportedAttributes, string];
+  
+  if (!filterString || filterString.trim() === '') {
+    throw new BadRequestError(`Filter value for ${filterAttribute} cannot be empty`);
+  }
+
+  const parsed = filterSchema.safeParse({ filterAttribute, filterString });
+  if (!parsed.success) {
+    throw new BadRequestError('Invalid filter parameter');
+  }
+
+  return parsed.data;
 }
 
 /**
- * Gets the date filter query parameters for a given request.
+ * Gets the date filters for a given request.
  * @param event the request event
  * @returns the date filter parameters
  */
-export function getDateFilterParameters(event: APIGatewayProxyEventV2): DateFilter {
+export function getDateFilters(event: APIGatewayProxyEventV2): DateFilter {
   const queryParams = event.queryStringParameters;
-  const startDate: string | undefined = queryParams ? queryParams.startDate : undefined;
-  const endDate: string | undefined = queryParams ? queryParams.endDate : undefined;
 
-  const dateFilter: DateFilter = {
-    startDate: startDate,
-    endDate: endDate
-  };
+  const startDate: string | undefined = queryParams?.startDate;
+  const endDate: string | undefined = queryParams?.endDate;
 
-  return dateFilter;
+  const parsed = dateFilterSchema.safeParse({
+    startDate,
+    endDate
+  });
+
+  if (!parsed.success) {
+    throw new BadRequestError('Invalid date filter parameters');
+  }
+
+  return parsed.data
 }
 
 /**

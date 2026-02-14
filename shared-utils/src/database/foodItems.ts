@@ -7,7 +7,6 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import {
   convertReviewPrototypesToDto,
-  CriteriaFilter,
   decodeCursor,
   deleteReview,
   encodeCursor,
@@ -23,6 +22,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { BadRequestError } from '../errors/index.js';
 import { 
   EntityType,
+  Filter,
+  foodFilterSchema,
   FoodItem,
   FoodItemPaginatedResponse,
   foodItemProps,
@@ -87,25 +88,26 @@ export async function createFoodItem(foodItem: FoodItem) {
  */
 export async function getAllFoodItems(
   pagination?: PaginationParameters,
-  criteriaFilter?: CriteriaFilter
+  filter?: Filter
 ): Promise<FoodItemPaginatedResponse> {
   let indexName: string;
   let keyConditionExpression: string;
   let expressionAttributeValues: Record<string, string>;
 
   // Query the database for food items using a criteria and filter.
-  if (criteriaFilter) {
-    const filter = criteriaFilter.filter;
-    const criteria = criteriaFilter.criteria;
+  if (filter) {
+    const parsed = foodFilterSchema.safeParse(filter);
+    if (!parsed.success) {
+      throw new BadRequestError('Invalid user filter provided');
+    }
+    const attribute = filter.filterAttribute;
+    const filterString = filter.filterString;
 
-    if (criteria !== foodItemProps.foodName && criteria !== foodItemProps.foodOrigin)
-      throw new BadRequestError('Unsupported criteria');
-
-    indexName = `GSI-${foodItemProps.entityType}-${criteria}`;
-    keyConditionExpression = `${foodItemProps.entityType} = :pkValue AND begins_with(${criteria}, :skValue)`;
+    indexName = `GSI-${foodItemProps.entityType}-${attribute}`;
+    keyConditionExpression = `${foodItemProps.entityType} = :pkValue AND begins_with(${attribute}, :skValue)`;
     expressionAttributeValues = {
       ':pkValue': EntityType.FoodItem,
-      ':skValue': filter
+      ':skValue': filterString
     };
   }
   // Query the database for all food items.

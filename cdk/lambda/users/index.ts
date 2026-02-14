@@ -11,11 +11,11 @@ import {
   getUser,
   updateUser,
   createUser,
-  CriteriaFilter,
-  getCriteriaFilterParameters,
   getAllUsers,
   NoIdProvidedError,
   getReviewsFromUser,
+  getFilters,
+  Filter,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -58,7 +58,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         break;
       }
       case 'GET /users': {
-        const filter: CriteriaFilter | undefined = getCriteriaFilterParameters(event);
+        const filter: Filter | undefined = getFilters(event);
         const pagination: PaginationParameters = getPaginationParameters(event);
 
         body = await getAllUsers(pagination, filter);
