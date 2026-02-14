@@ -56,6 +56,7 @@ export async function constructUser(json: any, oldUser?: User) {
   const preFilledJson = {
     ...json,
     entityId: oldUser?.entityId ?? json.entityId,
+    userPicture: oldUser?.userPicture ?? json.userPicture,
     created: oldUser?.created ?? currDate
   }
 

@@ -6,7 +6,8 @@ import {
 } from "@mui/material";
 import InfiniteTable from "./InfiniteTable";
 import { useUsers } from "../../hooks/useFetch";
-import { User } from "@auth0/auth0-react";
+import { User } from "@lunch-box-reviews/shared-types";
+
 
 const UsersTable = () => {
   return (
@@ -30,7 +31,7 @@ const UsersTable = () => {
               avatar={
                 <Avatar
                   alt={user.userName}
-                  src="logo192.png"
+                  src={user.userPicture}
                 />
               }
               title={user.userName}

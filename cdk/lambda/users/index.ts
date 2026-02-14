@@ -43,7 +43,10 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         const userInDatabase = await getUser(user.entityId)
         if (userInDatabase) {
           // If needed, update the user in the database.
-          if (user.userName !== userInDatabase.userName || user.userEmail !== userInDatabase.userEmail) {
+          if (user.userName !== userInDatabase.userName
+            || user.userEmail !== userInDatabase.userEmail
+            || user.userPicture !== userInDatabase.userPicture
+          ) {
             await updateUser(user);
             body = user;
           }

@@ -34,8 +34,8 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
         >
           <Box
             component="img"
-            src="logo192.png"
-            alt="Profile"
+            alt={user.userName}
+            src={user.userPicture}
             sx={{ maxWidth: '100%', height: 'auto' }}
           />
         </Box>

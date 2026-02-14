@@ -104,6 +104,7 @@ export const foodItemProps = props(foodItemSchema);
  * ```js
  * userName         // the user name of the user.
  * userEmail        // the email of the user.
+ * userPicture      // the picture of the user.
  * created          // the date of account creation.
  * ```
  */
@@ -112,6 +113,7 @@ export const userSchema = entitySchema.extend({
   entityType: entitySchema.shape.entityType.default(EntityType.User),
   userName: z.string(),
   userEmail: z.string(),
+  userPicture: z.string(),
   created: z.string().datetime()
 });
 export const userProps = props(userSchema);

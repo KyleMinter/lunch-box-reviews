@@ -67,6 +67,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
           entityType: EntityType.User,
           userName: 'User Name',
           userEmail: 'user.email@gmail.com',
+          userPicture: '/logo192.png',
           created: '02/07/2026'
         };
         setUser(fakeUser);
@@ -81,7 +82,8 @@ const AuthProvider = (opts: AuthProviderOptions) => {
 
         const body = {
           userName: `${auth0User!.username}`,
-          userEmail: `${auth0User!.email}`
+          userEmail: `${auth0User!.email}`,
+          userPicture: `${auth0User!.picture}`
         }
 
         const url = `${AUTH0_AUDIENCE}users`;
