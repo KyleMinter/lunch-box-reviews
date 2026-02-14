@@ -3,10 +3,23 @@ import InfiniteTable from "./InfiniteTable";
 import { useReviews } from "../../hooks/useFetch";
 import { Review } from "@lunch-box-reviews/shared-types";
 
-const ReviewsTable = () => {
+
+interface ReviewsTableProps {
+  useData?: (rowsPerPage: number) => {
+    data: any;
+    fetchNextPage: () => Promise<any>;
+    hasNextPage?: boolean;
+    isFetchingNextPage: boolean;
+    isLoading: boolean;
+  }
+}
+
+const ReviewsTable: React.FC<ReviewsTableProps> = ({
+  useData = useReviews
+}) => {
   return (
     <InfiniteTable
-      useData={useReviews}
+      useData={useData}
       getRowId={(review: Review) => review.entityId}
       columns={[
         { id: "item", label: "Item" },
