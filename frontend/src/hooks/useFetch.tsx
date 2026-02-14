@@ -9,7 +9,9 @@ import {
   FoodItemPaginatedResponse,
   foodItemPaginatedResponseSchema,
   User,
-  userSchema
+  userSchema,
+  FoodItem,
+  foodItemSchema,
 } from "@lunch-box-reviews/shared-types";
 import { API_URL } from "../constants";
 
@@ -48,6 +50,27 @@ export function useReviewsFromUser(userId: string | undefined, pageSize: number)
       }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!userId, // ✅ only fetch if userId exists
+    refetchOnWindowFocus: false,
+  });
+}
+
+async function fetchReviewsFromFood(foodId: string, { cursor, limit }: PaginationParameters) {
+  const url = `${API_URL}foods/${foodId}/reviews?limit=${limit}&cursor=${cursor ?? ''}`;
+  const response = await axios.get<ReviewPaginatedResponse>(url);
+  return reviewPaginatedResponseSchema.parse(response.data);
+}
+
+export function useReviewsFromFood(foodId: string | undefined, pageSize: number) {
+  return useInfiniteQuery({
+    queryKey: ['reviews', 'food', foodId, pageSize],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      fetchReviewsFromFood(foodId!, {
+        cursor: pageParam,
+        limit: pageSize,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: !!foodId, // ✅ only fetch if foodId exists
     refetchOnWindowFocus: false,
   });
 }
@@ -98,4 +121,18 @@ export function useFoodItems(pageSize: number) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false
   });
+}
+
+async function fetchFoodById(foodId: string) {
+  const url = `${API_URL}foods/${foodId}`
+  const response = await axios.get<FoodItem>(url);
+  return foodItemSchema.parse(response.data);
+}
+
+export function useFood(foodId?: string) {
+  return useQuery<FoodItem, Error>({
+    queryKey: ['food', foodId],
+    queryFn: () => fetchFoodById(foodId!),
+    enabled: !!foodId // only run query if foodId exists
+  })
 }

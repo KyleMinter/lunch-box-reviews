@@ -16,6 +16,7 @@ import AuthProvider from './utils/auth/AuthProvider';
 import LoadingSpinner from './components/LoadingSpinner';
 import { Box, Button, Typography } from '@mui/material';
 import UserPage from './pages/userPage/UserPage';
+import FoodPage from './pages/foodPage/FoodPage';
 
 
 const App = () => {
@@ -91,7 +92,7 @@ const PageRoutes = () => {
         element={<AuthGuard Component={ProfilePage} />}
       />
       <Route path="/user/:userId" element={<UserPage />} />
-      <Route path="/food/:foodId" element={<UserPage />} />
+      <Route path="/food/:foodId" element={<FoodPage />} />
       <Route path="*" element={(
         <Box sx={{
           pt: 2,
