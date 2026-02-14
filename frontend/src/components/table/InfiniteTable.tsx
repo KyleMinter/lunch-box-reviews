@@ -78,6 +78,7 @@ function InfiniteTable<T>({
         onRowsPerPageChange={(e) =>
           setRowsPerPage(Number(e.target.value))
         }
+        labelDisplayedRows={({ from, to}) => `Items: ${from}-${to}`}
         slotProps={{
           actions: {
             nextButton: { disabled: !hasNextPage },
