@@ -22,11 +22,11 @@ const SearchPage = () => {
 
   return (
     <Box sx={{
+      mt: 3,
       mx: 'auto',
       maxWidth: 950
     }}>
       <Box sx={{
-        pt: 3,
         pb: 2,
         textAlign: 'center'
       }}>
