@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const routeKey = event.requestContext.http.method;
+  const routeKey = event.requestContext.routeKey;
   const foodId = event.pathParameters?.id;
 
   try {

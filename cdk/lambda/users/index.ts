@@ -25,12 +25,12 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   let statusCode = 200;
   const headers = getAuthorizationHeaders('OPTIONS,POST,PUT,GET,DELETE');
 
-  const routeKey = event.requestContext.http.method;
+  const routeKey = event.requestContext.routeKey;
   const userId = event.pathParameters?.id;
 
   try {
     switch (routeKey) {
-      case 'POST': {
+      case 'POST /users': {
         if (!event.body || event.body.length === 0)
           throw new NoBodyProvidedError();
 
