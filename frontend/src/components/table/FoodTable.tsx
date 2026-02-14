@@ -2,9 +2,12 @@ import { TableCell, TableRow, Typography } from "@mui/material";
 import { useFoodItems } from "../../hooks/useFetch";
 import InfiniteTable from "./InfiniteTable";
 import { FoodItem } from "@lunch-box-reviews/shared-types";
+import { useNavigate } from "react-router-dom";
 
 
 const FoodTable = () => {
+  const navigate = useNavigate();
+
   return (
     <InfiniteTable
       useData={useFoodItems}
@@ -18,7 +21,19 @@ const FoodTable = () => {
         const { description, nutrition } = food.foodAttributes
         return (
           <>
-            <TableRow>
+            <TableRow
+              sx={{
+                cursor: "pointer",
+                "&:hover": { backgroundColor: "action.hover" },
+                "&:hover + tr td": {
+                  outline: "1px solid",
+                  outlineColor: "grey.300",
+                  outlineOffset: -2, // pulls it inward so it looks like a border without shifting content
+                  backgroundColor: "inherit",
+                },
+              }}
+              onClick={() => navigate(`/food/${food.entityId}`)}
+            >
               <TableCell>{food.foodName}</TableCell>
               <TableCell>{food.foodOrigin}</TableCell>
               <TableCell>

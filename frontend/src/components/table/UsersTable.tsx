@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Button,
   CardHeader,
   TableCell,
   TableRow,
@@ -7,9 +8,12 @@ import {
 import InfiniteTable from "./InfiniteTable";
 import { useUsers } from "../../hooks/useFetch";
 import { User } from "@lunch-box-reviews/shared-types";
+import { useNavigate } from "react-router-dom";
 
 
 const UsersTable = () => {
+  const navigate = useNavigate();
+
   return (
     <InfiniteTable
       useData={useUsers}
@@ -20,11 +24,14 @@ const UsersTable = () => {
         { id: "created", label: "Account Created" },
       ]}
       renderRow={(user: User) => (
-        <TableRow>
+        <TableRow
+          hover
+          sx={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/user/${user.entityId}`)}
+        >
           <TableCell
             sx={{
               minWidth: 15,
-              paddingLeft: 9, // roughly equivalent to 72px spacing
             }}
           >
             <CardHeader
@@ -37,6 +44,7 @@ const UsersTable = () => {
               title={user.userName}
               sx={{ p: 0, textAlign: "left" }}
             />
+
           </TableCell>
 
           <TableCell>{user.userEmail}</TableCell>
