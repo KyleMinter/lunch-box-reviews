@@ -14,6 +14,7 @@ interface InfiniteTableProps<T> {
   columns: { id: string; label: string }[];
   getRowId: (row: T) => string | number;
   renderRow: (row: T) => React.ReactNode;
+  noResultsComponent?: React.ReactNode;
 };
 
 function InfiniteTable<T>({
@@ -21,6 +22,7 @@ function InfiniteTable<T>({
   columns,
   getRowId,
   renderRow,
+  noResultsComponent
 }: InfiniteTableProps<T>) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -58,7 +60,7 @@ function InfiniteTable<T>({
             {items.length === 0 && (
               <TableRow>
                 <TableCell colSpan={columns.length} align="center">
-                  <NoResultsFound />
+                  {noResultsComponent ?? <NoResultsFound />}
                 </TableCell>
               </TableRow>
             )}
