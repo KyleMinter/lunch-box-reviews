@@ -1,63 +1,102 @@
-import { TableCell, TableRow, Typography } from "@mui/material";
+import { Box, Collapse, IconButton, TableCell, TableRow, Typography } from "@mui/material";
 import { useFoodItems } from "../../hooks/useFetch";
 import InfiniteTable from "./InfiniteTable";
 import { FoodItem } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 
 const FoodTable = () => {
-  const navigate = useNavigate();
-
   return (
     <InfiniteTable
       useData={useFoodItems}
       getRowId={(food: FoodItem) => food.entityId}
       columns={[
+        { id: "", label: "" },
         { id: "name", label: "Name" },
         { id: "origin", label: "Location" },
         { id: "rating", label: "Average Rating" },
       ]}
-      renderRow={(food: FoodItem) => {
-        const { description, nutrition } = food.foodAttributes
-        return (
-          <>
-            <TableRow
-              sx={{
-                cursor: "pointer",
-                "&:hover": { backgroundColor: "action.hover" },
-                "&:hover + tr td": {
-                  outline: "1px solid",
-                  outlineColor: "grey.300",
-                  outlineOffset: -2,
-                  backgroundColor: "inherit",
-                },
-              }}
-              onClick={() => {
-                navigate(`/food/${food.entityId}`)
+      renderRow={(food: FoodItem) => (
+        <FoodRow food={food} />
+      )}
+    />
+  )
+}
+
+interface FoodRowProps {
+  food: FoodItem
+}
+
+const FoodRow: React.FC<FoodRowProps> = ({ food }) => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const { description, nutrition } = food.foodAttributes
+  const hasExtraContent = Boolean(description || nutrition);
+
+  return (
+    <>
+      <TableRow
+        hover
+        sx={{ cursor: 'pointer' }}
+        onClick={() => {
+          navigate(`/food/${food.entityId}`)
+        }}
+      >
+        <TableCell width={48} sx={{ p: 0, textAlign: 'center' }}>
+          {hasExtraContent ? (
+            <IconButton
+              aria-label="expand row"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(!open)
               }}
             >
-              <TableCell>{food.foodName}</TableCell>
-              <TableCell>{food.foodOrigin}</TableCell>
-              <TableCell>
-                {food.totalRating / food.numReviews}
-              </TableCell>
-            </TableRow>
+              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          ) : (
+            <Box sx={{ height: 24 }} />
+          )}
+        </TableCell>
+        <TableCell>{food.foodName}</TableCell>
+        <TableCell>{food.foodOrigin}</TableCell>
+        <TableCell>
+          {food.totalRating / food.numReviews}
+        </TableCell>
+      </TableRow>
 
-            {(description || nutrition) && (
-              <TableRow>
-                <TableCell colSpan={3}>
-                  <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                    {description}
-                    {description && nutrition && <br />}
-                    {nutrition}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </>
-        )
-      }}
-    />
+      {hasExtraContent && (
+        <TableRow>
+          <TableCell 
+            colSpan={4}
+            sx={{
+              py: 0,
+              px: 0,
+              borderBottom: open ? undefined : 0
+            }}
+          >
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{
+                px: 2,
+                py: 2,
+                bgcolor: 'grey.50',
+                borderLeft: 3,
+                borderColor: 'grey.300'
+              }}>
+                <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                  {description}
+                  {description && nutrition && <br />}
+                  {nutrition}
+                </Typography>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   )
 }
 
