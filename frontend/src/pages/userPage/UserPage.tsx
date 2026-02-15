@@ -1,4 +1,3 @@
-import { User } from "@lunch-box-reviews/shared-types";
 import UserInfo from "./UserInfo";
 import { Box, Typography } from "@mui/material";
 import ReviewsTable from "../../components/table/ReviewsTable";
@@ -8,16 +7,13 @@ import { useReviewsFromUser, useUser } from "../../hooks/useFetch";
 
 
 interface UserPageProps {
-  user?: User
+  userId?: string
 }
 
-const UserPage: React.FC<UserPageProps> = ({ user: initialUser }) => {
-  const { userId } = useParams<{ userId: string }>();
-  const { data: fetchedUser, isLoading } = useUser(
-    initialUser ? undefined : userId
-  );
-
-  const user = initialUser ?? fetchedUser;
+const UserPage: React.FC<UserPageProps> = ({ userId: loggedInUserId }) => {
+  const params = useParams<{ userId: string }>();
+  const userId = params.userId ?? loggedInUserId;
+  const { data: user, isLoading } = useUser(userId);
 
   if (isLoading) {
     return <LoadingSpinner />

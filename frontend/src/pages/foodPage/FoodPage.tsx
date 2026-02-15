@@ -1,4 +1,3 @@
-import { EntityType, FoodItem } from "@lunch-box-reviews/shared-types";
 import { Box, Typography } from "@mui/material";
 import ReviewsTable from "../../components/table/ReviewsTable";
 import { useParams } from "react-router-dom";
@@ -7,17 +6,9 @@ import { useFood, useReviewsFromFood } from "../../hooks/useFetch";
 import FoodInfo from "./FoodInfo";
 
 
-interface FoodPageProps {
-  food?: FoodItem
-}
-
-const FoodPage: React.FC<FoodPageProps> = ({ food: initialFood }) => {
+const FoodPage = () => {
   const { foodId } = useParams<{ foodId: string }>();
-  const { data: fetchedFood, isLoading } = useFood(
-    initialFood ? undefined : foodId
-  );
-
-  const food = initialFood ?? fetchedFood;
+  const { data: food, isLoading } = useFood(foodId);
 
   if (isLoading) {
     return <LoadingSpinner />

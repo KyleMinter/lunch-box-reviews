@@ -22,18 +22,18 @@ const ReviewsTable: React.FC<ReviewsTableProps> = ({
   noResultsComponent
 }) => {
   return (
-      <InfiniteTable
-        useData={useData}
-        noResultsComponent={noResultsComponent}
-        getRowId={(review: Review) => review.entityId}
-        columns={[
-          { id: "item", label: "Item" },
-          { id: "reviewer", label: "Reviewer" },
-          { id: "rating", label: "Rating" },
-          { id: "date", label: "Date" },
-        ]}
-        renderRow={(review: Review) => <ReviewRow review={review} />}
-      />
+    <InfiniteTable
+      useData={useData}
+      noResultsComponent={noResultsComponent}
+      getRowId={(review: Review) => review.entityId}
+      columns={[
+        { id: "item", label: "Item" },
+        { id: "reviewer", label: "Reviewer" },
+        { id: "rating", label: "Rating" },
+        { id: "date", label: "Date" },
+      ]}
+      renderRow={(review: Review) => <ReviewRow review={review} />}
+    />
   );
 };
 

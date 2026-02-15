@@ -28,11 +28,13 @@ const FoodTable = () => {
                 "&:hover + tr td": {
                   outline: "1px solid",
                   outlineColor: "grey.300",
-                  outlineOffset: -2, // pulls it inward so it looks like a border without shifting content
+                  outlineOffset: -2,
                   backgroundColor: "inherit",
                 },
               }}
-              onClick={() => navigate(`/food/${food.entityId}`)}
+              onClick={() => {
+                navigate(`/food/${food.entityId}`)
+              }}
             >
               <TableCell>{food.foodName}</TableCell>
               <TableCell>{food.foodOrigin}</TableCell>

@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Button,
   CardHeader,
   TableCell,
   TableRow,
@@ -27,7 +26,9 @@ const UsersTable = () => {
         <TableRow
           hover
           sx={{ cursor: 'pointer' }}
-          onClick={() => navigate(`/user/${user.entityId}`)}
+          onClick={() => {
+            navigate(`/user/${user.entityId}`);
+          }}
         >
           <TableCell
             sx={{

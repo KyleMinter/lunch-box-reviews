@@ -102,7 +102,6 @@ export function useUser(userId?: string) {
   return useQuery<User, Error>({
     queryKey: ['user', userId],
     queryFn: () => fetchUserById(userId!),
-    enabled: !!userId
   })
 }
 
@@ -133,6 +132,5 @@ export function useFood(foodId?: string) {
   return useQuery<FoodItem, Error>({
     queryKey: ['food', foodId],
     queryFn: () => fetchFoodById(foodId!),
-    enabled: !!foodId
   })
 }
