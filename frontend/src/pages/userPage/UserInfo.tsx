@@ -8,6 +8,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import { formatDateISO } from '../../utils/utils';
 
 interface UserInfoProps {
   user: User;
@@ -16,6 +17,8 @@ interface UserInfoProps {
 const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+
+  const formattedDate = formatDateISO(user.created);
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -59,7 +62,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
           </Box>
 
           <Typography variant="caption">
-            Account Created: {user.created}
+            Account Created: {formattedDate}
           </Typography>
         </Stack>
       </Stack>

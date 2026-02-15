@@ -19,7 +19,40 @@ import { API_URL } from "../constants";
 async function fetchReviews({ cursor, limit }: PaginationParameters) {
   const url = `${API_URL}reviews?limit=${limit}&cursor=${cursor ?? ''}`;
   const response = await axios.get<ReviewPaginatedResponse>(url);
-  return reviewPaginatedResponseSchema.parse(response.data);
+  // return reviewPaginatedResponseSchema.parse(response.data);
+  return {
+    items: [
+      {
+        entityId: 'w',
+        entityType: 'review',
+        food: {
+          entityId: 'wasd',
+          entityType: 'foodItem',
+          foodName: 'name',
+          foodOrigin: 'origin',
+          foodAttributes: {
+            description: 'description',
+            nutrition: 'nutrition'
+          },
+          totalRating: 7,
+          numReviews: 2
+        },
+        user: {
+          entityId: 'user',
+          entityType: 'user',
+          userName: 'name',
+          userEmail: 'email',
+          userPicture: 'wasd',
+          created: 'wasd'
+        },
+        quality: 5,
+        quantity: 5,
+        rating: 5,
+        reviewDate: '2026-02-14T07:25:06.016Z'
+      }
+    ],
+    nextCursor: null
+  }
 }
 
 export function useReviews(pageSize: number) {
@@ -108,7 +141,32 @@ export function useUser(userId?: string) {
 async function fetchFoodItems({ cursor, limit }: PaginationParameters) {
   const url = `${API_URL}foods?limit=${limit}&cursor=${cursor ?? ''}`;
   const response = await axios.get<FoodItemPaginatedResponse>(url);
-  return foodItemPaginatedResponseSchema.parse(response.data);
+  // return foodItemPaginatedResponseSchema.parse(response.data);
+  return {
+    items: [{
+      entityId: 'wasd',
+      entityType: 'foodItem',
+      foodName: 'name',
+      foodOrigin: 'origin',
+      foodAttributes: {
+        description: 'description',
+        nutrition: 'nutrition'
+      },
+      totalRating: 7,
+      numReviews: 2
+    },
+  {
+      entityId: 'ww',
+      entityType: 'foodItem',
+      foodName: 'name',
+      foodOrigin: 'origin',
+      foodAttributes: {
+      },
+      totalRating: 7,
+      numReviews: 2
+    }],
+    nextCursor: null
+  }
 }
 
 export function useFoodItems(pageSize: number) {

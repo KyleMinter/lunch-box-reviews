@@ -4,6 +4,7 @@ import { useReviews } from "../../hooks/useFetch";
 import { Review } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { formatDateISO } from "../../utils/utils";
 
 
 interface ReviewsTableProps {
@@ -56,6 +57,8 @@ const ReviewRow: React.FC<ReviewRowProps> = ({ review }) => {
 
   const open = Boolean(anchorEl);
 
+  const formattedDate = formatDateISO(review.reviewDate);
+
   return (
     <>
       <TableRow
@@ -66,7 +69,7 @@ const ReviewRow: React.FC<ReviewRowProps> = ({ review }) => {
         <TableCell>{review.food.foodName}</TableCell>
         <TableCell>{review.user.userName}</TableCell>
         <TableCell>{review.rating} / 10</TableCell>
-        <TableCell>{review.reviewDate}</TableCell>
+        <TableCell>{formattedDate}</TableCell>
       </TableRow >
       <Popover
         open={open}

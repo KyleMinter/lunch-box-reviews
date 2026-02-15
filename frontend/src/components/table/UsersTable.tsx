@@ -8,6 +8,7 @@ import InfiniteTable from "./InfiniteTable";
 import { useUsers } from "../../hooks/useFetch";
 import { User } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
+import { formatDateISO } from "../../utils/utils";
 
 
 const UsersTable = () => {
@@ -22,37 +23,40 @@ const UsersTable = () => {
         { id: "email", label: "Email" },
         { id: "created", label: "Account Created" },
       ]}
-      renderRow={(user: User) => (
-        <TableRow
-          hover
-          sx={{ cursor: 'pointer' }}
-          onClick={() => {
-            navigate(`/user/${user.entityId}`);
-          }}
-        >
-          <TableCell
-            sx={{
-              minWidth: 15,
+      renderRow={(user: User) => {
+        const formattedDate = formatDateISO(user.created);
+        return (
+          <TableRow
+            hover
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              navigate(`/user/${user.entityId}`);
             }}
           >
-            <CardHeader
-              avatar={
-                <Avatar
-                  alt={user.userName}
-                  src={user.userPicture}
-                />
-              }
-              title={user.userName}
-              sx={{ p: 0, textAlign: "left" }}
-            />
+            <TableCell
+              sx={{
+                minWidth: 15,
+              }}
+            >
+              <CardHeader
+                avatar={
+                  <Avatar
+                    alt={user.userName}
+                    src={user.userPicture}
+                  />
+                }
+                title={user.userName}
+                sx={{ p: 0, textAlign: "left" }}
+              />
 
-          </TableCell>
+            </TableCell>
 
-          <TableCell>{user.userEmail}</TableCell>
+            <TableCell>{user.userEmail}</TableCell>
 
-          <TableCell>{user.created}</TableCell>
-        </TableRow>
-      )}
+            <TableCell>{formattedDate}</TableCell>
+          </TableRow>
+        )
+      }}
     />
   );
 };
