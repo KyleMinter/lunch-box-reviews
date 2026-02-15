@@ -14,7 +14,7 @@ const FoodTable = () => {
       useData={useFoodItems}
       getRowId={(food: FoodItem) => food.entityId}
       columns={[
-        { id: "", label: "" },
+        { id: "action", label: "" },
         { id: "name", label: "Name" },
         { id: "origin", label: "Location" },
         { id: "rating", label: "Average Rating" },

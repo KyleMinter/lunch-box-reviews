@@ -256,13 +256,11 @@ export async function updateUser(user: User) {
       },
       UpdateExpression: `SET
         ${userProps.userName} = :newName,
-        ${userProps.userEmail} = :newEmail,
-        ${userProps.created} = :newCreated`,
+        ${userProps.userEmail} = :newEmail`,
       ConditionExpression: `attribute_exists(${userProps.entityId})`,
       ExpressionAttributeValues: {
         ':newName': user.userName,
-        ':newEmail': user.userEmail,
-        ':newCreated': user.created
+        ':newEmail': user.userEmail
       },
       ReturnValues: 'UPDATED_NEW'
     })
