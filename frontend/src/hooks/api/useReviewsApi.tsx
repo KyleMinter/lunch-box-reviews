@@ -1,11 +1,14 @@
 import axios from "axios";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { 
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
   reviewPaginatedResponseSchema,
   PaginationParameters,
   ReviewPaginatedResponse,
+  Review,
 } from "@lunch-box-reviews/shared-types";
 import { API_URL } from "../../constants";
+import useAppToast from "../useAppToast";
+import useAuth from "../useAuth";
 
 
 async function fetchReviews({ cursor, limit }: PaginationParameters) {
@@ -64,5 +67,79 @@ export function useReviewsFromFood(foodId: string | undefined, pageSize: number)
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!foodId,
     refetchOnWindowFocus: false,
+  });
+}
+
+export function useDeleteReview() {
+  const toast = useAppToast();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth();
+
+  return useMutation({
+    mutationFn: async (reviewId: string) => {
+      if (!isAuthenticated) {
+        throw new Error('User is not authenticated');
+      }
+      const token = await getAccessTokenSilently();
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      const url = `${API_URL}reviews/${reviewId}`;
+      await axios.delete(url, { headers: headers });
+    },
+
+    // Optimistic update
+    onMutate: async (reviewId) => {
+      await queryClient.cancelQueries({ queryKey: ['reviews'] });
+
+      const previousData = queryClient.getQueriesData({
+        queryKey: ['reviews']
+      });
+
+      // Remove review from all review queries
+      queryClient.setQueriesData(
+        { queryKey: ['reviews'] },
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          // Handle infinite query structure
+          if (oldData.pages) {
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any) => ({
+                ...page,
+                items: page.items.filter(
+                  (review: Review) => review.entityId !== reviewId
+                )
+              }))
+            };
+          }
+
+          return oldData;
+        }
+      );
+
+      return { previousData };
+    },
+
+    onSuccess: () => {
+      toast.success('Review deleted');
+    },
+
+    // If request fails, rollback
+    onError: (_err, _reviewId, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach(([keyboard, data]) => {
+          queryClient.setQueryData(keyboard, data);
+        });
+      }
+      toast.error('Failed to delete review');
+    },
+
+    // After success or error
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    }
   });
 }

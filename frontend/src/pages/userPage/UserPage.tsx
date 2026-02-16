@@ -71,6 +71,7 @@ const UserPage: React.FC<UserPageProps> = ({ userId: loggedInUserId }) => {
               </Typography>
             </Box>
           }
+          loggedInUserId={user.entityId}
         />
       </Box>
     </Box>
