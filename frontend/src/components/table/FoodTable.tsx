@@ -1,11 +1,11 @@
 import { Box, Collapse, IconButton, TableCell, TableRow, Typography } from "@mui/material";
-import { useFoodItems } from "../../hooks/useFetch";
 import InfiniteTable from "./InfiniteTable";
 import { FoodItem } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { useFoodItems } from "../../hooks/api/useFoodsApi";
 
 
 const FoodTable = () => {

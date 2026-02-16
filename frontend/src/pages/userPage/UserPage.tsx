@@ -3,7 +3,8 @@ import { Box, Typography } from "@mui/material";
 import ReviewsTable from "../../components/table/ReviewsTable";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useReviewsFromUser, useUser } from "../../hooks/useFetch";
+import { useReviewsFromUser } from "../../hooks/api/useReviewsApi";
+import { useUser } from "../../hooks/api/useUsersApi";
 
 
 interface UserPageProps {

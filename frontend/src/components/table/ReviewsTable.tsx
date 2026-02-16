@@ -1,6 +1,6 @@
 import { MenuItem, MenuList, Popover, TableCell, TableRow } from "@mui/material";
 import InfiniteTable from "./InfiniteTable";
-import { useReviews } from "../../hooks/useFetch";
+import { useReviews } from "../../hooks/api/useReviewsApi";
 import { Review } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

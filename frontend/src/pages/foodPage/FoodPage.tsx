@@ -2,8 +2,9 @@ import { Box, Typography } from "@mui/material";
 import ReviewsTable from "../../components/table/ReviewsTable";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useFood, useReviewsFromFood } from "../../hooks/useFetch";
 import FoodInfo from "./FoodInfo";
+import { useReviewsFromFood } from "../../hooks/api/useReviewsApi";
+import { useFood } from "../../hooks/api/useFoodsApi";
 
 
 const FoodPage = () => {

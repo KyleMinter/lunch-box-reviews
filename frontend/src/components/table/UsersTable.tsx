@@ -5,7 +5,7 @@ import {
   TableRow,
 } from "@mui/material";
 import InfiniteTable from "./InfiniteTable";
-import { useUsers } from "../../hooks/useFetch";
+import { useUsers } from "../../hooks/api/useUsersApi";
 import { User } from "@lunch-box-reviews/shared-types";
 import { useNavigate } from "react-router-dom";
 import { formatDateISO } from "../../utils/utils";
