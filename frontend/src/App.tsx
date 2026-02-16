@@ -1,11 +1,10 @@
 import './App.css';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
+import { Route, Routes, useSearchParams } from 'react-router-dom';
 import HomePage from './pages/homePage/HomePage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
 import ProfilePage from './pages/userPage/ProfilePage';
 import VerifyEmailModal from './components/modal/VerifyEmailModal';
-import AuthErrorModal from './components/modal/AuthErrorModal';
 import SearchPage from './pages/searchPage/SearchPage';
 import SearchProvider from './utils/search/SearchProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,6 +18,7 @@ import UserPage from './pages/userPage/UserPage';
 import FoodPage from './pages/foodPage/FoodPage';
 import { SnackbarProvider } from 'notistack';
 import NotFoundPage from './pages/NotFoundPage';
+import AuthErrorPage from './pages/AuthErrorPage';
 
 
 const App = () => {
@@ -72,11 +72,6 @@ const App = () => {
         isOpen={isVerifyEmailModalOpen}
         onClose={onVerifyEmailModalClose}
       />
-      <AuthErrorModal
-        closeOnLossOfFocus={true}
-        isOpen={isAuthErrorModalOpen}
-        onClose={onAuthErrorModalClose}
-      />
     </>
   );
 }
@@ -102,6 +97,7 @@ const PageRoutes = () => {
       />
       <Route path="/user/:userId" element={<UserPage />} />
       <Route path="/food/:foodId" element={<FoodPage />} />
+      <Route path="/authError" element={<AuthErrorPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
