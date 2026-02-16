@@ -1,8 +1,7 @@
 import './App.css';
-import { Route, Routes, useSearchParams } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import HomePage from './pages/homePage/HomePage';
 import Navbar from './navigation/Navbar';
-import usePopupElement from './hooks/usePopupElement';
 import ProfilePage from './pages/userPage/ProfilePage';
 import SearchPage from './pages/searchPage/SearchPage';
 import SearchProvider from './utils/search/SearchProvider';
