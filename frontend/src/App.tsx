@@ -17,6 +17,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { Box, Button, Typography } from '@mui/material';
 import UserPage from './pages/userPage/UserPage';
 import FoodPage from './pages/foodPage/FoodPage';
+import { SnackbarProvider } from 'notistack';
 
 
 const App = () => {
@@ -47,16 +48,24 @@ const App = () => {
 
   return (
     <>
-      <Auth0ProviderWithNavigate>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <SearchProvider>
-              <Navbar />
-              <PageRoutes />
-            </SearchProvider>
-          </QueryClientProvider>
-        </AuthProvider>
-      </Auth0ProviderWithNavigate>
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+      >
+        <Auth0ProviderWithNavigate>
+          <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <SearchProvider>
+                <Navbar />
+                <PageRoutes />
+              </SearchProvider>
+            </QueryClientProvider>
+          </AuthProvider>
+        </Auth0ProviderWithNavigate>
+      </SnackbarProvider>
       <VerifyEmailModal
         closeOnLossOfFocus={true}
         isOpen={isVerifyEmailModalOpen}
