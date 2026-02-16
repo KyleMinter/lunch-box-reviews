@@ -4,7 +4,6 @@ import HomePage from './pages/homePage/HomePage';
 import Navbar from './navigation/Navbar';
 import usePopupElement from './hooks/usePopupElement';
 import ProfilePage from './pages/userPage/ProfilePage';
-import VerifyEmailModal from './components/modal/VerifyEmailModal';
 import SearchPage from './pages/searchPage/SearchPage';
 import SearchProvider from './utils/search/SearchProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,13 +18,10 @@ import FoodPage from './pages/foodPage/FoodPage';
 import { SnackbarProvider } from 'notistack';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthErrorPage from './pages/AuthErrorPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 
 const App = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { isOpen: isVerifyEmailModalOpen, setIsOpen: setIsVerifyEmailModalOpen } = usePopupElement(searchParams.has('verifyEmail'));
-  const { isOpen: isAuthErrorModalOpen, setIsOpen: setIsAuthErrorModalOpen } = usePopupElement(searchParams.has('authError'));
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -34,18 +30,6 @@ const App = () => {
       }
     }
   });
-
-  const onVerifyEmailModalClose = () => {
-    setIsVerifyEmailModalOpen(false);
-    searchParams.delete('verifyEmail');
-    setSearchParams(searchParams)
-  }
-
-  const onAuthErrorModalClose = () => {
-    setIsAuthErrorModalOpen(false);
-    searchParams.delete('authError');
-    setSearchParams(searchParams);
-  }
 
   return (
     <>
@@ -67,11 +51,6 @@ const App = () => {
           </AuthProvider>
         </Auth0ProviderWithNavigate>
       </SnackbarProvider>
-      <VerifyEmailModal
-        closeOnLossOfFocus={true}
-        isOpen={isVerifyEmailModalOpen}
-        onClose={onVerifyEmailModalClose}
-      />
     </>
   );
 }
@@ -98,6 +77,7 @@ const PageRoutes = () => {
       <Route path="/user/:userId" element={<UserPage />} />
       <Route path="/food/:foodId" element={<FoodPage />} />
       <Route path="/authError" element={<AuthErrorPage />} />
+      <Route path="/verifyEmail" element={<VerifyEmailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
