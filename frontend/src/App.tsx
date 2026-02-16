@@ -14,10 +14,11 @@ import AuthGuard from './utils/auth/AuthGuard';
 import Auth0ProviderWithNavigate from './utils/auth/Auth0ProviderWithNavigate';
 import AuthProvider from './utils/auth/AuthProvider';
 import LoadingSpinner from './components/LoadingSpinner';
-import { Box, Button, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import UserPage from './pages/userPage/UserPage';
 import FoodPage from './pages/foodPage/FoodPage';
 import { SnackbarProvider } from 'notistack';
+import NotFoundPage from './pages/NotFoundPage';
 
 
 const App = () => {
@@ -82,7 +83,6 @@ const App = () => {
 
 const PageRoutes = () => {
   const { isLoading: isLoadingAuth } = useAuth();
-  const navigate = useNavigate();
 
   if (isLoadingAuth) {
     return (
@@ -102,28 +102,7 @@ const PageRoutes = () => {
       />
       <Route path="/user/:userId" element={<UserPage />} />
       <Route path="/food/:foodId" element={<FoodPage />} />
-      <Route path="*" element={(
-        <Box sx={{
-          pt: 2,
-          textAlign: 'center',
-          borderTop: 1,
-          borderColor: 'divider'
-        }}>
-          <Typography variant="h6">
-            Page not found
-          </Typography>
-          <Typography variant="subtitle1">
-            Click the button below to navigate back to the home page
-          </Typography>
-          <Button
-            variant="contained"
-            sx={{ mt: 2 }}
-            onClick={() => navigate('/')}
-          >
-            Home
-          </Button>
-        </Box>
-      )} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
