@@ -75,9 +75,8 @@ jobs:
         working-directory: ./cdk
         run: |
           touch .env
-          echo "DOMAIN is set? $([[ -n "$DOMAIN" ]] && echo yes || echo no)"
-          echo "TABLE_NAME is set? $([[ -n "$TABLE_NAME" ]] && echo yes || echo no)"
           echo "AUTH0_DOMAIN=$DOMAIN" >> .env
+          echo "AUTH0_CLAIM_NAMESPACE=$AUTH0_CLAIM_NAMESPACE" >> .env
           echo "AWS_REGION=$AWS_REGION" >> .env
           echo "TABLE_NAME=$TABLE_NAME" >> .env
         env:

@@ -10,6 +10,12 @@ import {
   getReviewsFromFoodItem,
   getFilters,
   Filter,
+  NoBodyProvidedError,
+  validateJwtToken,
+  UnauthorizedError,
+  FoodItem,
+  constructFoodItem,
+  createFoodItem,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -24,6 +30,22 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   try {
     switch (routeKey) {
+      case 'POST /foods': {
+        if (!event.body || event.body.length === 0)
+          throw new NoBodyProvidedError();
+
+        const jwt = await validateJwtToken(event);
+        const adminRole = process.env.AUTH0_CLAIM_NAMESPACE!
+        const roles = jwt[adminRole] || [];
+        if (!roles.include('Admin')) {
+          throw new UnauthorizedError();
+        }
+
+        const json = JSON.parse(event.body);
+        const food: FoodItem = await constructFoodItem(json);
+        body = await createFoodItem(food);
+        break;
+      }
       case 'GET /foods': {
         const filter: Filter | undefined = getFilters(event);
         const pagination: PaginationParameters = getPaginationParameters(event);
