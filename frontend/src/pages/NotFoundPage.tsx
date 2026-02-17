@@ -9,8 +9,6 @@ const NotFoundPage = () => {
     <Box sx={{
       pt: 2,
       textAlign: 'center',
-      borderTop: 1,
-      borderColor: 'divider'
     }}>
       <Typography variant="h6">
         Page not found
