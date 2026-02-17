@@ -7,6 +7,7 @@ export interface AuthContextInterface {
   isEnabled: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   getAccessTokenSilently: (options?: GetTokenSilentlyOptions | undefined) => Promise<string>;
   user?: User;
   login: () => Promise<void>;
@@ -22,6 +23,7 @@ const init: AuthContextInterface = {
   isEnabled: true,
   isAuthenticated: false,
   isLoading: true,
+  isAdmin: false,
   getAccessTokenSilently: stub,
   user: undefined,
   login: stub,

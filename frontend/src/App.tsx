@@ -18,6 +18,7 @@ import { SnackbarProvider } from 'notistack';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthErrorPage from './pages/AuthErrorPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import NewFoodItemPage from './pages/foodPage/NewFoodPage';
 
 
 const App = () => {
@@ -71,10 +72,21 @@ const PageRoutes = () => {
       <Route path="/search" element={<SearchPage />} />
       <Route
         path="/profile"
-        element={<AuthGuard Component={ProfilePage} />}
+        element={
+          <AuthGuard Component={ProfilePage} />
+        }
       />
       <Route path="/user/:userId" element={<UserPage />} />
       <Route path="/food/:foodId" element={<FoodPage />} />
+      <Route
+        path="/newFood" 
+        element={
+          <AuthGuard
+            Component={NewFoodItemPage}
+            requireAdmin
+          />
+        }
+      />
       <Route path="/authError" element={<AuthErrorPage />} />
       <Route path="/verifyEmail" element={<VerifyEmailPage />} />
       <Route path="*" element={<NotFoundPage />} />

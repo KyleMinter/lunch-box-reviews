@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { EntityType, User, userSchema } from "@lunch-box-reviews/shared-types";
 import axios, { AxiosResponse } from "axios";
 import AuthContext, { AuthContextInterface } from "./AuthContext";
-import { AUTH0_AUDIENCE, AUTH_ENABLED } from "../../constants";
+import { AUTH0_AUDIENCE, AUTH0_CLAIM_NAMESPACE, AUTH_ENABLED } from "../../constants";
 
 
 // Returns auth values based on whether or not authenticaion is enabled/disabled
@@ -28,6 +28,7 @@ const getAuth = (authEnabled: boolean) => {
       isLoading: false,
       user: undefined,
       getAccessTokenSilently: stub,
+      getIdTokenClaims: stub,
       loginWithRedirect: stub,
       logout: stub,
     };
@@ -51,11 +52,13 @@ const AuthProvider = (opts: AuthProviderOptions) => {
     isLoading,
     user: auth0User,
     getAccessTokenSilently,
+    getIdTokenClaims,
     loginWithRedirect,
     logout: auth0Logout
   } = getAuth(AUTH_ENABLED)
 
   const [user, setUser] = useState<User | undefined>(undefined);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -71,29 +74,26 @@ const AuthProvider = (opts: AuthProviderOptions) => {
           created: '02/07/2026'
         };
         setUser(fakeUser);
+        setIsAdmin(true);
       }
       else if (AUTH_ENABLED && isAuthenticated) {
+        const claims = await getIdTokenClaims();
+        const roles = claims?.[`${AUTH0_CLAIM_NAMESPACE}/roles`] || [];
+        setIsAdmin(roles.includes('Admin'));
+        
         const token = await getAccessTokenSilently();
-
         const headers = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         };
-
         const body = {
           userName: `${auth0User!.username}`,
           userEmail: `${auth0User!.email}`,
           userPicture: `${auth0User!.picture}`
         }
-
         const url = `${AUTH0_AUDIENCE}users`;
 
         try {
-          /*  TODO: it may be worth investigating using auth0's user for everything and then just grabbing user perms from this API call.
-              the result of this is that it will be faster to fetch user info for profile, and we won't mind waiting a hot sec for perm checks.
-              this all might be a mute point tho since becayse once we've grabbed the user info from the DB for the first time, we won't have to fetch it again.
-          */
-
           const response: AxiosResponse<User> = await axios.post(url, body, { headers: headers });
           const user = userSchema.parse(response.data);
           setUser(user);
@@ -102,8 +102,6 @@ const AuthProvider = (opts: AuthProviderOptions) => {
           logoutWithError();
         }
       }
-
-
     })()
   },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,6 +131,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
       isEnabled,
       isAuthenticated,
       isLoading,
+      isAdmin,
       getAccessTokenSilently,
       user,
       login,
@@ -143,6 +142,7 @@ const AuthProvider = (opts: AuthProviderOptions) => {
     isEnabled,
     isAuthenticated,
     isLoading,
+    isAdmin,
     getAccessTokenSilently,
     user,
     login,
