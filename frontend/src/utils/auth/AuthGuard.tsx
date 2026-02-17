@@ -8,10 +8,17 @@ import { useNavigate } from "react-router-dom";
 
 interface AuthGuardProps {
   Component: ComponentType<object>;
+  requireAdmin?: boolean;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
-  const { isEnabled, user, isAuthenticated, isAuthorized } = useAuth();
+const AuthGuard: React.FC<AuthGuardProps> = ({ Component, requireAdmin }) => {
+  const {
+    isEnabled,
+    user,
+    isAuthenticated,
+    isAdmin,
+    isAuthorized
+  } = useAuth();
   const navigate = useNavigate();
 
   // If authentication is disabled we will simply permit navigation to the provided component.
@@ -37,7 +44,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
       </Box>
     );
   // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
-  else if (!isAuthorized())
+  else if (!isAuthorized() || (requireAdmin && !isAdmin))
     return (
       <Box sx={{ pt: 2, textAlign: 'center' }}>
         <Typography variant="h6">
