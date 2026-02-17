@@ -39,7 +39,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ Component }) => {
   // Now that we know the user is authenticated, we can ensure they have the valid permissions for the provided route.
   else if (!isAuthorized())
     return (
-      <Box sx={{ mt: 5 }}>
+      <Box sx={{ pt: 2, textAlign: 'center' }}>
         <Typography variant="h6">
           You are not authorized to view this page
         </Typography>
