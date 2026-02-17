@@ -12,6 +12,7 @@ interface ApiStackProps extends cdk.StackProps {
   auth0_domain: string;
   region: string;
   tableName: string;
+  claimNamespace: string;
 }
 
 export class ApiStack extends cdk.Stack {
@@ -53,6 +54,7 @@ export class ApiStack extends cdk.Stack {
             }),
             environment: {
               AUTH0_DOMAIN: props.auth0_domain,
+              AUTH0_CLAIM_NAMESPACE: props.claimNamespace,
               REGION: props.region,
               TABLE_NAME: props.tableName
             }

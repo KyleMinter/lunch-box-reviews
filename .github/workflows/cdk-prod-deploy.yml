@@ -56,6 +56,7 @@ jobs:
           echo "REACT_APP_AUTH0_DOMAIN=$DOMAIN" >> .env
           echo "REACT_APP_AUTH0_CLIENT_ID=$CLIENT_ID" >> .env
           echo "REACT_APP_AUTH0_AUDIENCE=$AUDIENCE" >> .env
+          echo "REACT_APP_AUTH0_CLAIM_NAMESPACE=$AUTH0_CLAIM_NAMESPACE" >> .env
           echo "REACT_APP_AUTH_ENABLE=TRUE" >> .env
           echo "REACT_APP_API_URL=$API_URL" >> .env
           npm install
@@ -64,7 +65,12 @@ jobs:
           DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
           CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
           AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          AUTH0_CLAIM_NAMESPACE: ${{ secrets.AUTH0_CLAIM_NAMESPACE }}
           API_URL: ${{ secrets.API_URL }}
+      
+      - name: print
+        working-directory: ./frontend
+        run: cat .env
 
       - name: Copy Frontend Build to CDK Assets
         run: |
@@ -75,13 +81,13 @@ jobs:
         working-directory: ./cdk
         run: |
           touch .env
-          echo "DOMAIN is set? $([[ -n "$DOMAIN" ]] && echo yes || echo no)"
-          echo "TABLE_NAME is set? $([[ -n "$TABLE_NAME" ]] && echo yes || echo no)"
           echo "AUTH0_DOMAIN=$DOMAIN" >> .env
+          echo "AUTH0_CLAIM_NAMESPACE=$AUTH0_CLAIM_NAMESPACE" >> .env
           echo "AWS_REGION=$AWS_REGION" >> .env
           echo "TABLE_NAME=$TABLE_NAME" >> .env
         env:
           DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLAIM_NAMESPACE: ${{ secrets.AUTH0_CLAIM_NAMESPACE }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           TABLE_NAME: ${{ secrets.TABLE_NAME }}
 
