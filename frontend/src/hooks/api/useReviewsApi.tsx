@@ -2,68 +2,93 @@ import axios from "axios";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   reviewPaginatedResponseSchema,
-  PaginationParameters,
   ReviewPaginatedResponse,
   Review,
+  dateFilterSchema,
 } from "@lunch-box-reviews/shared-types";
 import { API_URL } from "../../constants";
 import useAppToast from "../useAppToast";
 import useAuth from "../useAuth";
+import SearchFilters from "../../utils/search/searchFilters";
+import useSearchState from "../useSearchState";
 
 
-async function fetchReviews({ cursor, limit }: PaginationParameters) {
-  const url = `${API_URL}reviews?limit=${limit}&cursor=${cursor ?? ''}`;
-  const response = await axios.get<ReviewPaginatedResponse>(url);
-  return reviewPaginatedResponseSchema.parse(response.data);
+export function buildReviewFilterQuery(
+  searchFilters: SearchFilters
+): string {
+  const startDate =
+    searchFilters.startDate?.selected && searchFilters.startDate.value
+      ? searchFilters.startDate.value.toISOString()
+      : undefined;
+
+  const endDate =
+    searchFilters.endDate?.selected && searchFilters.endDate.value
+      ? searchFilters.endDate.value.toISOString()
+      : undefined;
+
+  if (!startDate && !endDate) {
+    return '';
+  }
+
+  const parsed = dateFilterSchema.safeParse({ startDate, endDate });
+  if (!parsed.success) {
+    return '';
+  }
+
+  let query = '';
+
+  if (startDate) {
+    query += `&startDate=${encodeURIComponent(startDate)}`;
+  }
+
+  if (endDate) {
+    query += `&endDate=${encodeURIComponent(endDate)}`;
+  }
+
+  return query;
 }
 
 export function useReviews(pageSize: number) {
+  const { searchFilters } = useSearchState();
+  const filterQuery = buildReviewFilterQuery(searchFilters);
+
   return useInfiniteQuery({
-    queryKey: ['reviews', pageSize],
+    queryKey: ['reviews', pageSize, filterQuery],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) =>
-      fetchReviews({ cursor: pageParam, limit: pageSize }),
+    queryFn: async ({ pageParam }) => {
+      const url = `${API_URL}reviews?limit=${pageSize}&cursor=${pageParam ?? ''}${filterQuery ?? ''}`;
+      const response = await axios.get<ReviewPaginatedResponse>(url);
+      return reviewPaginatedResponseSchema.parse(response.data);
+    },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false
   });
-}
-
-async function fetchReviewsFromUser(userId: string, { cursor, limit }: PaginationParameters) {
-  const url = `${API_URL}users/${userId}/reviews?limit=${limit}&cursor=${cursor ?? ''}`;
-  const response = await axios.get<ReviewPaginatedResponse>(url);
-  return reviewPaginatedResponseSchema.parse(response.data);
 }
 
 export function useReviewsFromUser(userId: string | undefined, pageSize: number) {
   return useInfiniteQuery({
     queryKey: ['reviews', 'user', userId, pageSize],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) =>
-      fetchReviewsFromUser(userId!, {
-        cursor: pageParam,
-        limit: pageSize,
-      }),
+    queryFn: async ({ pageParam }) => {
+      const url = `${API_URL}users/${userId}/reviews?limit=${pageSize}&cursor=${pageParam ?? ''}`;
+      const response = await axios.get<ReviewPaginatedResponse>(url);
+      return reviewPaginatedResponseSchema.parse(response.data);
+    },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!userId,
     refetchOnWindowFocus: false,
   });
 }
 
-async function fetchReviewsFromFood(foodId: string, { cursor, limit }: PaginationParameters) {
-  const url = `${API_URL}foods/${foodId}/reviews?limit=${limit}&cursor=${cursor ?? ''}`;
-  const response = await axios.get<ReviewPaginatedResponse>(url);
-  return reviewPaginatedResponseSchema.parse(response.data);
-}
-
 export function useReviewsFromFood(foodId: string | undefined, pageSize: number) {
   return useInfiniteQuery({
     queryKey: ['reviews', 'food', foodId, pageSize],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) =>
-      fetchReviewsFromFood(foodId!, {
-        cursor: pageParam,
-        limit: pageSize,
-      }),
+    queryFn: async ({ pageParam }) => {
+      const url = `${API_URL}foods/${foodId}/reviews?limit=${pageSize}&cursor=${pageParam ?? ''}`;
+      const response = await axios.get<ReviewPaginatedResponse>(url);
+      return reviewPaginatedResponseSchema.parse(response.data);
+    },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!foodId,
     refetchOnWindowFocus: false,
