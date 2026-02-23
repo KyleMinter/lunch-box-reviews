@@ -64,7 +64,11 @@ const FoodRow: React.FC<FoodRowProps> = ({ food }) => {
         <TableCell>{food.foodName}</TableCell>
         <TableCell>{food.foodOrigin}</TableCell>
         <TableCell>
-          {food.totalRating / food.numReviews}
+          {
+            food.numReviews > 0
+            ? (food.totalRating / food.numReviews).toFixed(2)
+            : 'No Reviews'
+          }
         </TableCell>
       </TableRow>
 
