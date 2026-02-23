@@ -61,6 +61,18 @@ export class DynamoDBStack extends cdk.Stack {
       }
     };
 
+    const GSI_UserID_FoodID: GlobalSecondaryIndexProps = {
+      indexName: 'GSI-userId-foodId',
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'foodId',
+        type: AttributeType.STRING,
+      }
+    }
+
     const GSI_EntityType_ReviewDate: GlobalSecondaryIndexProps = {
       indexName: 'GSI-entityType-reviewDate',
       partitionKey: {
@@ -125,6 +137,7 @@ export class DynamoDBStack extends cdk.Stack {
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType);
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodID);
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_UserID);
+    TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_UserID_FoodID);
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_ReviewDate);
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodName);
     TABLE_ReviewEntities.addGlobalSecondaryIndex(GSI_EntityType_FoodOrigin);
