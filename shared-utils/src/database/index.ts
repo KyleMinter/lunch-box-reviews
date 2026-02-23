@@ -96,7 +96,7 @@ export function getFilters(event: APIGatewayProxyEventV2): Filter | undefined {
     return undefined;
   }
 
-  if (entries.length === 1) {
+  if (entries.length > 1) {
     throw new BadRequestError('Only one filter parameter is allowed at a time');
   }
 
