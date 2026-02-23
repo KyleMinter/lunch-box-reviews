@@ -7,7 +7,6 @@ import {
   getFoodItem,
   getAllFoodItems,
   NoIdProvidedError,
-  getReviewsFromFoodItem,
   getFilters,
   Filter,
   NoBodyProvidedError,
@@ -67,16 +66,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           throw new NotFoundError();
         }
         body = foodItem;
-        break;
-      }
-      case 'GET /foods/{id}/reviews': {
-        if (!foodId) {
-          throw new NoIdProvidedError();
-        }
-
-        const pagination: PaginationParameters = getPaginationParameters(event);
-        body = await getReviewsFromFoodItem(foodId, pagination);
-
         break;
       }
     }

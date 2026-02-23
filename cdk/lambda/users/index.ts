@@ -13,7 +13,6 @@ import {
   createUser,
   getAllUsers,
   NoIdProvidedError,
-  getReviewsFromUser,
   getFilters,
   Filter,
 } from '@lunch-box-reviews/shared-utils';
@@ -77,16 +76,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           throw new NotFoundError();
         }
         body = user;
-        break;
-      }
-      case 'GET /users/{id}/reviews': {
-        if (!userId) {
-          throw new NoIdProvidedError();
-        }
-
-        const pagination: PaginationParameters = getPaginationParameters(event);
-        body = await getReviewsFromUser(userId, pagination);
-
         break;
       }
     }

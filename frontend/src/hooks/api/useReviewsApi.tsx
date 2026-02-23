@@ -70,7 +70,7 @@ export function useReviewsFromUser(userId: string | undefined, pageSize: number)
     queryKey: ['reviews', 'user', userId, pageSize],
     initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam }) => {
-      const url = `${API_URL}users/${userId}/reviews?limit=${pageSize}&cursor=${pageParam ?? ''}`;
+      const url = `${API_URL}reviews/users/${userId}?limit=${pageSize}&cursor=${pageParam ?? ''}`;
       const response = await axios.get<ReviewPaginatedResponse>(url);
       return reviewPaginatedResponseSchema.parse(response.data);
     },
@@ -85,7 +85,7 @@ export function useReviewsFromFood(foodId: string | undefined, pageSize: number)
     queryKey: ['reviews', 'food', foodId, pageSize],
     initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam }) => {
-      const url = `${API_URL}foods/${foodId}/reviews?limit=${pageSize}&cursor=${pageParam ?? ''}`;
+      const url = `${API_URL}reviews/foods/${foodId}?limit=${pageSize}&cursor=${pageParam ?? ''}`;
       const response = await axios.get<ReviewPaginatedResponse>(url);
       return reviewPaginatedResponseSchema.parse(response.data);
     },

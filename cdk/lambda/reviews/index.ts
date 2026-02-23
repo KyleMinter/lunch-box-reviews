@@ -19,6 +19,8 @@ import {
   NotFoundError,
   NoIdProvidedError,
   getDateFilters,
+  getReviewsFromUser,
+  getReviewsFromFoodItem,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -30,6 +32,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   const routeKey = event.requestContext.routeKey;
   const reviewId = event.pathParameters?.id;
+  const userId = event.pathParameters?.userId;
+  const foodId = event.pathParameters?.foodId;
 
   try {
     switch (routeKey) {
@@ -109,6 +113,26 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         const pagination: PaginationParameters = getPaginationParameters(event);
         
         body = await getAllReviews(filter, pagination);
+        break;
+      }
+      case 'GET /reviews/users/{userId}': {
+        if (!userId) {
+          throw new NoIdProvidedError();
+        }
+
+        const pagination: PaginationParameters = getPaginationParameters(event);
+        body = await getReviewsFromUser(userId, pagination);
+
+        break;
+      }
+      case 'GET /reviews/foods/{foodId}': {
+        if (!foodId) {
+          throw new NoIdProvidedError();
+        }
+
+        const pagination: PaginationParameters = getPaginationParameters(event);
+        body = await getReviewsFromFoodItem(foodId, pagination);
+
         break;
       }
     }
