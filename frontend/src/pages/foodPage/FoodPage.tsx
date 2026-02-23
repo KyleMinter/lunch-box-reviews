@@ -51,7 +51,7 @@ const FoodPage = () => {
           textAlign: 'center'
         }}>
           <Typography variant="h5">
-            Food Reviews
+            All Reviews
           </Typography>
         </Box>
         <ReviewsTable
