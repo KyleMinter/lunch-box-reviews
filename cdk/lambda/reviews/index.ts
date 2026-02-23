@@ -21,6 +21,7 @@ import {
   getDateFilters,
   getReviewsFromUser,
   getReviewsFromFoodItem,
+  getReviewFromUserAndFoodItem,
 } from '@lunch-box-reviews/shared-utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
@@ -133,6 +134,18 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         const pagination: PaginationParameters = getPaginationParameters(event);
         body = await getReviewsFromFoodItem(foodId, pagination);
 
+        break;
+      }
+      case 'GET /reviews/users/{userId}/foods/{foodId}': {
+        if (!userId || !foodId) {
+          throw new NoIdProvidedError();
+        }
+        
+        const review = await getReviewFromUserAndFoodItem(userId, foodId);
+        if (!review) {
+          throw new NotFoundError();
+        }
+        body = reviewPrototypeToDtoSchema.parse(review);
         break;
       }
     }

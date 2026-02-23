@@ -242,6 +242,30 @@ export async function getReview(reviewId: string) {
 }
 
 /**
+ * Retrieves a review from the database.
+ * @param reviewId the id of the review to retrieve
+ * @returns the review retrieved
+ */
+export async function getReviewFromUserAndFoodItem(userId: string, foodId: string) {
+  const dynamo = getDynamoDbClient();
+  const results = await dynamo.send(
+    new QueryCommand({
+      TableName: REVIEWS_TABLE,
+      IndexName: `GSI-${reviewPrototypeProps.userId}-${reviewPrototypeProps.foodId}`,
+      KeyConditionExpression: `${reviewPrototypeProps.userId} = :userId AND ${reviewPrototypeProps.foodId} <= :foodId`,
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':foodId': foodId
+      },
+      Limit: 1,
+      ProjectionExpression: reviewPrototypeProps.keys,
+    })
+  ) as IQueryCommandOutput<ReviewPrototype>;
+
+  return results.Items && results.Items.length > 0 ? results.Items[0] as ReviewPrototype : undefined;
+}
+
+/**
  * Updates an existing review in the database.
  * @param review a review containing the updated information
  * @param oldReview the old review containing the outdated information
