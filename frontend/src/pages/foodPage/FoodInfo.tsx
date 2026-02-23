@@ -13,6 +13,8 @@ interface FoodInfoProps {
 
 const FoodInfo: React.FC<FoodInfoProps> = ({ food }) => {
   const { description, nutrition } = food.foodAttributes;
+  const averageRating = food.numReviews > 0
+    ? food.totalRating / food.numReviews : null;
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -22,9 +24,24 @@ const FoodInfo: React.FC<FoodInfoProps> = ({ food }) => {
         divider={<Divider />}
         sx={{ flex: 1, width: '100%' }}
       >
-        <Box>
-          <Typography variant="h3">{food.foodName}</Typography>
-          <Typography variant="subtitle1">{food.foodOrigin}</Typography>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Box>
+            <Typography variant="h3">{food.foodName}</Typography>
+            <Typography variant="subtitle1">{food.foodOrigin}</Typography>
+          </Box>
+          {averageRating !== null && (
+            <Typography
+              variant="h5"
+              color="primary"
+              sx={{ ml: 2 }}
+            >
+              {averageRating.toFixed(2)}
+            </Typography>
+          )}
         </Box>
 
         {(description || nutrition) && (
@@ -66,8 +83,6 @@ const FoodInfo: React.FC<FoodInfoProps> = ({ food }) => {
               </Box>
             )}
           </Box>
-
-          
         )}
       </Stack>
     </Paper>
