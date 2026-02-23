@@ -105,7 +105,7 @@ export async function getAllUsers(
     const attribute = filter.filterAttribute;
     const filterString = filter.filterString;
 
-    indexName = `GSI-${userProps.entityId}-${attribute}`;
+    indexName = `GSI-${userProps.entityType}-${attribute}`;
     keyConditionExpression = `${userProps.entityType} = :pkValue AND begins_with(${attribute}, :skValue)`;
     expressionAttributeValues = {
       ':pkValue': EntityType.User,
